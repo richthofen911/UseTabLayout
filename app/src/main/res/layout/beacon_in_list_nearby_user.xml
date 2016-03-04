@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="50dp"
+    android:id="@+id/beacon_nearby_user_cell"
+    android:paddingLeft="8dp"
+    android:paddingTop="5dp"
+    android:paddingBottom="2dp"
+    android:paddingRight="8dp"
+    android:clickable="true">
+
+    <TextView
+        android:id="@+id/tv_beacon_nearby_user_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:gravity="center"
+        android:background="@color/light_blue"
+        android:text="A"
+        android:textColor="@android:color/white"
+        android:textSize="30sp"/>
+
+    <TextView
+        android:id="@+id/tv_beacon_nearby_user_name"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:layout_toEndOf="@id/tv_beacon_nearby_user_icon"
+        android:layout_marginLeft="7dp"
+        android:gravity="center_vertical"
+        android:text="Lumber"
+        android:textColor="@android:color/black" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:layout_toEndOf="@id/tv_beacon_nearby_user_name"
+        android:layout_marginLeft="4dp"
+        android:gravity="center_vertical"
+        android:text="| Registered"/>
+
+    <TextView
+        android:id="@+id/tv_beacon_nearby_in_proximity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_beacon_nearby_user_name"
+        android:layout_marginLeft="7dp"
+        android:layout_toEndOf="@id/tv_beacon_nearby_user_icon"
+        android:gravity="center_vertical"
+        android:text="Not in proximity"/>
+
+    <TextView
+        android:id="@+id/tv_beacon_nearby_user_attributes"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:layout_toEndOf="@id/tv_beacon_nearby_in_proximity"
+        android:layout_below="@id/tv_beacon_nearby_user_name"
+        android:layout_marginLeft="4dp"
+        android:gravity="center_vertical"
+        android:text="| major: 666 minor: 5" />
+
+    <TextView
+        android:id="@+id/tv_arrow_nearby_user"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:gravity="center"
+        android:scaleType="centerCrop"
+        android:text="》"
+        android:textColor="@color/light_blue"
+        android:textSize="30sp"
+        />
+</RelativeLayout>

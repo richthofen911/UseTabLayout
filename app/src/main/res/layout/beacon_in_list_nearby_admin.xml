@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="50dp"
+    android:id="@+id/beacon_nearby_admin_cell"
+    android:paddingLeft="8dp"
+    android:paddingTop="5dp"
+    android:paddingBottom="2dp"
+    android:paddingRight="8dp"
+    android:clickable="true">
+
+    <TextView
+        android:id="@+id/tv_beacon_nearby_admin_name"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:layout_marginLeft="7dp"
+        android:gravity="center_vertical"
+        android:text="Inactive"
+        android:textColor="@android:color/black" />
+
+    <TextView
+        android:id="@+id/tv_beacon_nearby_admin_attributes"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:layout_below="@id/tv_beacon_nearby_admin_name"
+        android:layout_marginLeft="4dp"
+        android:gravity="center_vertical"
+        android:text="major: 666 minor: 5"
+        android:textColor="@android:color/black"/>
+
+    <TextView
+        android:id="@+id/tv_arrow_nearby_admin"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_marginEnd="10dp"
+        android:gravity="center"
+        android:scaleType="centerCrop"
+        android:text="+"
+        android:textColor="@color/light_blue"
+        android:textSize="22sp"
+        />
+</RelativeLayout>

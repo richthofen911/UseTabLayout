@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="io.ap1.proximity">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="AIzaSyCfXJZLpEcIcOX3mIeYPl6RPcki6Wij2t8" />
+        <meta-data
+            android:name="idparent"
+            android:value="11" />
+
+        <activity
+            android:name=".view.ActivityMain"
+            android:screenOrientation="nosensor">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".view.ActivityLogin"
+            android:screenOrientation="nosensor" />
+        <activity
+            android:name=".view.ActivityDeviceList"
+            android:screenOrientation="nosensor" />
+        <activity android:name=".view.ActivityBeaconUrlContent" />
+        <activity
+            android:name=".view.ActivityBeaconDetail"
+            android:screenOrientation="nosensor" />
+
+        <service
+            android:name="io.ap1.libbeaconmanagement.ServiceBeaconManagement"
+            android:enabled="true"
+            android:exported="true" />
+        <service android:name="com.perples.recosdk.RECOBeaconService" />
+
+        <activity android:name=".view.ActivitySelectCompany"></activity>
+    </application>
+
+</manifest>

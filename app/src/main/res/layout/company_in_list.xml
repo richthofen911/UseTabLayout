@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/tv_company_in_list_name"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:layout_marginLeft="7dp"
+        android:gravity="center_vertical"
+        android:text="Company Name"
+        android:textColor="@android:color/black" />
+
+    <TextView
+        android:id="@+id/tv_company_in_list_info"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:layout_marginEnd="10dp"
+        android:gravity="right"
+        android:layout_weight="1"
+        android:text="i"
+        android:textColor="@android:color/black"
+        android:clickable="true"/>
+
+</LinearLayout>

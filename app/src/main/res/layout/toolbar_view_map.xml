@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:id="@+id/map_switch"
+    android:visibility="gone"
+    tools:context="io.ap1.proximity.view.ActivityMain">
+
+    <TextView
+        android:id="@+id/tv_map_my_beacons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
+        android:textColor="@color/light_blue"
+        android:background="@android:color/white"
+        android:text="My beacons"
+        android:clickable="true"/>
+
+    <TextView
+        android:id="@+id/tv_map_all_beacons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
+        android:background="@drawable/outline_switch"
+        android:text="All beacons"
+        android:clickable="true"/>
+</LinearLayout>
+
+<!--
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:layout_alignParentEnd="true">
+<TextView
+    android:id="@+id/tv_map_my_beacons"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp"
+    android:paddingTop="3dp"
+    android:paddingBottom="3dp"
+    android:textColor="@color/light_blue"
+    android:background="@android:color/white"
+    android:text="My beacons"
+    android:clickable="true"/>
+
+<TextView
+    android:id="@+id/tv_map_all_beacons"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp"
+    android:paddingTop="3dp"
+    android:paddingBottom="3dp"
+    android:background="@drawable/outline_switch"
+    android:text="All beacons"
+    android:clickable="true"/>
+</RelativeLayout>
+-->
