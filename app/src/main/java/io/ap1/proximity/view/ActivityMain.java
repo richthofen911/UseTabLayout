@@ -3,6 +3,7 @@ package io.ap1.proximity.view;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
