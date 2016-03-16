@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:openDrawer="start">
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:background="#FFFFFF">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar_settings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/light_blue"
+            android:minHeight="?attr/actionBarSize"
+            app:title="@string/app_name"
+            app:titleTextColor="@android:color/white">
+            <TextView
+                android:id="@+id/tv_toobar_settings_save"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:layout_marginEnd="15dp"
+                android:onClick="onSaveClicked"
+                android:text="Save"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"/>
+        </android.support.v7.widget.Toolbar>
+
+        <ImageView
+            android:id="@+id/iv_profile_image"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_below="@id/toolbar_settings"
+            android:layout_marginTop="20dp"
+            android:layout_centerHorizontal="true"
+            android:onClick="onCameraIconClicked"
+            android:src="@drawable/iv_upload_image"/>
+
+        <TextView
+            android:id="@+id/tv_settings_nickname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:textColor="#00B9E6"
+            android:layout_below="@+id/iv_profile_image"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="20dp"
+            android:textSize="22sp"
+            android:text="Nickname"/>
+
+        <EditText
+            android:id="@+id/et_settings_nickname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:textSize="20sp"
+            android:ems="13"
+            android:textColor="@android:color/black"
+            android:layout_alignBottom="@+id/tv_settings_nickname"
+            android:layout_toEndOf="@+id/tv_settings_nickname" />
+
+        <TextView
+            android:id="@+id/tv_settings_about_me"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="About Me"
+            android:textColor="#00B9E6"
+            android:layout_below="@+id/tv_settings_nickname"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="20dp"
+            android:textSize="22sp"/>
+
+        <EditText
+            android:id="@+id/et_settings_about_me"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:textSize="20sp"
+            android:ems="13"
+            android:textColor="@android:color/black"
+            android:layout_alignBottom="@+id/tv_settings_about_me"
+            android:layout_toEndOf="@+id/tv_settings_about_me" />
+
+        <TextView
+            android:id="@+id/tv_settings_privacy_options"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:paddingBottom="10dp"
+            android:layout_below="@+id/tv_settings_about_me"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="30dp"
+            android:layout_marginTop="30dp"
+            android:textColor="@android:color/darker_gray"
+            android:text="Privacy Options"
+            android:background="@drawable/cell_divider"/>
+
+        <TextView
+            android:id="@+id/tv_settings_visible"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="Visible"
+            android:textColor="@android:color/black"
+            android:layout_below="@+id/tv_settings_privacy_options"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="10dp"
+            android:textSize="20sp"/>
+
+        <CheckBox
+            android:id="@+id/checkBox_settings_visible"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_alignBottom="@+id/tv_settings_visible"
+            android:layout_alignParentEnd="true"/>
+
+        <TextView
+            android:id="@+id/tv_settings_show_picture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="Show Picture"
+            android:textColor="@android:color/black"
+            android:textSize="20sp"
+            android:layout_below="@+id/tv_settings_visible"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="10dp"/>
+
+        <CheckBox
+            android:id="@+id/checkBox_settings_show_picture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_alignBottom="@+id/tv_settings_show_picture"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+
+        <TextView
+            android:id="@+id/tv_settings_incognito"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:textColor="@android:color/black"
+            android:text="Incognito"
+            android:textSize="20sp"
+            android:layout_below="@+id/tv_settings_show_picture"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="10dp"/>
+
+        <CheckBox
+            android:id="@+id/checkBox_settings_incognito"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_alignBottom="@+id/tv_settings_incognito"
+            android:layout_alignParentEnd="true" />
+
+        <TextView
+            android:id="@+id/tv_settings_color"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_below="@id/tv_settings_incognito"
+            android:textSize="20sp"
+            android:text="Color"
+            android:textColor="@android:color/black" />
+
+        <TextView
+            android:id="@+id/tv_settings_color_value"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignStart="@id/checkBox_settings_incognito"
+            android:layout_toEndOf="@id/tv_settings_color"
+            android:layout_alignBottom="@id/tv_settings_color"
+            android:background="@android:color/black"
+            android:onClick="onColorClicked"/>
+    </RelativeLayout>
+
+    <android.support.design.widget.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/nav_header_main"
+        app:menu="@menu/activity_main_drawer" />
+</android.support.v4.widget.DrawerLayout>

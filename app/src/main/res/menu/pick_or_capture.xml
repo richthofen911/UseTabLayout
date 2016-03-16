@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/image_take_photo"
+        android:icon="@drawable/image_take"
+        android:title="take_photo" />
+    <item
+        android:id="@+id/image_choose_picture"
+        android:icon="@drawable/image_pick"
+        android:title="pick_from_device"/>
+</menu>

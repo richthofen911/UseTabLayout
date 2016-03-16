@@ -17,6 +17,7 @@ import com.j256.ormlite.table.TableUtils;
 
 import io.ap1.libbeaconmanagement.Beacon;
 import io.ap1.libbeaconmanagement.BeaconOperation;
+import io.ap1.libbeaconmanagement.Company;
 
 /**
  * Created by admin on 06/10/15.
@@ -26,9 +27,14 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
     private static final String DATABASE_NAME = "beacons.db";
     private static final int DATABASE_VERSION = 1;
 
+    private static DatabaseHelper instance;
+
     private static Dao<Beacon, Integer> beaconDao = null;
     private RuntimeExceptionDao<Beacon, Integer> beaconRuntimeExceptionDao = null;
-    private static DatabaseHelper instance;
+
+
+    private static Dao<Company, Integer> companyDao = null;
+    private RuntimeExceptionDao<Company, Integer> companyRuntimeExceptionDao = null;
 
     public DatabaseHelper(Context context){
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -51,6 +57,10 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
             TableUtils.createTable(connectionSource, Beacon.class);
             beaconDao = getBeaconDao();
             beaconRuntimeExceptionDao = getBeaconRuntimeExceptionDao();
+
+            TableUtils.createTable(connectionSource, Company.class);
+            companyDao = getCompanyDao();
+            companyRuntimeExceptionDao = getCompanyRuntimeExceptionDao();
         } catch(SQLException e){
             Log.e(TAG, e.toString());
         }
@@ -75,6 +85,14 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
         return beaconDao;
     }
 
+    public Dao<Company, Integer> getCompanyDao() throws SQLException{
+        if(companyDao == null){
+            companyDao = getDao(Company.class);
+            Log.e("companyDao", "null but created");
+        }
+        return companyDao;
+    }
+
     public RuntimeExceptionDao<Beacon, Integer> getBeaconRuntimeExceptionDao(){
         if (beaconRuntimeExceptionDao == null){
             beaconRuntimeExceptionDao = getRuntimeExceptionDao(Beacon.class);
@@ -83,11 +101,18 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
         return beaconRuntimeExceptionDao;
     }
 
-    public void saveABeacon(Beacon newBeacon){
+    public RuntimeExceptionDao<Company, Integer> getCompanyRuntimeExceptionDao(){
+        if(companyRuntimeExceptionDao == null){
+            companyRuntimeExceptionDao = getRuntimeExceptionDao(Company.class);
+            Log.e("companyRuntimeExDao", "null but created");
+        }
+        return companyRuntimeExceptionDao;
+    }
+
+    public void saveBeacon(Beacon newBeacon){
         if(beaconDao == null){
             try{
                 beaconDao = getBeaconDao();
-                Log.e("beaconDao saveBeacon", "null but created");
             } catch(SQLException e){
                 Log.e(TAG, e.toString());
             }
@@ -95,7 +120,22 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
         try {
             beaconDao.createIfNotExists(newBeacon);
         }catch (SQLException e){
-            Log.e("save beacon error", e.toString());
+            Log.e(TAG, "save beacon error " + e.toString());
+        }
+    }
+
+    public void saveCompany(Company newCompany){
+        if(companyDao == null){
+            try {
+                companyDao = getCompanyDao();
+            }catch (SQLException e){
+                Log.e(TAG, e.toString());
+            }
+        }
+        try{
+            companyDao.createIfNotExists(newCompany);
+        }catch (SQLException e){
+            Log.e(TAG, "save company err " + e.toString());
         }
     }
 
@@ -108,13 +148,28 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
 
     }
 
-    public List<Beacon> queryForAllBeacons(){
-        List<Beacon> beaconsInLocalDB;
-        try {
-            beaconsInLocalDB = beaconDao.queryForAll();
-            return beaconsInLocalDB;
+    public void deleteAllCompanies(){
+        try{
+            companyDao.delete(queryForAllCompanies());
         }catch (SQLException e){
-            Log.e("query all error", e.toString());
+            Log.e(TAG, "del all companies err " + e.toString());
+        }
+    }
+
+    public List<Beacon> queryForAllBeacons(){
+        try {
+            return beaconDao.queryForAll();
+        }catch (SQLException e){
+            Log.e(TAG, "query all beacons err " + e.toString());
+            return null;
+        }
+    }
+
+    public List<Company> queryForAllCompanies(){
+        try{
+            return companyDao.queryForAll();
+        }catch (SQLException e){
+            Log.e(TAG, "query all companies err " + e.toString());
             return null;
         }
     }

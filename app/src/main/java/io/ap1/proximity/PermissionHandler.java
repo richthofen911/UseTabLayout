@@ -12,6 +12,8 @@ import android.util.Log;
  */
 public class PermissionHandler {
 
+    private Activity clientActivity;
+
     public static boolean checkPermission(Context context, String permissionName){
         return (ContextCompat.checkSelfPermission(context, permissionName) == PackageManager.PERMISSION_GRANTED);
     }
@@ -24,5 +26,7 @@ public class PermissionHandler {
             ActivityCompat.requestPermissions(activity, new String[]{permissionName}, 1);
         }
     }
+
+
 
 }

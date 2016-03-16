@@ -7,6 +7,7 @@
     <color name="dark_blue">#0490af</color>
     <color name="light_blue">#04A9CE</color>
     <color name="facebook_blue">#3b5998</color>
+    <color name="login_blue">#000033</color>
     <color name="light_grey">#cccccc</color>
     <color name="tab_color">#FAFAFA</color>
     <color name="tab_shadow_color">#B2B2B2</color>

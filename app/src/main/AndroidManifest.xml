@@ -8,6 +8,11 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
 
     <application
         android:allowBackup="true"
@@ -26,7 +31,7 @@
             android:value="11" />
 
         <activity
-            android:name=".view.ActivityMain"
+            android:name=".view.ActivityLogin"
             android:screenOrientation="nosensor">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -35,7 +40,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".view.ActivityLogin"
+            android:name=".view.ActivityMain"
             android:screenOrientation="nosensor" />
         <activity
             android:name=".view.ActivityDeviceList"
@@ -51,7 +56,10 @@
             android:exported="true" />
         <service android:name="com.perples.recosdk.RECOBeaconService" />
 
-        <activity android:name=".view.ActivitySelectCompany"></activity>
+        <activity android:name=".view.ActivityColorPicker" />
+        <activity android:name=".view.ActivitySettings" />
+        <activity android:name=".view.ActivityCompanyDetails" />
+        <activity android:name=".view.ActivityCompanyList"></activity>
     </application>
 
 </manifest>

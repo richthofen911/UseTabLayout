@@ -2,18 +2,38 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
-    android:layout_marginTop="16dp"
     android:layout_marginBottom="16dp"
     tools:context=".view.ActivityBeaconDetail">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar_beacon_detail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/light_blue"
+        android:minHeight="?attr/actionBarSize"
+        app:title="@string/app_name"
+        app:titleTextColor="@android:color/white">
+        <TextView
+            android:id="@+id/tv_toobar_beacon_add"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_marginEnd="15dp"
+            android:onClick="onAddClicked"
+            android:text="Add"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"/>
+    </android.support.v7.widget.Toolbar>
 
     <ScrollView
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp">
 
         <LinearLayout
             android:layout_width="fill_parent"
@@ -32,7 +52,7 @@
 
                 <EditText
                     android:id="@+id/et_beacon_detail_nickName"
-                    android:layout_width="wrap_content"
+                    android:layout_width="200dp"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"/>
             </LinearLayout>
@@ -76,6 +96,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
                 android:orientation="horizontal">
                 <TextView
                     android:id="@+id/tv_beacon_detail_company"
@@ -98,7 +119,10 @@
                     android:layout_marginEnd="10dp"
                     android:textSize="14sp"
                     android:textColor="@color/light_blue"
-                    android:text=">"/>
+                    android:text=">"
+                    android:clickable="true"
+                    android:onClick="onSelectCompanyClicked"
+                    />
             </LinearLayout>
 
             <LinearLayout
@@ -147,7 +171,7 @@
 
                 <EditText
                     android:id="@+id/et_beacon_detail_uuid"
-                    android:layout_width="wrap_content"
+                    android:layout_width="200dp"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"/>
             </LinearLayout>
@@ -164,7 +188,7 @@
 
                 <EditText
                     android:id="@+id/et_beacon_detail_major"
-                    android:layout_width="wrap_content"
+                    android:layout_width="200dp"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"/>
             </LinearLayout>
@@ -181,7 +205,7 @@
 
                 <EditText
                     android:id="@+id/et_beacon_detail_minor"
-                    android:layout_width="wrap_content"
+                    android:layout_width="200dp"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"/>
             </LinearLayout>
@@ -198,7 +222,7 @@
 
                 <EditText
                     android:id="@+id/et_beacon_detail_rssi"
-                    android:layout_width="wrap_content"
+                    android:layout_width="200dp"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"/>
             </LinearLayout>
@@ -215,7 +239,7 @@
 
                 <EditText
                     android:id="@+id/et_beacon_detail_macAddress"
-                    android:layout_width="wrap_content"
+                    android:layout_width="200dp"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"/>
             </LinearLayout>
@@ -233,7 +257,7 @@
 
                 <EditText
                     android:id="@+id/et_beacon_detail_lat"
-                    android:layout_width="wrap_content"
+                    android:layout_width="200dp"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"/>
             </LinearLayout>
@@ -250,7 +274,7 @@
 
                 <EditText
                     android:id="@+id/et_beacon_detail_lng"
-                    android:layout_width="wrap_content"
+                    android:layout_width="200dp"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"/>
             </LinearLayout>

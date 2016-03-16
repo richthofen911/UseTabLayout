@@ -251,7 +251,8 @@ public class ServiceBeaconDetection extends OrmLiteBaseService<DatabaseHelper> i
                 if(BeaconOperation.equals(detectedBeacon, beaconInDetectedList)){
                     isNewDetected = false;
                     //Log.e("beacon in list", "already");
-                    if(Integer.parseInt(detectedBeacon.getRssi()) != Integer.parseInt(beaconInDetectedList.getRssi())){
+                    // if absolute value > 3, determine the rssi has changed
+                    if(Math.abs(Integer.parseInt(detectedBeacon.getRssi()) - Integer.parseInt(beaconInDetectedList.getRssi())) > 3){
                         //Log.e("but rssi", "has changed, need to resort list");
                         actionOnRssiChanged(i, detectedBeacon.getRssi());
                     }

@@ -4,20 +4,20 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 
+import io.ap1.libbeaconmanagement.Company;
 import io.ap1.proximity.R;
 
 /**
  * Created by admin on 04/03/16.
  */
-public class ViewHolderCompany extends RecyclerView.ViewHolder{
+public class ViewHolderCompanyList extends RecyclerView.ViewHolder{
     public TextView tvCompanyToBeSelected;
     public TextView tvCompanyInfo;
-
 
     public int selfPosition;
     public String url = "http://ap1.io/";
 
-    public ViewHolderCompany(View rootView){
+    public ViewHolderCompanyList(View rootView){
         super(rootView);
 
         tvCompanyToBeSelected = (TextView) rootView.findViewById(R.id.tv_company_in_list_name);

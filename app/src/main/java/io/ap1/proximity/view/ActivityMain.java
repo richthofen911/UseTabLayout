@@ -3,7 +3,6 @@ package io.ap1.proximity.view;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -25,7 +24,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import io.ap1.libbeaconmanagement.ServiceBeaconManagement;
-import io.ap1.libbeaconmanagement.Utils.ICallBackUpdateBeaconSet;
+import io.ap1.libbeaconmanagement.Utils.CallBackUpdateBeaconSet;
+import io.ap1.libbeaconmanagement.Utils.CallBackUpdateCompanySet;
 import io.ap1.proximity.PermissionHandler;
 import io.ap1.proximity.adapter.AdapterBeaconNearbyAdmin;
 import io.ap1.proximity.adapter.AdapterBeaconNearbyUser;
@@ -58,12 +58,16 @@ public class ActivityMain extends AppCompatActivity{
     public LinearLayout mapSwitch;
     public TextView tvToolbarEnd;
 
+    private String userObjectId;
+
     public boolean isAdmin = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        userObjectId = getIntent().getStringExtra("userObjectId");
 
         adapterBeaconNearbyAdmin = new AdapterBeaconNearbyAdmin();
         adapterBeaconNearbyUser = new AdapterBeaconNearbyUser();
@@ -91,21 +95,38 @@ public class ActivityMain extends AppCompatActivity{
                 //myBinder.setListAdapter(adapterBeaconNearbyAdmin);
                 myBinder.setListAdapter(adapterBeaconNearbyUser);
 
-                final ProgressDialog progressDialog = android.app.ProgressDialog.show(ActivityMain.this, "Update Beacon Information", "Please Wait", true);
-                myBinder.getServerHash("/getAllBeaconsv5.php", new ICallBackUpdateBeaconSet() {
+                final ProgressDialog progCheckCompany = android.app.ProgressDialog.show(ActivityMain.this, "Update Company Data", "Please wait", true);
+                myBinder.getRemoteCompanyHash("/getAllCompanies_a.php", new CallBackUpdateCompanySet() {
                     @Override
                     public void onSuccess() {
-                        progressDialog.dismiss();
-                        //myBinder.startScanning();
-                        startScanning();
+                        progCheckCompany.dismiss();
+
+                        final ProgressDialog progressDialog = android.app.ProgressDialog.show(ActivityMain.this, "Update Beacon Data", "Please Wait", true);
+                        myBinder.getRemoteBeaconHash("/getAllBeacons_a.php", new CallBackUpdateBeaconSet() {
+                            @Override
+                            public void onSuccess() {
+                                progressDialog.dismiss();
+                                startScanning();
+                            }
+
+                            @Override
+                            public void onFailure(String cause) {
+                                progressDialog.dismiss();
+                                Toast.makeText(ActivityMain.this, cause, Toast.LENGTH_SHORT).show();
+                                Log.e("update beacon hash err", cause);
+                            }
+                        });
+                        progressDialog.setCancelable(true);
                     }
+
                     @Override
-                    public void onFailure(String cause){
-                        progressDialog.dismiss();
+                    public void onFailure(String cause) {
+                        progCheckCompany.dismiss();
                         Toast.makeText(ActivityMain.this, cause, Toast.LENGTH_SHORT).show();
                         Log.e("update beacon hash err", cause);
                     }
                 });
+                progCheckCompany.setCancelable(true);
             }
 
             @Override
@@ -175,15 +196,9 @@ public class ActivityMain extends AppCompatActivity{
             public boolean onNavigationItemSelected(MenuItem item) {
                 int id = item.getItemId();
 
-                if (id == R.id.nav_camera) {
-                    // Handle the camera action
-                } else if (id == R.id.nav_gallery) {
-
-                } else if (id == R.id.nav_slideshow) {
-
-                } else if (id == R.id.nav_manage) {
-
-                } else if (id == R.id.nav_share) {
+                if (id == R.id.nav_settings) {
+                    startActivity(new Intent(ActivityMain.this, ActivitySettings.class).putExtra("userObjectId", userObjectId));
+                } else if (id == R.id.nav_logout) {
 
                 }
 
@@ -230,6 +245,16 @@ public class ActivityMain extends AppCompatActivity{
     public void stopScanning(){
         if(myBinder != null && myBinder.isBinderAlive())
             myBinder.stopScanning();
+    }
+
+    public void updateCompanySet(String apiPath, CallBackUpdateCompanySet callBackUpdateCompanySet){
+        if(myBinder != null && myBinder.isBinderAlive())
+            myBinder.getRemoteCompanyHash(apiPath, callBackUpdateCompanySet);
+    }
+
+    public void updateBeaconSet(String apiPath, CallBackUpdateBeaconSet callBackUpdateBeaconSet){
+        if(myBinder != null && myBinder.isBinderAlive())
+            myBinder.getRemoteBeaconHash(apiPath, callBackUpdateBeaconSet);
     }
 
     @Override

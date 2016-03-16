@@ -62,11 +62,12 @@ public class FragmentLogin extends Fragment implements View.OnClickListener {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btn_login:
-                Backendless.UserService.login(etLoginUsername.getText().toString(), etSignInPassword.getText().toString(), new BackendlessCallback<BackendlessUser>() {
+                Backendless.UserService.login("yli@ap1.io", "yichao", new BackendlessCallback<BackendlessUser>() {
+                //Backendless.UserService.login(etLoginUsername.getText().toString(), etSignInPassword.getText().toString(), new BackendlessCallback<BackendlessUser>() {
                     @Override
                     public void handleResponse(BackendlessUser backendlessUser) {
-                        Log.e("login", backendlessUser.getEmail() + " successfully login");
-                        ((ActivityLogin)getActivity()).goToMainUI();
+                        Log.e("login", backendlessUser.getEmail() + " successfully login " + backendlessUser.getObjectId());
+                        ((ActivityLogin)getActivity()).goToMainUI(backendlessUser.getObjectId());
                     }
                     @Override
                     public void handleFault(BackendlessFault fault){
