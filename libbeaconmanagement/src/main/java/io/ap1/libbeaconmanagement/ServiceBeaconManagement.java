@@ -208,6 +208,7 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
         }
         spHashValue.edit().putString("hashBeacon", remoteBeaconHash).apply();
         DataStore.beaconInAllPlacesList = sortBeaconsByCompany();
+        Log.e(TAG, "update beacon info success");
         callBackUpdateBeaconSet.onSuccess();
     }
 
@@ -225,7 +226,7 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
             }
         }
         spHashValue.edit().putString("hashCompany", remoteCompanyHash).apply();
-
+        Log.e(TAG, "update company info success");
         callBackUpdateCompanySet.onSuccess();
     }
 
@@ -292,17 +293,44 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
     }
 
     protected ArrayList<Beacon> sortBeaconsByCompany(){
-        String[] companyNames = databaseHelper.queryDistinct("companyname");
+        String[] companyIds = databaseHelper.queryDistinct("idcompany");
 
-        if(companyNames != null){
+        //String[] companyNames = new String[companyAmount];
+        //for(int i = 0; i < companyAmount; i++)
+        //    companyNames[i] = databaseHelper.queryForOneCompany(companyIds[i]).getCompany();
+
+        if(companyIds.length > 0){
+            ArrayList[] sortByCompany = new ArrayList[companyIds.length];
+            int sortArrayLength = sortByCompany.length;
+            for(int i = 0; i < sortArrayLength; i++)
+                // each element in sortByCompany is an arrayList with beacons having the same idcompany
+                sortByCompany[i] = (ArrayList) databaseHelper.queryForBeaconsByCompanyId(companyIds[i]);
+
+            ArrayList<Beacon> finalResult = new ArrayList<>();
+            for(ArrayList byOneCompany : sortByCompany){
+                if(byOneCompany.size() > 0){ // if this company has beacons
+                    Beacon groupDivider = new Beacon(); // create a fake beacon as a group divider for different companies
+                    groupDivider.setIdcompany(((Beacon) byOneCompany.get(0)).getIdcompany());
+                    groupDivider.setNickname("groupDivider");
+                    finalResult.add(groupDivider);
+                    finalResult.addAll(byOneCompany);
+                    byOneCompany.clear(); // release the arraylist for memory
+                }
+            }
+            return finalResult;
+        }else
+            return null;
+
+        /*
+        if(companyNames.length > 0){
             ArrayList[] sortByCompany = new ArrayList[companyNames.length];
             for(int i = 0; i < sortByCompany.length; i++){
-                sortByCompany[i] = (ArrayList) databaseHelper.queryForBeaconsByCompany(companyNames[i]);
+                sortByCompany[i] = (ArrayList) databaseHelper.queryForBeaconsByCompanyId(companyNames[i]);
             }
             ArrayList<Beacon> finalResult = new ArrayList<>();
             for(ArrayList byOneCompany : sortByCompany){
                 Beacon groupDivider = new Beacon(); // create a fake beacon as a group divider for different companies
-                groupDivider.setCompanyname(((Beacon) byOneCompany.get(0)).getCompanyname());
+                groupDivider.setIdcompany(((Beacon) byOneCompany.get(0)).getIdcompany());
                 groupDivider.setNickname("groupDivider");
                 finalResult.add(groupDivider);
                 finalResult.addAll(byOneCompany);
@@ -312,6 +340,7 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
         }else {
             return null;
         }
+        */
     }
 
     public void setAdapter(@NonNull T t){

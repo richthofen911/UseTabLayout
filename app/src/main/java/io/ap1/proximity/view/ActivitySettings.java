@@ -36,12 +36,14 @@ import android.widget.Toast;
 import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
 import com.backendless.exceptions.BackendlessFault;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import io.ap1.proximity.Constants;
 import io.ap1.proximity.DefaultCallback;
 import io.ap1.proximity.PermissionHandler;
 import io.ap1.proximity.R;
@@ -117,6 +119,9 @@ public class ActivitySettings extends AppCompatActivity {
                 tvColorValue.setBackgroundColor(Color.parseColor(((String) response.getProperty("color"))));
                 tvColorValue.setText((String) response.getProperty("color"));
                 tvColorValue.setTextColor(Color.parseColor(((String) response.getProperty("color"))));
+                String profileImageUrl = Constants.PROFILE_IMAGE_PATH_ROOT + response.getProperty("pictureUrl");
+                Log.e(TAG, "profileImageUrl: " + profileImageUrl);
+                Picasso.with(ActivitySettings.this).load(profileImageUrl).into(ivProfileImage);
             }
 
             @Override
@@ -265,6 +270,10 @@ public class ActivitySettings extends AppCompatActivity {
         });
         popup.inflate(R.menu.pick_or_capture);
         popup.show();
+    }
+
+    private void uploadImage(){
+
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {

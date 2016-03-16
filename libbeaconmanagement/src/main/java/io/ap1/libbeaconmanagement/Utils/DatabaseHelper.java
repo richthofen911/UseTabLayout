@@ -141,6 +141,8 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
 
     public void deleteAllBeacons(Context context){
         try {
+            if(beaconDao == null)
+                beaconDao = getBeaconDao();
             beaconDao.delete(queryForAllBeacons());
         }catch (SQLException e){
             Log.e("del all beacons error", e.toString());
@@ -150,6 +152,8 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
 
     public void deleteAllCompanies(){
         try{
+            if(companyDao == null)
+                companyDao = getCompanyDao();
             companyDao.delete(queryForAllCompanies());
         }catch (SQLException e){
             Log.e(TAG, "del all companies err " + e.toString());
@@ -158,6 +162,8 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
 
     public List<Beacon> queryForAllBeacons(){
         try {
+            if(beaconDao == null)
+                beaconDao = getBeaconDao();
             return beaconDao.queryForAll();
         }catch (SQLException e){
             Log.e(TAG, "query all beacons err " + e.toString());
@@ -167,6 +173,8 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
 
     public List<Company> queryForAllCompanies(){
         try{
+            if(companyDao == null)
+                companyDao = getCompanyDao();
             return companyDao.queryForAll();
         }catch (SQLException e){
             Log.e(TAG, "query all companies err " + e.toString());
@@ -182,6 +190,8 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
      */
     public Beacon queryForOneBeacon(Beacon beaconFromDetectedList){
         try {
+            if(beaconDao == null)
+                beaconDao = getBeaconDao();
             List<Beacon> beaconWanted = beaconDao.queryBuilder().where().
                     eq("major", beaconFromDetectedList.getMajor()).and().
                     eq("minor", beaconFromDetectedList.getMinor()).query();
@@ -198,12 +208,28 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
         }
     }
 
-    public List<Beacon> queryForBeaconsByCompany(String companyName){
+    public Company queryForOneCompany(String idcompany){
+        try{
+            if(companyDao == null)
+                companyDao = getCompanyDao();
+            List<Company> companyWanted = companyDao.queryBuilder().where().
+                    eq("id", idcompany).query();
+            if(companyWanted.size() > 0)
+                return companyWanted.get(0);
+            else
+                return null;
+        }catch (SQLException e){
+            Log.e(TAG, "query one company err " + e.toString());
+            return null;
+        }
+    }
+
+    public List<Beacon> queryForBeaconsByCompanyId(String idcompany){
         try {
             List<Beacon> beaconByTheCompany = beaconDao.queryBuilder().where().
-                    eq("companyname", companyName).query();
+                    eq("idcompany", idcompany).query();
             return beaconByTheCompany;
-        }catch (SQLException e){
+        } catch (SQLException e){
             Log.e("queryByCompany", e.toString());
             return null;
         }
@@ -230,7 +256,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
             int resultsAmount = distinctSamples.size();
             String[] results = new String[resultsAmount];
             for(int i = 0; i < resultsAmount; i++){
-                results[i] = ((Beacon)((ArrayList)distinctSamples).get(i)).getCompanyname().replace("\'", "\'\'");
+                results[i] = ((Beacon)((ArrayList)distinctSamples).get(i)).getIdcompany();
             }
             return results;
         }catch (SQLException e) {

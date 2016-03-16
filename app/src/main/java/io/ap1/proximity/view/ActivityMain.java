@@ -60,6 +60,7 @@ public class ActivityMain extends AppCompatActivity{
 
     private String userObjectId;
 
+
     public boolean isAdmin = true;
 
     @Override
@@ -70,8 +71,8 @@ public class ActivityMain extends AppCompatActivity{
         userObjectId = getIntent().getStringExtra("userObjectId");
 
         adapterBeaconNearbyAdmin = new AdapterBeaconNearbyAdmin();
-        adapterBeaconNearbyUser = new AdapterBeaconNearbyUser();
-        adapterBeaconPlaces = new AdapterBeaconPlaces();
+        adapterBeaconNearbyUser = new AdapterBeaconNearbyUser(this);
+        adapterBeaconPlaces = new AdapterBeaconPlaces(this);
         adapterFragmentPager = new AdapterFragmentPager(getSupportFragmentManager());
 
         // Get local Bluetooth adapter
@@ -102,7 +103,7 @@ public class ActivityMain extends AppCompatActivity{
                         progCheckCompany.dismiss();
 
                         final ProgressDialog progressDialog = android.app.ProgressDialog.show(ActivityMain.this, "Update Beacon Data", "Please Wait", true);
-                        myBinder.getRemoteBeaconHash("/getAllBeacons_a.php", new CallBackUpdateBeaconSet() {
+                        myBinder.getRemoteBeaconHash("/getAllBeaconsv5_a.php", new CallBackUpdateBeaconSet() {
                             @Override
                             public void onSuccess() {
                                 progressDialog.dismiss();

@@ -22,9 +22,10 @@ public interface Constants {
     int MY_PERMISSIONS_ACCESS_FINE_LOCATION = 1;
     String PERMISSION_ACCESS_FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
 
-    static final String MAJOR = "major: ";
+    String MAJOR = "major: ";
     String MINOR = " minor: ";
     int COLOR_WHITE = Color.parseColor("#FFFFFF");
     int COLOR_BLUE_LIGHT = Color.parseColor("#04A9CE");
-
+    String PROFILE_IMAGE_PATH_ROOT = "http://159.203.15.85:80/api/CBCCFC6F-B6C9-A38D-FF43-FB8A5C7BD400/v1/files/profileImage/";
+    //String PROXIMITY_API_BASE = "http://159.203.15.85:80/api" + ;
 }

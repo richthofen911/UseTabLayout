@@ -21,6 +21,7 @@ android {
 
     dexOptions{
         incremental true
+        javaMaxHeapSize "4g"
     }
 }
 
@@ -33,6 +34,7 @@ dependencies {
     compile 'com.android.support:design:23.2.0'
     compile 'com.jakewharton:butterknife:7.0.1'
     compile 'com.android.support:support-v4:23.2.0'
+    compile 'com.squareup.picasso:picasso:2.5.2'
     compile project(':libbeaconmanagement')
 }
 
