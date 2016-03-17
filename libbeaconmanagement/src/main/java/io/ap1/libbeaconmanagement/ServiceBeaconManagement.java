@@ -320,27 +320,6 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
             return finalResult;
         }else
             return null;
-
-        /*
-        if(companyNames.length > 0){
-            ArrayList[] sortByCompany = new ArrayList[companyNames.length];
-            for(int i = 0; i < sortByCompany.length; i++){
-                sortByCompany[i] = (ArrayList) databaseHelper.queryForBeaconsByCompanyId(companyNames[i]);
-            }
-            ArrayList<Beacon> finalResult = new ArrayList<>();
-            for(ArrayList byOneCompany : sortByCompany){
-                Beacon groupDivider = new Beacon(); // create a fake beacon as a group divider for different companies
-                groupDivider.setIdcompany(((Beacon) byOneCompany.get(0)).getIdcompany());
-                groupDivider.setNickname("groupDivider");
-                finalResult.add(groupDivider);
-                finalResult.addAll(byOneCompany);
-                byOneCompany.clear(); // release the arraylist for memory
-            }
-            return finalResult;
-        }else {
-            return null;
-        }
-        */
     }
 
     public void setAdapter(@NonNull T t){

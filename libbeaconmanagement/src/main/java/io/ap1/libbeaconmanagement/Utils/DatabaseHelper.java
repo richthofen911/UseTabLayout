@@ -235,21 +235,6 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
         }
     }
 
-    public boolean isBeaconInLocalDB(Beacon beaconDetected){
-        List<Beacon> beaconsInLocalDB = queryForAllBeacons();
-        if(beaconsInLocalDB != null){
-            for (Beacon localBeacon: beaconsInLocalDB){
-                if(BeaconOperation.equals(beaconDetected, localBeacon)){
-                    return true;
-                }
-            }
-            return false;
-        }else{
-            Log.e("queryLocalBeacon", "error");
-            return false;
-        }
-    }
-
     public String[] queryDistinct(String columnName){
         try{
             List<Beacon> distinctSamples = beaconDao.queryBuilder().distinct().selectColumns(columnName).query();

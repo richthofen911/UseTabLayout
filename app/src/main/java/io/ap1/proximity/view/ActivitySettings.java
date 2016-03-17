@@ -1,7 +1,6 @@
 package io.ap1.proximity.view;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -9,6 +8,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -26,7 +26,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -35,7 +34,9 @@ import android.widget.Toast;
 
 import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
+import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
+import com.backendless.files.BackendlessFile;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -58,17 +59,18 @@ public class ActivitySettings extends AppCompatActivity {
     private ImageView ivProfileImage;
 
     private Toolbar toolbar;
-
     private Intent intentPicture;
-
     private String selectedImagePath;
-
+    private String profileImageUrl;
     private String userObjectId;
+    private Bitmap profileImage;
 
     private static final String TAG = "ActivitySettings";
     private static final int SELECT_PICTURE = 1;
     private static final int TAKE_A_PHOTO = 2;
     public static final int USER_CHANGE_COLOR = 3;
+
+    private float density;
 
     private static final String newPhotoPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath() + File.separator + "proximity_profile_image.jpg";
 
@@ -78,6 +80,8 @@ public class ActivitySettings extends AppCompatActivity {
         setContentView(R.layout.activity_settings);
 
         mContext = this;
+
+        density = getResources().getDisplayMetrics().density;
 
         nickname = (EditText)findViewById(R.id.et_settings_nickname);
         aboutMe = (EditText)findViewById(R.id.et_settings_about_me);
@@ -119,9 +123,9 @@ public class ActivitySettings extends AppCompatActivity {
                 tvColorValue.setBackgroundColor(Color.parseColor(((String) response.getProperty("color"))));
                 tvColorValue.setText((String) response.getProperty("color"));
                 tvColorValue.setTextColor(Color.parseColor(((String) response.getProperty("color"))));
-                String profileImageUrl = Constants.PROFILE_IMAGE_PATH_ROOT + response.getProperty("pictureUrl");
+                profileImageUrl = (String) response.getProperty("pictureUrl");
                 Log.e(TAG, "profileImageUrl: " + profileImageUrl);
-                Picasso.with(ActivitySettings.this).load(profileImageUrl).into(ivProfileImage);
+                Picasso.with(ActivitySettings.this).load(Constants.PROFILE_IMAGE_PATH_ROOT + profileImageUrl).into(ivProfileImage);
             }
 
             @Override
@@ -175,6 +179,28 @@ public class ActivitySettings extends AppCompatActivity {
     }
 
     public void onSaveClicked(View v){
+        if (!profileImageUrl.equals("/placeholder.png") && profileImage != null) {
+            Toast.makeText(this, "update Image", Toast.LENGTH_SHORT).show();
+            // update profile image
+            Backendless.Files.Android.upload(profileImage, Bitmap.CompressFormat.PNG, 100, "/" + userObjectId + ".png", "profileImage", true, new AsyncCallback<BackendlessFile>() {
+                @Override
+                public void handleResponse(BackendlessFile backendlessFile) {
+                    Toast.makeText(ActivitySettings.this, "Successfully update your profile image", Toast.LENGTH_SHORT).show();
+
+                    // update other data
+                    updateUserDataExceptImage();
+                }
+
+                @Override
+                public void handleFault(BackendlessFault backendlessFault) {
+
+                }
+            });
+        }else
+            updateUserDataExceptImage();
+    }
+
+    private void updateUserDataExceptImage(){
         Backendless.Persistence.of(BackendlessUser.class).findById(userObjectId, new DefaultCallback<BackendlessUser>(ActivitySettings.this) {
             @Override
             public void handleResponse(BackendlessUser respFindUser) {
@@ -186,12 +212,12 @@ public class ActivitySettings extends AppCompatActivity {
                 respFindUser.setProperty("showPicture", String.valueOf(showPicture.isChecked()));
                 respFindUser.setProperty("incognito", String.valueOf(incognito.isChecked()));
                 respFindUser.setProperty("color", tvColorValue.getText().toString());
+                respFindUser.setProperty("pictureUrl", profileImageUrl);
                 Backendless.Persistence.save(respFindUser, new DefaultCallback<BackendlessUser>(mContext) {
                     @Override
                     public void handleResponse(BackendlessUser updatedResponse) {
                         super.handleResponse(updatedResponse);
                         Log.e(TAG, "update user persis :" + updatedResponse.toString());
-                       // ActivitySettings.this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
                         Toast.makeText(ActivitySettings.this, "Profile successfully updated", Toast.LENGTH_SHORT).show();
                     }
 
@@ -202,6 +228,7 @@ public class ActivitySettings extends AppCompatActivity {
                     }
                 });
             }
+
             @Override
             public void handleFault(BackendlessFault respFindUser) {
                 super.handleFault(respFindUser);
@@ -272,8 +299,17 @@ public class ActivitySettings extends AppCompatActivity {
         popup.show();
     }
 
-    private void uploadImage(){
-
+    private Bitmap resizeImage(Bitmap bitmapOriginal){
+        // desired image size is height(<=200px) * width(<=200px)
+        int bmpWidth = bitmapOriginal.getWidth();
+        int bmpHeight = bitmapOriginal.getHeight();
+        Log.e("original width, height", bmpWidth + ", " + bmpHeight);
+        // choose the larger value between width and height as the resizing arg
+        float wantedScale = 200 / (bmpWidth > bmpHeight ? bmpWidth : bmpHeight / density);
+        Log.e("wanted scale", wantedScale + "");
+        Matrix matrix = new Matrix();
+        matrix.postScale(wantedScale, wantedScale);
+        return Bitmap.createBitmap(bitmapOriginal, 0, 0, bmpWidth, bmpHeight, matrix, true);
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -283,18 +319,20 @@ public class ActivitySettings extends AppCompatActivity {
                     Uri selectedImageUri = data.getData();
                     if (Build.VERSION.SDK_INT < 19) {
                         selectedImagePath = getPath(selectedImageUri);
-                        Bitmap bitmap = BitmapFactory.decodeFile(selectedImagePath);
-                        ivProfileImage.setImageBitmap(bitmap);
-
+                        //profileImage = BitmapFactory.decodeFile(selectedImagePath);
+                        profileImage = resizeImage(BitmapFactory.decodeFile(selectedImagePath));
+                        ivProfileImage.setImageBitmap(profileImage);
+                        profileImageUrl = "/" + userObjectId + ".png";
                     } else {
                         ParcelFileDescriptor parcelFileDescriptor;
                         try {
                             parcelFileDescriptor = getContentResolver().openFileDescriptor(selectedImageUri, "r");
                             FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
-                            Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
+                            //profileImage = BitmapFactory.decodeFileDescriptor(fileDescriptor);
+                            profileImage = resizeImage(BitmapFactory.decodeFileDescriptor(fileDescriptor));
                             parcelFileDescriptor.close();
-                            ivProfileImage.setImageBitmap(image);
-
+                            ivProfileImage.setImageBitmap(profileImage);
+                            profileImageUrl = "/" + userObjectId + ".png";
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
                         } catch (IOException e) {
@@ -307,8 +345,10 @@ public class ActivitySettings extends AppCompatActivity {
             case TAKE_A_PHOTO:
                 if(resultCode == RESULT_OK){
                     selectedImagePath = getPath(Uri.parse(newPhotoPath));
-                    Bitmap bitmap = BitmapFactory.decodeFile(selectedImagePath);
-                    ivProfileImage.setImageBitmap(bitmap);
+                    //profileImage = BitmapFactory.decodeFile(selectedImagePath);
+                    profileImage = resizeImage(BitmapFactory.decodeFile(selectedImagePath));
+                    ivProfileImage.setImageBitmap(profileImage);
+                    profileImageUrl = "/" + userObjectId + ".png";
                 }
                 break;
             case USER_CHANGE_COLOR:
