@@ -1,1 +1,1 @@
-include ':app', ':libbeaconmanagement'
+include ':app', ':libbeaconmanagement', ':apas'

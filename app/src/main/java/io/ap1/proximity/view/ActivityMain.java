@@ -3,8 +3,12 @@ package io.ap1.proximity.view;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -23,24 +27,36 @@ import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.pubnub.api.Pubnub;
+
 import io.ap1.libbeaconmanagement.ServiceBeaconManagement;
 import io.ap1.libbeaconmanagement.Utils.CallBackUpdateBeaconSet;
 import io.ap1.libbeaconmanagement.Utils.CallBackUpdateCompanySet;
+import io.ap1.proximity.AppDataStore;
+import io.ap1.proximity.AppPubsubCallback;
+import io.ap1.proximity.MyPubsubProviderClient;
 import io.ap1.proximity.PermissionHandler;
+import io.ap1.proximity.ServiceMessageCenter;
 import io.ap1.proximity.adapter.AdapterBeaconNearbyAdmin;
 import io.ap1.proximity.adapter.AdapterBeaconNearbyUser;
 import io.ap1.proximity.adapter.AdapterBeaconPlaces;
 import io.ap1.proximity.adapter.AdapterFragmentPager;
 import io.ap1.proximity.R;
+import io.ap1.proximity.adapter.AdapterUserInList;
 
 
 public class ActivityMain extends AppCompatActivity{
+    private static final String TAG = "ActivityMain";
 
     public static Intent intentShowBeaconUrlContent;
     public static Intent intentShowBeaconDetails;
     private static final int requestCodeFineLoc = 101;
 
-    protected ServiceBeaconManagement.BinderManagement myBinder;
+    protected ServiceBeaconManagement.BinderManagement binderBeaconManagement;
+    public ServiceMessageCenter.BinderMsgCenter binderMsgCenter;
+
+    public MyPubsubProviderClient myPubsubProviderClient;
 
     private static final String UUID_AprilBrother = "E2C56DB5-DFFB-48D2-B060-D0F5A71096E0";
     public ViewPager viewPager;
@@ -50,15 +66,24 @@ public class ActivityMain extends AppCompatActivity{
     public AdapterFragmentPager adapterFragmentPager;
     public static final int rssiBorder = -80;
 
-    private ServiceConnection conn;
+    private ServiceConnection connBeaconManagement;
+    private ServiceConnection connChat;
+
+    String btNameOrigin = "unknown";
+    private String myProximityDeviceName;
+    private BroadcastReceiver mReceiver;
+
+    public AdapterUserInList adapterUserInList;
 
     public BluetoothAdapter mBluetoothAdapter = null;
+
+    public AppPubsubCallback appPubsubCallback;
 
     public Toolbar toolbar;
     public LinearLayout mapSwitch;
     public TextView tvToolbarEnd;
 
-    private String userObjectId;
+    private String myUserObjectId;
 
 
     public boolean isAdmin = true;
@@ -68,12 +93,17 @@ public class ActivityMain extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        userObjectId = getIntent().getStringExtra("userObjectId");
+        myUserObjectId = getIntent().getStringExtra("userObjectId");
 
         adapterBeaconNearbyAdmin = new AdapterBeaconNearbyAdmin();
         adapterBeaconNearbyUser = new AdapterBeaconNearbyUser(this);
         adapterBeaconPlaces = new AdapterBeaconPlaces(this);
         adapterFragmentPager = new AdapterFragmentPager(getSupportFragmentManager());
+
+        adapterUserInList = new AdapterUserInList(this);
+
+        myPubsubProviderClient = new MyPubsubProviderClient(new Pubnub("pub-c-af13868a-beb9-4719-82fc-8518ddfacea8", "sub-c-48ef81b4-f118-11e5-8f88-0619f8945a4f"));
+        appPubsubCallback = new AppPubsubCallback(this, myUserObjectId, adapterUserInList, TAG);
 
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -82,28 +112,46 @@ public class ActivityMain extends AppCompatActivity{
         if (mBluetoothAdapter == null)
             Toast.makeText(this, "Bluetooth is not available", Toast.LENGTH_LONG).show();
         else {
-            //mBluetoothAdapter.getBluetoothLeAdvertiser();
-            //AdvertiseSettings advertiseSettings = new AdvertiseSettings.Builder()
-
+            changeBTNameForThisApp(myUserObjectId);
+            ensureDiscoverable();
         }
 
-        conn = new ServiceConnection() {
+        mReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    String detectedDeviceName = device.getName();
+                    Log.e("receiver", "get device name: " + detectedDeviceName);
+                    if(detectedDeviceName != null && detectedDeviceName.startsWith("proximity/")) {
+                        Log.e("proximity user found", device.getName() + "\n" + device.getAddress());
+                        binderMsgCenter.getUserObjectByObjectId(getTargetUserObjectId(detectedDeviceName));
+                    }
+                } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                    //discoverDevices();
+                    Log.e("device discovery", "finished");
+                }
+            }
+        };
+
+        connBeaconManagement = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 Log.e("Service FindBeacon", "Connected");
-                myBinder = (ServiceBeaconManagement.BinderManagement) service;
-                myBinder.getIdparent();
-                //myBinder.setListAdapter(adapterBeaconNearbyAdmin);
-                myBinder.setListAdapter(adapterBeaconNearbyUser);
+                binderBeaconManagement = (ServiceBeaconManagement.BinderManagement) service;
+                binderBeaconManagement.getIdparent();
+
+                binderBeaconManagement.setListAdapter(adapterBeaconNearbyUser);
 
                 final ProgressDialog progCheckCompany = android.app.ProgressDialog.show(ActivityMain.this, "Update Company Data", "Please wait", true);
-                myBinder.getRemoteCompanyHash("/getAllCompanies_a.php", new CallBackUpdateCompanySet() {
+                binderBeaconManagement.getRemoteCompanyHash("/getAllCompanies_a.php", new CallBackUpdateCompanySet() {
                     @Override
                     public void onSuccess() {
                         progCheckCompany.dismiss();
 
                         final ProgressDialog progressDialog = android.app.ProgressDialog.show(ActivityMain.this, "Update Beacon Data", "Please Wait", true);
-                        myBinder.getRemoteBeaconHash("/getAllBeaconsv5_a.php", new CallBackUpdateBeaconSet() {
+                        binderBeaconManagement.getRemoteBeaconHash("/getAllBeaconsv5_a.php", new CallBackUpdateBeaconSet() {
                             @Override
                             public void onSuccess() {
                                 progressDialog.dismiss();
@@ -136,6 +184,34 @@ public class ActivityMain extends AppCompatActivity{
             }
         };
 
+        connChat = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                Log.e("Service MessageCenter", "Connected");
+                binderMsgCenter = (ServiceMessageCenter.BinderMsgCenter) service;
+
+                binderMsgCenter.setMyAdapterUserInList(adapterUserInList);
+                registerMyReceiver(ActivityMain.this);
+                discoverDevices();
+                binderMsgCenter.setSubChannel("proximity_" + myUserObjectId);
+                binderMsgCenter.setPubsubProviderClient(myPubsubProviderClient);
+                binderMsgCenter.setPubsubCallback(appPubsubCallback);
+
+                binderMsgCenter.subToChannel();
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                Log.e("Service MessageCenter", "Disconnected");
+            }
+        };
+
+        if(!PermissionHandler.checkPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)){
+            PermissionHandler.requestPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        }else {
+            bindServiceMsgCenter();
+            bindServiceBeaconManagement();
+        }
 
         toolbar = (Toolbar) findViewById(R.id.toolbar_main);
         toolbar.setTitleTextColor(Color.WHITE);
@@ -173,12 +249,6 @@ public class ActivityMain extends AppCompatActivity{
 
         setUpDrawer();
 
-        if(!PermissionHandler.checkPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)){
-            PermissionHandler.requestPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-        }else {
-            bindServiceBeaconManagement();
-        }
-
         intentShowBeaconUrlContent = new Intent(ActivityMain.this, ActivityBeaconUrlContent.class);
         intentShowBeaconUrlContent = new Intent(ActivityMain.this, ActivityBeaconDetail.class);
     }
@@ -198,7 +268,7 @@ public class ActivityMain extends AppCompatActivity{
                 int id = item.getItemId();
 
                 if (id == R.id.nav_settings) {
-                    startActivity(new Intent(ActivityMain.this, ActivitySettings.class).putExtra("userObjectId", userObjectId));
+                    startActivity(new Intent(ActivityMain.this, ActivitySettings.class).putExtra("userObjectId", myUserObjectId));
                 } else if (id == R.id.nav_logout) {
 
                 }
@@ -221,6 +291,11 @@ public class ActivityMain extends AppCompatActivity{
         }
     }
 
+    private void discoverDevices(){
+        if(!mBluetoothAdapter.isDiscovering())
+            mBluetoothAdapter.startDiscovery();
+    }
+
     protected void bindServiceBeaconManagement(){
         Log.e("trying to bind", "Service BeaconManagement");
         Bundle beaconInfo = new Bundle();
@@ -230,32 +305,68 @@ public class ActivityMain extends AppCompatActivity{
         beaconInfo.putInt("borderValue", rssiBorder);
         beaconInfo.putBoolean("useGeneralSearchMode", true);
         //beaconInfo.putString("idparent", "11");
-        bindService(new Intent(ActivityMain.this, ServiceBeaconManagement.class).putExtras(beaconInfo), conn, BIND_AUTO_CREATE);
+        bindService(new Intent(ActivityMain.this, ServiceBeaconManagement.class).putExtras(beaconInfo), connBeaconManagement, BIND_AUTO_CREATE);
+    }
+
+    private void bindServiceMsgCenter(){
+        Log.e("trying to bind", "Service MessageCenter");
+        Bundle bundle = new Bundle();
+        bundle.putString("myUserObjectId", myUserObjectId);
+        bindService(new Intent(ActivityMain.this, ServiceMessageCenter.class).putExtras(bundle), connChat, BIND_AUTO_CREATE);
+    }
+
+    private void ensureDiscoverable() {
+        if (mBluetoothAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
+            Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 0);
+            startActivity(discoverableIntent);
+        }
+    }
+
+    private void changeBTNameForThisApp(String myUserObjectId){
+        btNameOrigin = mBluetoothAdapter.getName();
+        myProximityDeviceName = "proximity/" + myUserObjectId;
+        mBluetoothAdapter.setName(myProximityDeviceName);
+    }
+
+    private void registerMyReceiver(Context context) {
+        context.registerReceiver(mReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+        context.registerReceiver(mReceiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));
+    }
+
+    private String getTargetUserObjectId(String targetDeviceName){
+        String[] components = targetDeviceName.split("/");
+        return components[1];
     }
 
     protected void unbindServiceBeaconManagement(){
-        if(myBinder != null && myBinder.isBinderAlive())
-            unbindService(conn);
+        if(binderBeaconManagement != null && binderBeaconManagement.isBinderAlive())
+            unbindService(connBeaconManagement);
+    }
+
+    protected void unbindServiceChat(){
+        if(binderMsgCenter != null && binderMsgCenter.isBinderAlive())
+            unbindService(connChat);
     }
 
     public void startScanning(){
-        if(myBinder != null && myBinder.isBinderAlive())
-            myBinder.startScanning();
+        if(binderBeaconManagement != null && binderBeaconManagement.isBinderAlive())
+            binderBeaconManagement.startScanning();
     }
 
     public void stopScanning(){
-        if(myBinder != null && myBinder.isBinderAlive())
-            myBinder.stopScanning();
+        if(binderBeaconManagement != null && binderBeaconManagement.isBinderAlive())
+            binderBeaconManagement.stopScanning();
     }
 
     public void updateCompanySet(String apiPath, CallBackUpdateCompanySet callBackUpdateCompanySet){
-        if(myBinder != null && myBinder.isBinderAlive())
-            myBinder.getRemoteCompanyHash(apiPath, callBackUpdateCompanySet);
+        if(binderBeaconManagement != null && binderBeaconManagement.isBinderAlive())
+            binderBeaconManagement.getRemoteCompanyHash(apiPath, callBackUpdateCompanySet);
     }
 
     public void updateBeaconSet(String apiPath, CallBackUpdateBeaconSet callBackUpdateBeaconSet){
-        if(myBinder != null && myBinder.isBinderAlive())
-            myBinder.getRemoteBeaconHash(apiPath, callBackUpdateBeaconSet);
+        if(binderBeaconManagement != null && binderBeaconManagement.isBinderAlive())
+            binderBeaconManagement.getRemoteBeaconHash(apiPath, callBackUpdateBeaconSet);
     }
 
     @Override
@@ -278,8 +389,23 @@ public class ActivityMain extends AppCompatActivity{
 
     @Override
     protected void onDestroy(){
-        unbindServiceBeaconManagement();
         super.onDestroy();
+        Log.e(TAG, "onDestroy");
+
+        unbindServiceChat();
+        unbindServiceBeaconManagement();
+
+        if (mBluetoothAdapter != null){
+            mBluetoothAdapter.setName(btNameOrigin);
+            if(mBluetoothAdapter.isDiscovering())
+                mBluetoothAdapter.cancelDiscovery();
+        }
+
+        AppDataStore.userList.clear();
+        AppDataStore.duplicateCheck.clear();
+        adapterUserInList.notifyItemChanged(0, AppDataStore.userList.size() - 1);
+
+        unregisterReceiver(mReceiver);
     }
 
 }

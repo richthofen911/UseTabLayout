@@ -45,7 +45,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import io.ap1.proximity.Constants;
-import io.ap1.proximity.DefaultCallback;
+import io.ap1.proximity.DefaultBackendlessCallback;
 import io.ap1.proximity.PermissionHandler;
 import io.ap1.proximity.R;
 
@@ -61,8 +61,8 @@ public class ActivitySettings extends AppCompatActivity {
     private Toolbar toolbar;
     private Intent intentPicture;
     private String selectedImagePath;
-    private String profileImageUrl;
-    private String userObjectId;
+    private String profileImageName;
+    private String myUserObjectId;
     private Bitmap profileImage;
 
     private static final String TAG = "ActivitySettings";
@@ -96,14 +96,14 @@ public class ActivitySettings extends AppCompatActivity {
 
         setUpDrawer();
 
-        userObjectId = getIntent().getStringExtra("userObjectId");
-        Log.e(TAG, "userObjectId: " + userObjectId);
+        myUserObjectId = getIntent().getStringExtra("userObjectId");
+        Log.e(TAG, "userObjectId: " + myUserObjectId);
         //String objectId = user.substring(user.indexOf("objectId="), user.length() - 1);
         //Log.i("Object Id", objectId);
         //final String realObjectId = getIntent().getStringExtra("objectId");
         //Log.i("Real Object Id", realObjectId);
 
-        Backendless.Persistence.of( BackendlessUser.class ).findById(userObjectId, new DefaultCallback<BackendlessUser>(mContext) {
+        Backendless.Persistence.of( BackendlessUser.class ).findById(myUserObjectId, new DefaultBackendlessCallback<BackendlessUser>(mContext, "Getting user data...") {
             @Override
             public void handleResponse(BackendlessUser response) {
                 super.handleResponse(response);
@@ -120,12 +120,12 @@ public class ActivitySettings extends AppCompatActivity {
                 visible.setChecked(Boolean.getBoolean((String) response.getProperty("visible")));
                 showPicture.setChecked(Boolean.getBoolean((String) response.getProperty("showPicture")));
                 incognito.setChecked(Boolean.getBoolean((String) response.getProperty("incognito")));
-                tvColorValue.setBackgroundColor(Color.parseColor(((String) response.getProperty("color"))));
+                tvColorValue.setBackgroundColor(Color.parseColor(("#" + response.getProperty("color"))));
                 tvColorValue.setText((String) response.getProperty("color"));
-                tvColorValue.setTextColor(Color.parseColor(((String) response.getProperty("color"))));
-                profileImageUrl = (String) response.getProperty("pictureUrl");
-                Log.e(TAG, "profileImageUrl: " + profileImageUrl);
-                Picasso.with(ActivitySettings.this).load(Constants.PROFILE_IMAGE_PATH_ROOT + profileImageUrl).into(ivProfileImage);
+                tvColorValue.setTextColor(Color.parseColor(("#" + response.getProperty("color"))));
+                profileImageName = (String) response.getProperty("profileImage");
+                Log.e(TAG, "profileImageName: " + profileImageName);
+                Picasso.with(ActivitySettings.this).load(Constants.PROFILE_IMAGE_PATH_ROOT + profileImageName).into(ivProfileImage);
             }
 
             @Override
@@ -179,15 +179,15 @@ public class ActivitySettings extends AppCompatActivity {
     }
 
     public void onSaveClicked(View v){
-        if (!profileImageUrl.equals("/placeholder.png") && profileImage != null) {
+        // if either taking a photo or choose a picture will change default profileImageName 'placeholder.png'to 'userObjectId.png'
+        if (!profileImageName.equals("placeholder.png") && profileImage != null) {
             Toast.makeText(this, "update Image", Toast.LENGTH_SHORT).show();
             // update profile image
-            Backendless.Files.Android.upload(profileImage, Bitmap.CompressFormat.PNG, 100, "/" + userObjectId + ".png", "profileImage", true, new AsyncCallback<BackendlessFile>() {
+            // 100 is quality, true means overwrite the old one with if same name, "profileImage" is remote file directory path
+            Backendless.Files.Android.upload(profileImage, Bitmap.CompressFormat.PNG, 100, myUserObjectId + ".png", "profileImage", true, new AsyncCallback<BackendlessFile>() {
                 @Override
                 public void handleResponse(BackendlessFile backendlessFile) {
                     Toast.makeText(ActivitySettings.this, "Successfully update your profile image", Toast.LENGTH_SHORT).show();
-
-                    // update other data
                     updateUserDataExceptImage();
                 }
 
@@ -201,7 +201,7 @@ public class ActivitySettings extends AppCompatActivity {
     }
 
     private void updateUserDataExceptImage(){
-        Backendless.Persistence.of(BackendlessUser.class).findById(userObjectId, new DefaultCallback<BackendlessUser>(ActivitySettings.this) {
+        Backendless.Persistence.of(BackendlessUser.class).findById(myUserObjectId, new DefaultBackendlessCallback<BackendlessUser>(this, "Updating user data") {
             @Override
             public void handleResponse(BackendlessUser respFindUser) {
                 super.handleResponse(respFindUser);
@@ -212,8 +212,8 @@ public class ActivitySettings extends AppCompatActivity {
                 respFindUser.setProperty("showPicture", String.valueOf(showPicture.isChecked()));
                 respFindUser.setProperty("incognito", String.valueOf(incognito.isChecked()));
                 respFindUser.setProperty("color", tvColorValue.getText().toString());
-                respFindUser.setProperty("pictureUrl", profileImageUrl);
-                Backendless.Persistence.save(respFindUser, new DefaultCallback<BackendlessUser>(mContext) {
+                respFindUser.setProperty("profileImage", profileImageName);
+                Backendless.Persistence.save(respFindUser, new DefaultBackendlessCallback<BackendlessUser>(mContext) {
                     @Override
                     public void handleResponse(BackendlessUser updatedResponse) {
                         super.handleResponse(updatedResponse);
@@ -322,7 +322,7 @@ public class ActivitySettings extends AppCompatActivity {
                         //profileImage = BitmapFactory.decodeFile(selectedImagePath);
                         profileImage = resizeImage(BitmapFactory.decodeFile(selectedImagePath));
                         ivProfileImage.setImageBitmap(profileImage);
-                        profileImageUrl = "/" + userObjectId + ".png";
+                        profileImageName = myUserObjectId + ".png";
                     } else {
                         ParcelFileDescriptor parcelFileDescriptor;
                         try {
@@ -332,7 +332,7 @@ public class ActivitySettings extends AppCompatActivity {
                             profileImage = resizeImage(BitmapFactory.decodeFileDescriptor(fileDescriptor));
                             parcelFileDescriptor.close();
                             ivProfileImage.setImageBitmap(profileImage);
-                            profileImageUrl = "/" + userObjectId + ".png";
+                            profileImageName = myUserObjectId + ".png";
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
                         } catch (IOException e) {
@@ -348,13 +348,13 @@ public class ActivitySettings extends AppCompatActivity {
                     //profileImage = BitmapFactory.decodeFile(selectedImagePath);
                     profileImage = resizeImage(BitmapFactory.decodeFile(selectedImagePath));
                     ivProfileImage.setImageBitmap(profileImage);
-                    profileImageUrl = "/" + userObjectId + ".png";
+                    profileImageName = myUserObjectId + ".png";
                 }
                 break;
             case USER_CHANGE_COLOR:
                 if(resultCode == RESULT_OK){
                     int newColor = data.getIntExtra("newColor", 0);
-                    String hexColor = String.format("#%06X", (0xFFFFFF & newColor));
+                    String hexColor = Integer.toHexString(newColor).substring(2);
                     Log.e(TAG, "color: " + hexColor);
                     tvColorValue.setBackgroundColor(newColor);
                     tvColorValue.setText(hexColor);

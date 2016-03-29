@@ -45,21 +45,35 @@
         <activity
             android:name=".view.ActivityDeviceList"
             android:screenOrientation="nosensor" />
-        <activity android:name=".view.ActivityBeaconUrlContent" />
+        <activity android:name=".view.ActivityBeaconUrlContent"
+            android:screenOrientation="nosensor"/>
         <activity
             android:name=".view.ActivityBeaconDetail"
             android:screenOrientation="nosensor" />
+        <activity android:name=".view.ActivityChat"
+            android:screenOrientation="nosensor"/>
+        <activity
+            android:name=".view.ActivityColorPicker"
+            android:screenOrientation="nosensor"/>
+        <activity
+            android:name=".view.ActivitySettings"
+            android:screenOrientation="nosensor"/>
+        <activity
+            android:name=".view.ActivityCompanyDetails"
+            android:screenOrientation="nosensor"/>
+        <activity
+            android:name=".view.ActivityCompanyList"
+            android:screenOrientation="nosensor"/>
 
+        <service android:name=".ServiceMessageCenter"
+            android:enabled="true"
+            android:exported="true"/>
         <service
             android:name="io.ap1.libbeaconmanagement.ServiceBeaconManagement"
             android:enabled="true"
             android:exported="true" />
         <service android:name="com.perples.recosdk.RECOBeaconService" />
 
-        <activity android:name=".view.ActivityColorPicker" />
-        <activity android:name=".view.ActivitySettings" />
-        <activity android:name=".view.ActivityCompanyDetails" />
-        <activity android:name=".view.ActivityCompanyList"></activity>
     </application>
 
 </manifest>

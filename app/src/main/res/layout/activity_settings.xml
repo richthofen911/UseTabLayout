@@ -40,8 +40,7 @@
             android:layout_below="@id/toolbar_settings"
             android:layout_marginTop="20dp"
             android:layout_centerHorizontal="true"
-            android:onClick="onCameraIconClicked"
-            android:src="@drawable/iv_upload_image"/>
+            android:onClick="onCameraIconClicked" />
 
         <TextView
             android:id="@+id/tv_settings_nickname"
