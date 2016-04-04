@@ -21,6 +21,7 @@ import org.json.JSONException;
 
 import io.ap1.proximity.adapter.AdapterChatMsgList;
 import io.ap1.proximity.adapter.AdapterUserInList;
+import io.ap1.proximity.view.ActivityMain;
 
 /**
  * Created by admin on 23/03/16.
@@ -42,16 +43,17 @@ public class AppPubsubCallback extends Callback implements GeneralPubsubCallback
 
     public AppPubsubCallback(Activity activity, String myUserObjectId, AdapterUserInList adapterUserInList, @NonNull String TAG) {
         super();
+        instance = this;
         this.activity = activity;
         this.myUserObjectId = myUserObjectId;
         this.adapterUserInList = adapterUserInList;
         this.handler = new Handler(activity.getMainLooper());
         this.TAG = TAG;
         gson = new Gson();
-        instance = this;
+
     }
 
-    public static AppPubsubCallback getAppPubsubCallback(){
+    public synchronized static AppPubsubCallback getAppPubsubCallback(){
         return instance;
     }
 
@@ -100,65 +102,64 @@ public class AppPubsubCallback extends Callback implements GeneralPubsubCallback
 
     // this method is from GeneralPubsubCallback
     @Override
-    public synchronized void onSuccessReceive(final Message message) {
-        boolean isDuplicateMessage = false;
-
-        long timestamp = Long.parseLong(message.getHeaders().get("timestamp"));
-        String source = message.getHeaders().get("source");
-        Log.e(TAG, "onSuccessReceiveNotFiltered, last timestamp: " + checkDuplicateTimestamp + ", this timestamp: " + timestamp +
-                "\nlast source: " + checkDuplicateSource + ", this source: " + source);
-        if(timestamp == checkDuplicateTimestamp && source.equals(checkDuplicateSource))
-            isDuplicateMessage = true;
-        if(!isDuplicateMessage){
-            checkDuplicateTimestamp = timestamp;
-            checkDuplicateSource = source;
-            if(source.equals(myUserObjectId)){ // this is the msg I sent, show it on my chat history
-                Log.e(TAG, "onSuccessReceive, , source is myself");
-                if(adapterChatMsgList != null){
-                    adapterChatMsgList.getChatHistory().add(message);
-                    adapterChatMsgList.notifyItemInserted(adapterChatMsgList.getItemCount());
-                    if(recyclerViewToScroll != null){
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                // scroll to the bottom to show new msg
-                                recyclerViewToScroll.scrollToPosition(adapterChatMsgList.getItemCount() - 1);
-                            }
-                        });
-                    }
-
-                }
-            }else{
-                for (int i = 0; i < AppDataStore.userList.size(); i++) {
-                    Log.e(TAG, AppDataStore.userList.get(i).getUserObjectId());
-                    if (source.equals(AppDataStore.userList.get(i).getUserObjectId())) { // if publishId is in userList
-                        if(!source.equals(currentChattingUserObjectId)){ // if it's not the user you're currently chatting with
-                            Log.e(TAG, "onSuccessReceive, source is from a user in users list");
-                            AppDataStore.userList.get(i).addToMessageList(message);  // update the userList
-                            adapterUserInList.notifyItemChanged(i);
-                        }else{
-                            Log.e(TAG, "onSuccessReceive, source is from the person I'm talking to");
-                            adapterChatMsgList.getChatHistory().add(message); // if it is the user you're currently chatting with
-                            adapterChatMsgList.notifyItemInserted(adapterChatMsgList.getItemCount()); // update the chat history list
-                            if(recyclerViewToScroll != null){
-                                handler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        // scroll to the bottom to show new msg
-                                        recyclerViewToScroll.scrollToPosition(adapterChatMsgList.getItemCount() - 1);
-                                    }
-                                });
-                            }
+    public void onSuccessReceive(final Message message) {
+        synchronized (this){
+            boolean isDuplicateMessage = false;
+            long timestamp = Long.parseLong(message.getHeaders().get("timestamp"));
+            String source = message.getHeaders().get("source");
+            Log.e(TAG, "onSuccessReceiveNotFiltered, last timestamp: " + checkDuplicateTimestamp + ", this timestamp: " + timestamp +
+                    "\nlast source: " + checkDuplicateSource + ", this source: " + source);
+            if(timestamp == checkDuplicateTimestamp && source.equals(checkDuplicateSource))
+                isDuplicateMessage = true;
+            if(!isDuplicateMessage){
+                checkDuplicateTimestamp = timestamp;
+                checkDuplicateSource = source;
+                if(source.equals(myUserObjectId)){ // this is the msg I sent, show it on my chat history
+                    if(adapterChatMsgList != null){
+                        adapterChatMsgList.getChatHistory().add(message);
+                        adapterChatMsgList.notifyItemInserted(adapterChatMsgList.getItemCount());
+                        if(recyclerViewToScroll != null){
+                            handler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // scroll to the bottom to show new msg
+                                    recyclerViewToScroll.scrollToPosition(adapterChatMsgList.getItemCount() - 1);
+                                }
+                            });
                         }
-                        break;
+                    }
+                }else{
+                    for (int i = 0; i < AppDataStore.userList.size(); i++) {
+                        Log.e(TAG, AppDataStore.userList.get(i).getUserObjectId());
+                        if (source.equals(AppDataStore.userList.get(i).getUserObjectId())) { // if publishId is in userList
+                            if(!source.equals(currentChattingUserObjectId)){ // if it's not the user you're currently chatting with
+                                Log.e(TAG, "onSuccessReceive, source is from a user in users list");
+                                AppDataStore.userList.get(i).addToMessageList(message);  // update the userList
+                                adapterUserInList.notifyItemChanged(i, AppDataStore.userList.get(i));
+                            }else{
+                                Log.e(TAG, "onSuccessReceive, source is from the person I'm talking to");
+                                adapterChatMsgList.getChatHistory().add(message); // if it is the user you're currently chatting with
+                                adapterChatMsgList.notifyItemInserted(adapterChatMsgList.getItemCount()); // update the chat history list
+                                if(recyclerViewToScroll != null){
+                                    handler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            // scroll to the bottom to show new msg
+                                            recyclerViewToScroll.scrollToPosition(adapterChatMsgList.getItemCount() - 1);
+                                        }
+                                    });
+                                }
+                            }
+                            break;
+                        }
                     }
                 }
             }
-
         }
+
     }
 
-    public void setActivity(Activity activity){
+    public void setActivity(@NonNull Activity activity){
         this.activity = activity;
         this.handler = new Handler(this.activity.getMainLooper());
     }

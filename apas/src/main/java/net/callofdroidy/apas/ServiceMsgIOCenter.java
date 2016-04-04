@@ -107,7 +107,7 @@ public class ServiceMsgIOCenter<T extends PubsubProviderClient, S extends Genera
         }
 
         public void pubToAnotherChannel(String anotherChannelName, Message message){
-            pubToAnotherChannel(anotherChannelName, message);
+            publishToAnotherChannel(anotherChannelName, message);
         }
     }
 }

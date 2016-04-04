@@ -41,7 +41,7 @@ public class ActivityCompanyDetails extends AppCompatActivity {
         setContentView(R.layout.activity_company_details);
         ButterKnife.bind(this);
 
-        tvCompanyDetailsColor.setOnClickListener(new View.OnClickListener() {
+        tvCompanyDetailsColorChange.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent changeColor = new Intent(ActivityCompanyDetails.this, ActivityColorPicker.class);
@@ -50,6 +50,10 @@ public class ActivityCompanyDetails extends AppCompatActivity {
                 startActivityForResult(changeColor, COMPANY_CHANGE_COLOR);
             }
         });
+    }
+
+    public void onSaveClicked(View v){
+        Log.e(TAG, "save clicked");
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -62,6 +66,7 @@ public class ActivityCompanyDetails extends AppCompatActivity {
                     tvCompanyDetailsColorChange.setBackgroundColor(newColor);
                     tvCompanyDetailsColorChange.setText(hexColor);
                     tvCompanyDetailsColorChange.setTextColor(newColor);
+                    tvCompanyDetailsColor.setText(hexColor);
                 }
         }
     }

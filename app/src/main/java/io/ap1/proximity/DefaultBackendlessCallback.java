@@ -11,27 +11,32 @@ import com.backendless.exceptions.BackendlessFault;
 public class DefaultBackendlessCallback<T> extends BackendlessCallback<T> {
     private Context context;
     private ProgressDialog progressDialog;
+    private String TAG;
 
-    public DefaultBackendlessCallback(Context context) {
+    public DefaultBackendlessCallback(Context context, String TAG) {
         this.context = context;
+        this.TAG = TAG;
         //progressDialog = ProgressDialog.show( context, "", "Loading...", true );
         //progressDialog.setCancelable(true);
     }
 
-    public DefaultBackendlessCallback(Context context, String message) {
+    public DefaultBackendlessCallback(Context context, String TAG, String message) {
         this.context = context;
-        progressDialog = ProgressDialog.show( context, "", message, true );
+        this.TAG = TAG;
+        progressDialog = ProgressDialog.show(context, "", message, true );
     }
 
     @Override
     public void handleResponse( T response ) {
-        progressDialog.cancel();
+        if(progressDialog != null)
+            progressDialog.cancel();
         Log.e("progressDialog", "canceled");
     }
 
     @Override
     public void handleFault( BackendlessFault fault ) {
-        progressDialog.cancel();
-        Toast.makeText( context, fault.getMessage(), Toast.LENGTH_LONG ).show();
+        if(progressDialog != null)
+            progressDialog.cancel();
+        Toast.makeText(context, TAG + ": " + fault.getMessage(), Toast.LENGTH_LONG).show();
     }
 }

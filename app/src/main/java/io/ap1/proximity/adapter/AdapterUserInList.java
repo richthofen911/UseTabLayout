@@ -32,7 +32,7 @@ public class AdapterUserInList extends RecyclerView.Adapter<ViewHolderUserInList
     }
 
     @Override
-    public void onBindViewHolder(ViewHolderUserInList detectedUser, final int position){
+    public void onBindViewHolder(ViewHolderUserInList detectedUser, int position){
         MyBackendlessUser userTmp = AppDataStore.userList.get(position);
         /*
         String userName = (String) userTmp.getProperty("name");

@@ -21,6 +21,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
@@ -35,6 +36,7 @@ import io.ap1.libbeaconmanagement.Utils.CallBackUpdateBeaconSet;
 import io.ap1.libbeaconmanagement.Utils.CallBackUpdateCompanySet;
 import io.ap1.proximity.AppDataStore;
 import io.ap1.proximity.AppPubsubCallback;
+import io.ap1.proximity.MyBackendlessUser;
 import io.ap1.proximity.MyPubsubProviderClient;
 import io.ap1.proximity.PermissionHandler;
 import io.ap1.proximity.ServiceMessageCenter;
@@ -52,6 +54,25 @@ public class ActivityMain extends AppCompatActivity{
     public static Intent intentShowBeaconUrlContent;
     public static Intent intentShowBeaconDetails;
     private static final int requestCodeFineLoc = 101;
+
+    public static RecyclerView.AdapterDataObserver adapterDataObserver = new RecyclerView.AdapterDataObserver() {
+        @Override
+        public void onItemRangeChanged(int positionStart, int itemCount, Object payload) {
+            super.onItemRangeChanged(positionStart, itemCount, payload);
+            String className = "unknown";
+            if(payload != null)
+                className = payload.getClass().getSimpleName();
+
+            //Log.e("onSuccessReceive, ", "onItemRangeChanged: " + positionStart + "->" + itemCount + "::" + ((MyBackendlessUser) payload).getUnreadMessageList().size());
+            Log.e("onSuccessReceive, ", "onItemRangeChanged: " + positionStart + "->" + itemCount + "::" + className);
+        }
+
+        @Override
+        public void onChanged() {
+            super.onChanged();
+            Log.e("onSuccessReceive, ", "onChanged");
+        }
+    };
 
     protected ServiceBeaconManagement.BinderManagement binderBeaconManagement;
     public ServiceMessageCenter.BinderMsgCenter binderMsgCenter;
@@ -101,6 +122,7 @@ public class ActivityMain extends AppCompatActivity{
         adapterFragmentPager = new AdapterFragmentPager(getSupportFragmentManager());
 
         adapterUserInList = new AdapterUserInList(this);
+        adapterUserInList.registerAdapterDataObserver(ActivityMain.adapterDataObserver);
 
         myPubsubProviderClient = new MyPubsubProviderClient(new Pubnub("pub-c-af13868a-beb9-4719-82fc-8518ddfacea8", "sub-c-48ef81b4-f118-11e5-8f88-0619f8945a4f"));
         appPubsubCallback = new AppPubsubCallback(this, myUserObjectId, adapterUserInList, TAG);
@@ -123,7 +145,6 @@ public class ActivityMain extends AppCompatActivity{
                 if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                     String detectedDeviceName = device.getName();
-                    Log.e("receiver", "get device name: " + detectedDeviceName);
                     if(detectedDeviceName != null && detectedDeviceName.startsWith("proximity/")) {
                         Log.e("proximity user found", device.getName() + "\n" + device.getAddress());
                         binderMsgCenter.getUserObjectByObjectId(getTargetUserObjectId(detectedDeviceName));
@@ -155,7 +176,11 @@ public class ActivityMain extends AppCompatActivity{
                             @Override
                             public void onSuccess() {
                                 progressDialog.dismiss();
-                                startScanning();
+                                if(!PermissionHandler.checkPermission(ActivityMain.this, Manifest.permission.ACCESS_FINE_LOCATION)){
+                                    PermissionHandler.requestPermission(ActivityMain.this, Manifest.permission.ACCESS_FINE_LOCATION);
+                                }else {
+                                    startScanning();
+                                }
                             }
 
                             @Override
@@ -394,6 +419,7 @@ public class ActivityMain extends AppCompatActivity{
 
         unbindServiceChat();
         unbindServiceBeaconManagement();
+        appPubsubCallback = null;
 
         if (mBluetoothAdapter != null){
             mBluetoothAdapter.setName(btNameOrigin);
@@ -404,8 +430,14 @@ public class ActivityMain extends AppCompatActivity{
         AppDataStore.userList.clear();
         AppDataStore.duplicateCheck.clear();
         adapterUserInList.notifyItemChanged(0, AppDataStore.userList.size() - 1);
+        adapterUserInList.unregisterAdapterDataObserver(adapterDataObserver);
 
-        unregisterReceiver(mReceiver);
+        try{
+            unregisterReceiver(mReceiver);
+        }catch (Exception e){
+            Log.e(TAG, "mReceiver was not registered, cannot unregister it");
+        }
+
     }
 
 }

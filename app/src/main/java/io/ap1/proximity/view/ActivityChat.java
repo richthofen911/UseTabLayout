@@ -41,7 +41,7 @@ public class ActivityChat extends AppCompatActivity {
 
     ServiceMessageCenter.BinderMsgCenter binderMsgCenter;
 
-    private ServiceConnection messageIOCenterChatConn;
+    private ServiceConnection messageCenterChatConn;
 
     public EditText etMsgInput;
     public Button btnSend;
@@ -81,7 +81,7 @@ public class ActivityChat extends AppCompatActivity {
         if(currentChatHistoryDataSource == null)
             currentChatHistoryDataSource = new ArrayList<>();
 
-        messageIOCenterChatConn = new ServiceConnection() {
+        messageCenterChatConn = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 binderMsgCenter = (ServiceMessageCenter.BinderMsgCenter) service;
@@ -127,24 +127,33 @@ public class ActivityChat extends AppCompatActivity {
             @Override
             public void onServiceDisconnected(ComponentName name) {
                 Log.e("Service MessageCenter", "Disconnected, name: " + name);
-
             }
         };
 
-        bindService(new Intent(ActivityChat.this, ServiceMessageCenter.class), messageIOCenterChatConn, BIND_AUTO_CREATE);
+        bindService(new Intent(ActivityChat.this, ServiceMessageCenter.class), messageCenterChatConn, BIND_AUTO_CREATE);
+    }
+    
+    @Override
+    public void onStop(){
+        super.onStop();
+
+        Log.e(TAG, "onStop");
     }
 
+    @Override
     public void onDestroy() {
         super.onDestroy();
 
+        Log.e(TAG, "onDestroy");
+        adapterChatMsgList.notifyItemRangeRemoved(0, 0);
+        otherBackendlessUser.clearMessageList();
         binderMsgCenter.setPubChannel(null); // clear targetPublishChannel
         appPubsubCallback.setCurrentTalkingUser(null);
         appPubsubCallback.setCurrentTalkingUser("0");
-        otherBackendlessUser.clearMessageList();
-        adapterChatMsgList.notifyItemRangeRemoved(0, 0);
+        appPubsubCallback.setChatMsgListAdapter(null);
 
         if(binderMsgCenter != null && binderMsgCenter.isBinderAlive())
-            this.unbindService(messageIOCenterChatConn);
+            this.unbindService(messageCenterChatConn);
     }
 
 }

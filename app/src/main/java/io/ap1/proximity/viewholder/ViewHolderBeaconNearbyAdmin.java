@@ -1,11 +1,14 @@
 package io.ap1.proximity.viewholder;
 
+import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import io.ap1.proximity.R;
+import io.ap1.proximity.view.ActivityBeaconDetail;
 import io.ap1.proximity.view.ActivityMain;
 
 /**
@@ -29,13 +32,15 @@ public class ViewHolderBeaconNearbyAdmin extends RecyclerView.ViewHolder{
         tvArrowNearbyAdmin = (TextView) rootview.findViewById(R.id.tv_arrow_nearby_admin);
         beaconNearbyAdminCell = (RelativeLayout) rootview.findViewById(R.id.beacon_nearby_admin_cell);
 
-        /*
+
         beaconNearbyAdminCell.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                v.getContext().startActivity(ActivityMain.intentShowBeaconDetails);
+                Context context = v.getContext();
+                Intent intent = new Intent(context, ActivityBeaconDetail.class);
+                context.startActivity(intent);
             }
         });
-        */
+
     }
 }

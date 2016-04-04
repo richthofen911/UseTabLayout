@@ -1,5 +1,7 @@
 package io.ap1.proximity.view;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -73,10 +75,17 @@ public class ActivityBeaconDetail extends AppCompatActivity {
         setContentView(R.layout.activity_beacon_detail);
         ButterKnife.bind(this);
 
-
+        tvBeaconDetailCompanyArrow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ActivityBeaconDetail.this, ActivityCompanyDetails.class);
+                startActivity(intent);
+            }
+        });
     }
 
     public void onAddClicked(View v){
 
     }
+
 }

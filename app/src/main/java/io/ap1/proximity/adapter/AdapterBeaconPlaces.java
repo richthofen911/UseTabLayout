@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 
 import io.ap1.libbeaconmanagement.Beacon;
+import io.ap1.libbeaconmanagement.Company;
 import io.ap1.libbeaconmanagement.Utils.DataStore;
 import io.ap1.libbeaconmanagement.Utils.DatabaseHelper;
 import io.ap1.proximity.Constants;
@@ -50,7 +51,9 @@ public class AdapterBeaconPlaces extends RecyclerView.Adapter<ViewHolderBeaconPl
             beaconInPlace.tvBeaconPlacesIcon.setText("");
             beaconInPlace.tvBeaconPlacesIcon.setBackgroundColor(Constants.COLOR_WHITE);
             beaconInPlace.tvBeaconPlacesAttributes.setText("");
-            beaconInPlace.tvBeaconPlacesName.setText(databaseHelper.queryForOneCompany(beaconTmp.getIdcompany()).getCompany());
+            Company companyTmp = databaseHelper.queryForOneCompany(beaconTmp.getIdcompany());
+            String companyName = companyTmp.getCompany();
+            beaconInPlace.tvBeaconPlacesName.setText(companyName);
         }
 
         beaconInPlace.selfPosition = position;

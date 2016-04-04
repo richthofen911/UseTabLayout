@@ -23,6 +23,7 @@
             android:layout_gravity="right"
             android:layout_marginEnd="15dp"
             android:onClick="onAddClicked"
+            android:clickable="true"
             android:text="Add"
             android:textColor="@android:color/white"
             android:textSize="18sp"/>

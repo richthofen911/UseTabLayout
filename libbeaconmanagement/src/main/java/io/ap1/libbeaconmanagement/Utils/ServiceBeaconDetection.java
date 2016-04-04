@@ -28,6 +28,7 @@ import io.ap1.libbeaconmanagement.BeaconOperation;
 
 public class ServiceBeaconDetection extends OrmLiteBaseService<DatabaseHelper> implements
         RECOServiceConnectListener, RECORangingListener{
+    private static final String TAG = "ServiceBeaconDetection";
 
     private final boolean DISCONTINUOUS_SCAN = false;
     protected boolean entered = false;
@@ -130,7 +131,7 @@ public class ServiceBeaconDetection extends OrmLiteBaseService<DatabaseHelper> i
         for(RECOBeaconRegion region : regions) {
             try {
                 mRecoManager.startRangingBeaconsInRegion(region);
-                Log.e("start detecting", region.describeContents() + "");
+                Log.e(TAG, "start detecting: " + region.describeContents());
 
                 //timerResortList.schedule(timerTaskResortList, 15000);
             } catch (RemoteException e) {

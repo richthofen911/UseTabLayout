@@ -92,7 +92,7 @@ public class ActivitySettings extends AppCompatActivity {
         ivProfileImage = (ImageView)findViewById(R.id.iv_profile_image);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar_settings);
-        tvSave = (TextView) findViewById(R.id.tv_toobar_settings_save);
+        tvSave = (TextView) findViewById(R.id.tv_company_details_toobar_save);
 
         setUpDrawer();
 
@@ -213,7 +213,7 @@ public class ActivitySettings extends AppCompatActivity {
                 respFindUser.setProperty("incognito", String.valueOf(incognito.isChecked()));
                 respFindUser.setProperty("color", tvColorValue.getText().toString());
                 respFindUser.setProperty("profileImage", profileImageName);
-                Backendless.Persistence.save(respFindUser, new DefaultBackendlessCallback<BackendlessUser>(mContext) {
+                Backendless.Persistence.save(respFindUser, new DefaultBackendlessCallback<BackendlessUser>(mContext, TAG) {
                     @Override
                     public void handleResponse(BackendlessUser updatedResponse) {
                         super.handleResponse(updatedResponse);

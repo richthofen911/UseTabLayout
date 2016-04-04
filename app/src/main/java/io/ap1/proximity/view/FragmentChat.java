@@ -37,7 +37,7 @@ import io.ap1.proximity.adapter.AdapterUserInList;
  * Created by admin on 09/02/16.
  */
 public class FragmentChat extends FragmentPreloadControl {
-    private static final String TAG = "Fragment Chat";
+    private static final String TAG = "FragmentChat";
     private Toolbar toolbar;
 
     private TextView tvToolbarEnd;
@@ -70,6 +70,7 @@ public class FragmentChat extends FragmentPreloadControl {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        Log.e(TAG, "onDestroyView");
     }
 
     @Override
@@ -78,7 +79,7 @@ public class FragmentChat extends FragmentPreloadControl {
         Log.e(TAG, "onResume");
 
         appPubsubCallback = AppPubsubCallback.getAppPubsubCallback();
-        appPubsubCallback.setActivity(getActivity());
+        appPubsubCallback.setActivity((ActivityMain)getActivity());
         appPubsubCallback.setChatMsgListAdapter(null);
         appPubsubCallback.setRecyclerViewToScroll(recyclerView);
         appPubsubCallback.setTAG(TAG);

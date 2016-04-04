@@ -31,8 +31,6 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
 
     private static Dao<Beacon, Integer> beaconDao = null;
     private RuntimeExceptionDao<Beacon, Integer> beaconRuntimeExceptionDao = null;
-
-
     private static Dao<Company, Integer> companyDao = null;
     private RuntimeExceptionDao<Company, Integer> companyRuntimeExceptionDao = null;
 
@@ -54,13 +52,16 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase, ConnectionSource connectionSource){
         try{
-            TableUtils.createTable(connectionSource, Beacon.class);
-            beaconDao = getBeaconDao();
-            beaconRuntimeExceptionDao = getBeaconRuntimeExceptionDao();
 
             TableUtils.createTable(connectionSource, Company.class);
+            Log.e(TAG, "onCreate: CompanyTable");
+            TableUtils.createTable(connectionSource, Beacon.class);
+            Log.e(TAG, "onCreate: BeaconTable");
             companyDao = getCompanyDao();
+            beaconDao = getBeaconDao();
+
             companyRuntimeExceptionDao = getCompanyRuntimeExceptionDao();
+            beaconRuntimeExceptionDao = getBeaconRuntimeExceptionDao();
         } catch(SQLException e){
             Log.e(TAG, e.toString());
         }
@@ -70,6 +71,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, ConnectionSource connectionSource, int oldVersion, int newVersion) {
         try {
             TableUtils.dropTable(connectionSource, Beacon.class, true);
+            TableUtils.dropTable(connectionSource, Class.class, true);
         }
         catch (SQLException e) {
             Log.e(TAG, e.toString());

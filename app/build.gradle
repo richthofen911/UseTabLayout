@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.2"
+    buildToolsVersion "23.0.3"
 
     defaultConfig {
         applicationId "io.ap1.proximity"
@@ -12,6 +12,7 @@ android {
         versionName "1.0"
         multiDexEnabled true
     }
+
     buildTypes {
         release {
             minifyEnabled false

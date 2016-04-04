@@ -23,6 +23,8 @@ import io.ap1.proximity.viewholder.ViewHolderChatMessage;
  * Created by admin on 18/03/16.
  */
 public class AdapterChatMsgList extends RecyclerView.Adapter<ViewHolderChatMessage>{
+    private static final String TAG = "AdapterChatMsgList";
+
     private Context context;
     private ArrayList<Message> chatHistory;
     private String myObjectId;
@@ -63,7 +65,8 @@ public class AdapterChatMsgList extends RecyclerView.Adapter<ViewHolderChatMessa
         }
 
         String userName = historyMsg.getHeaders().get("name");
-        String timestamp = AppDataStore.myDateFormat.format(historyMsg.getHeaders().get("timestamp"));
+        Log.e(TAG, "timestamp recv: " + historyMsg.getHeaders().get("timestamp"));
+        String timestamp = AppDataStore.myDateFormat.format(Long.parseLong(historyMsg.getHeaders().get("timestamp")));
         String content = historyMsg.getBody();
 
         newMessage.tvChatUserName.setText(userName);
