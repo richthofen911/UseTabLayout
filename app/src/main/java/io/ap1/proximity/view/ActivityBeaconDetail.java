@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -13,6 +14,7 @@ import butterknife.ButterKnife;
 import io.ap1.proximity.R;
 
 public class ActivityBeaconDetail extends AppCompatActivity {
+    public final static String TAG = "ActivityBeaconDetail";
 
     @Bind(R.id.tv_beacon_detail_nickName)
     TextView tvBeaconDetailNickName;
@@ -69,6 +71,8 @@ public class ActivityBeaconDetail extends AppCompatActivity {
     @Bind(R.id.et_beacon_detail_lng)
     EditText etBeaconDetailLng;
 
+    public final static int INTENT_CODE_SELECT_COMPANY = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,14 +82,27 @@ public class ActivityBeaconDetail extends AppCompatActivity {
         tvBeaconDetailCompanyArrow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(ActivityBeaconDetail.this, ActivityCompanyDetails.class);
-                startActivity(intent);
+                Log.e(TAG, "onClick: CompanyArrow");
+                Intent intent = new Intent(ActivityBeaconDetail.this, ActivityCompanyList.class);
+                startActivityForResult(intent, INTENT_CODE_SELECT_COMPANY);
             }
         });
     }
 
     public void onAddClicked(View v){
 
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode){
+            case INTENT_CODE_SELECT_COMPANY:
+                if(resultCode == RESULT_OK){
+                    String id = data.getStringExtra("id");
+                    String companyName = data.getStringExtra("company");
+
+                    tvBeaconDetailCompany.setText(companyName);
+                }
+        }
     }
 
 }

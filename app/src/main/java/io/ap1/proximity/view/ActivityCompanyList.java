@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 
 import java.util.ArrayList;
 
+import io.ap1.libbeaconmanagement.Company;
 import io.ap1.libbeaconmanagement.Utils.DatabaseHelper;
 import io.ap1.proximity.R;
 import io.ap1.proximity.adapter.AdapterCompanyList;
@@ -32,7 +33,8 @@ public class ActivityCompanyList extends AppCompatActivity {
 
         DatabaseHelper databaseHelper = DatabaseHelper.getHelper(this);
         toolbar = (Toolbar) findViewById(R.id.toolbar_company_list);
-        adapterCompanyList = new AdapterCompanyList((ArrayList)databaseHelper.queryForAllCompanies());
+        ArrayList<Company> companyListData = (ArrayList)databaseHelper.queryForAllCompanies();
+        adapterCompanyList = new AdapterCompanyList(companyListData);
         recyclerViewCompanyList = (RecyclerView) findViewById(R.id.recyclerView_company_list);
         linearLayoutManager = new LinearLayoutManager(getApplicationContext());
 

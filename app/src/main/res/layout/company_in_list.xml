@@ -2,13 +2,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="40dp"
+    android:gravity="center_horizontal">
 
     <TextView
         android:id="@+id/tv_company_in_list_name"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="20dp"
-        android:layout_marginLeft="7dp"
+        android:layout_marginStart="7dp"
+        android:layout_weight="1"
         android:gravity="center_vertical"
         android:text="Company Name"
         android:textColor="@android:color/black" />
@@ -17,11 +19,9 @@
         android:id="@+id/tv_company_in_list_info"
         android:layout_width="wrap_content"
         android:layout_height="20dp"
-        android:layout_marginEnd="10dp"
-        android:gravity="right"
-        android:layout_weight="1"
-        android:text="i"
-        android:textColor="@android:color/black"
+        android:layout_marginEnd="20dp"
+        android:gravity="end"
+        android:background="@drawable/ic_edit_24dp"
         android:clickable="true"/>
 
 </LinearLayout>

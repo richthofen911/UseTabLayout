@@ -34,9 +34,12 @@ public class AdapterCompanyList extends RecyclerView.Adapter<ViewHolderCompanyLi
     public void onBindViewHolder(ViewHolderCompanyList viewHolder, final int position){
         companyTmp = companyList.get(position);
         String companyName = companyTmp.getCompany();
-        viewHolder.tvCompanyToBeSelected.setText(companyName);
-        viewHolder.tvCompanyInfo.setText(">");
 
+        viewHolder.tvCompanyToBeSelected.setText(companyName);
+        viewHolder.id = companyTmp.getId();
+        viewHolder.color = companyTmp.getColor();
+        viewHolder.lat = companyTmp.getLat();
+        viewHolder.lng = companyTmp.getLng();
         viewHolder.selfPosition = position;
     }
 

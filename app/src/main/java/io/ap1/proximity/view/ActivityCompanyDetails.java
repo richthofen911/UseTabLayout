@@ -1,6 +1,7 @@
 package io.ap1.proximity.view;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -41,6 +42,19 @@ public class ActivityCompanyDetails extends AppCompatActivity {
         setContentView(R.layout.activity_company_details);
         ButterKnife.bind(this);
 
+        Intent intent = getIntent();
+        tvCompanyDetailsName.setText(intent.getStringExtra("company"));
+        String color = intent.getStringExtra("color");
+        tvCompanyDetailsColor.setText(color);
+        String colorToParse = "#" + color;
+        int colorParsed = Color.parseColor(colorToParse);
+        tvCompanyDetailsColorChange.setBackgroundColor(colorParsed);
+        tvCompanyDetailsColorChange.setText(colorToParse);
+        tvCompanyDetailsColorChange.setTextColor(colorParsed);
+
+        tvCompanyDetailsLatitude.setText(intent.getStringExtra("lat"));
+        tvCompanyDetailsLongitude.setText(intent.getStringExtra("lng"));
+
         tvCompanyDetailsColorChange.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -66,7 +80,7 @@ public class ActivityCompanyDetails extends AppCompatActivity {
                     tvCompanyDetailsColorChange.setBackgroundColor(newColor);
                     tvCompanyDetailsColorChange.setText(hexColor);
                     tvCompanyDetailsColorChange.setTextColor(newColor);
-                    tvCompanyDetailsColor.setText(hexColor);
+                    tvCompanyDetailsColor.setText(hexColor.substring(1));
                 }
         }
     }
