@@ -25,7 +25,6 @@ public class ActivityCompanyList extends AppCompatActivity {
     private Toolbar toolbar;
     private AdapterCompanyList adapterCompanyList;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,5 +45,6 @@ public class ActivityCompanyList extends AppCompatActivity {
     public void onAddClicked(View v){
         Log.e(TAG, "onAddClicked: clicked");
         Intent intent = new Intent(this, ActivityCompanyDetails.class);
+        startActivity(intent);
     }
 }

@@ -32,6 +32,7 @@
         android:id="@+id/recyclerView_company_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingTop="16dp"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:scrollbars="vertical" />

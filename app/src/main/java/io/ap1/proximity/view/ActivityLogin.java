@@ -14,6 +14,7 @@ import android.view.WindowManager;
 import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
 
+import io.ap1.proximity.MyApplication;
 import io.ap1.proximity.R;
 
 public class ActivityLogin extends AppCompatActivity {
@@ -21,6 +22,8 @@ public class ActivityLogin extends AppCompatActivity {
     FragmentManager fragmentManager;
     BackendlessUser backendlessUser;
     FragmentTransaction fragmentTransaction;
+
+    MyApplication myApplication;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,9 +46,16 @@ public class ActivityLogin extends AppCompatActivity {
                 return;
             }
 
+            myApplication = (MyApplication) getApplication();
+            Bundle userInfo = new Bundle();
+            userInfo.putString("loginName", myApplication.getUserLoginName());
+            userInfo.putString("loginPassword", myApplication.getUserLoginPassword());
+
             FragmentLogin fragmentLogin = new FragmentLogin();
+            fragmentLogin.setArguments(userInfo);
             fragmentManager = getFragmentManager();
             fragmentManager.beginTransaction().add(R.id.fragment_login_container, fragmentLogin).commit();
+
         }
     }
 

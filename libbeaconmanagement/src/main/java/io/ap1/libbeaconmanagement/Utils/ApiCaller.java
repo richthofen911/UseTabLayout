@@ -1,5 +1,6 @@
 package io.ap1.libbeaconmanagement.Utils;
 
+import android.app.Application;
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
@@ -17,28 +18,29 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import io.ap1.libbeaconmanagement.MyApplication;
-
 /**
  * Created by admin on 26/02/16.
  *  This is a singleton class used as an http client to call http APIs
  */
-public enum  ApiCaller {
+public class   ApiCaller {
 
-    INSTANCE(MyApplication.context, Volley.newRequestQueue(MyApplication.context));
-
-    private final Context context;
     private RequestQueue requestQueue;
     private String APIUrlStr;
     private String APIUrlEncoded;
+    private static ApiCaller instance;
 
     private int requestMethod; //Request.Method.GET is an int
     private Map<String, String> postParams; //this is for POST request
     private StringRequest requestCallAPI;
 
-    ApiCaller(Context context, RequestQueue requestQueue){
-        this.context = context;
-        this.requestQueue = requestQueue;
+    ApiCaller(Context context){
+        this.requestQueue = Volley.newRequestQueue(context);
+    }
+
+    public static synchronized ApiCaller getInstance(Context context){
+        if(instance == null)
+            instance = new ApiCaller(context);
+        return instance;
     }
 
     public ApiCaller setAPI(String urlBase, String urlPath, String urlParams, Map<String, String> postParams, int method){

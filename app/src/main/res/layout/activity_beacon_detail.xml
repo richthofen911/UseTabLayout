@@ -95,7 +95,7 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="20dp"
                 android:layout_marginTop="10dp"
                 android:orientation="horizontal">
                 <TextView
@@ -107,16 +107,17 @@
                 <TextView
                     android:id="@+id/tv_beacon_detail_company_select"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:textSize="14sp"
                     android:text="Select"
                     android:layout_weight="1"/>
 
                 <TextView
                     android:id="@+id/tv_beacon_detail_company_arrow"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="20dp"
+                    android:layout_height="match_parent"
                     android:layout_marginEnd="10dp"
+                    android:gravity="center"
                     android:textSize="14sp"
                     android:textColor="@color/light_blue"
                     android:text=">"

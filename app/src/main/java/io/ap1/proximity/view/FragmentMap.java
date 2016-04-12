@@ -1,5 +1,6 @@
 package io.ap1.proximity.view;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -43,7 +44,7 @@ import io.ap1.proximity.Constants;
 
 public class FragmentMap extends FragmentPreloadControl implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, ResultCallback<LocationSettingsResult> {
-    private static final String TAG = "Fragment Map";
+    private static final String TAG = "FragmentMap";
 
     private GoogleMap googleMap;
 
@@ -92,8 +93,8 @@ public class FragmentMap extends FragmentPreloadControl implements OnMapReadyCal
 
     private void setUpMap() {
         Log.e("map", "loading map and with last location coords");
-        if(!checkPermission(Constants.PERMISSION_ACCESS_FINE_LOCATION))
-            requestPermission(Constants.PERMISSION_ACCESS_FINE_LOCATION);
+        if(!checkPermission(Manifest.permission.ACCESS_FINE_LOCATION))
+            requestPermission(Manifest.permission.ACCESS_FINE_LOCATION);
         else {
             googleMap.setMyLocationEnabled(true);
             LatLng myLatLng = new LatLng(mLatitude, mLongitude);
@@ -121,8 +122,8 @@ public class FragmentMap extends FragmentPreloadControl implements OnMapReadyCal
     }
 
     private void requestLastLocation(){
-        if(!checkPermission(Constants.PERMISSION_ACCESS_FINE_LOCATION))
-            requestPermission(Constants.PERMISSION_ACCESS_FINE_LOCATION);
+        if(!checkPermission(Manifest.permission.ACCESS_FINE_LOCATION))
+            requestPermission(Manifest.permission.ACCESS_FINE_LOCATION);
         else {
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             if (mLastLocation != null) {
@@ -201,18 +202,12 @@ public class FragmentMap extends FragmentPreloadControl implements OnMapReadyCal
                 .build();
     }
 
-    private boolean checkPermission(String permissionName){
+    private boolean checkPermission(String permissionName){ // The global Permission Handler methods cannot be recognized in this fragment
         return (ContextCompat.checkSelfPermission(getActivity(), permissionName) == PackageManager.PERMISSION_GRANTED);
     }
 
-    private void requestPermission(String permissionName){
-        if(ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), permissionName)){
-            Log.e("request reason", "need the permission");
-            //Snackbar.make(googleMap, "need Permission: " + permissionName, Snackbar.LENGTH_SHORT).show();
-        }else {
-            Log.e("requesting Permission", permissionName);
-            ActivityCompat.requestPermissions(getActivity(), new String[]{permissionName}, Constants.MY_PERMISSIONS_ACCESS_FINE_LOCATION);
-        }
+    private void requestPermission(String permissionName){ // The global Permission Handler methods cannot be recognized in this fragment
+        ActivityCompat.requestPermissions(getActivity(), new String[]{permissionName}, Constants.PERMISSION_REQUEST_CODE_ACCESS_FINE_LOCATION);
     }
 
     @Override

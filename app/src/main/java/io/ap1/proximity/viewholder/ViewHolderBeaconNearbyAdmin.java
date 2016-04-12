@@ -24,6 +24,11 @@ public class ViewHolderBeaconNearbyAdmin extends RecyclerView.ViewHolder{
     public TextView tvArrowNearbyAdmin;
     public RelativeLayout beaconNearbyAdminCell;
 
+    public String uuid = "unknown";
+    public String major = "unknown";
+    public String minor = "unknown";
+    public String rssi = "unknown";
+
     public ViewHolderBeaconNearbyAdmin(View rootview){
         super(rootview);
 
@@ -38,6 +43,11 @@ public class ViewHolderBeaconNearbyAdmin extends RecyclerView.ViewHolder{
             public void onClick(View v) {
                 Context context = v.getContext();
                 Intent intent = new Intent(context, ActivityBeaconDetail.class);
+                intent.putExtra("uuid", uuid);
+                intent.putExtra("major", major);
+                intent.putExtra("minor", minor);
+                intent.putExtra("rssi", rssi);
+
                 context.startActivity(intent);
             }
         });

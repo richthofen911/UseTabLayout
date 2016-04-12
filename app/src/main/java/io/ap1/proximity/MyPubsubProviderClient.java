@@ -34,4 +34,9 @@ public class MyPubsubProviderClient implements PubsubProviderClient<AppPubsubCal
     public void publishToChannel(String channelName, Message message, AppPubsubCallback appPubsubCallback){
         pubnub.publish(channelName, gson.toJson(message), appPubsubCallback);
     }
+
+    @Override
+    public void unsubscribeAll(){
+        pubnub.unsubscribeAll();
+    }
 }

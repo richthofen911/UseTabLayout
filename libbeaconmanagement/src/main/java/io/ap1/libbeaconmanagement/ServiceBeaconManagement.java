@@ -118,7 +118,7 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
         Map<String, String> postParams = new HashMap<>();
         postParams.put("hash", spHashValue.getString("hashBeacon", "empty"));
 
-        ApiCaller.INSTANCE.setAPI(DataStore.urlBase, urlPath, null, postParams, Request.Method.POST).exec(
+        ApiCaller.getInstance(getApplicationContext()).setAPI(DataStore.urlBase, urlPath, null, postParams, Request.Method.POST).exec(
                 new ApiCaller.VolleyCallback() {
                     @Override
                     public void onDelivered(String result) {
@@ -159,7 +159,7 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
         Map<String, String> postParams = new HashMap<>();
         postParams.put("hash", spHashValue.getString("hashCompany", "empty"));
 
-        ApiCaller.INSTANCE.setAPI(DataStore.urlBase, urlPath, null, postParams, Request.Method.POST).exec(
+        ApiCaller.getInstance(getApplicationContext()).setAPI(DataStore.urlBase, urlPath, null, postParams, Request.Method.POST).exec(
                 new ApiCaller.VolleyCallback() {
                     @Override
                     public void onDelivered(String result) {

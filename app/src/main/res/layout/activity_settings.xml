@@ -59,11 +59,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
-            android:textSize="20sp"
+            android:layout_marginStart="10dp"
+            android:layout_marginBottom="-5dp"
+            android:layout_alignBottom="@+id/tv_settings_nickname"
+            android:layout_toEndOf="@+id/tv_settings_nickname"
+            android:textSize="17sp"
             android:ems="13"
             android:textColor="@android:color/black"
-            android:layout_alignBottom="@+id/tv_settings_nickname"
-            android:layout_toEndOf="@+id/tv_settings_nickname" />
+             />
 
         <TextView
             android:id="@+id/tv_settings_about_me"
@@ -82,11 +85,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
-            android:textSize="20sp"
+            android:layout_marginBottom="-5dp"
+            android:layout_alignBottom="@+id/tv_settings_about_me"
+            android:layout_alignLeft="@+id/et_settings_nickname"
+            android:layout_toEndOf="@+id/tv_settings_about_me"
+            android:textSize="17sp"
             android:ems="13"
             android:textColor="@android:color/black"
-            android:layout_alignBottom="@+id/tv_settings_about_me"
-            android:layout_toEndOf="@+id/tv_settings_about_me" />
+             />
 
         <TextView
             android:id="@+id/tv_settings_privacy_options"

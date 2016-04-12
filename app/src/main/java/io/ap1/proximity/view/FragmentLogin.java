@@ -1,8 +1,6 @@
 package io.ap1.proximity.view;
 
 import android.app.Fragment;
-import android.app.FragmentTransaction;
-import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -48,6 +46,26 @@ public class FragmentLogin extends Fragment implements View.OnClickListener {
         bindOnClickListeners();
         user = ((ActivityLogin)getActivity()).backendlessUser;
 
+        Bundle userInfo = getArguments();
+        String loginName = userInfo.getString("loginName");
+        String loginPassword = userInfo.getString("loginPassword");
+        if(loginName != null && loginPassword != null){
+            Backendless.UserService.login(loginName, loginPassword, new BackendlessCallback<BackendlessUser>() {
+                @Override
+                public void handleResponse(BackendlessUser backendlessUser) {
+                    String userObjectId = backendlessUser.getObjectId();
+                    Log.e("login", backendlessUser.getEmail() + " successfully login " + userObjectId);
+                    ((ActivityLogin)getActivity()).myApplication.setUserLoginName(etLoginUsername.getText().toString());
+                    ((ActivityLogin)getActivity()).myApplication.setUserLoginPassword(etSignInPassword.getText().toString());
+                    ((ActivityLogin)getActivity()).goToMainUI(userObjectId);
+                }
+                @Override
+                public void handleFault(BackendlessFault fault){
+                    Toast.makeText(getActivity(), fault.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
         return view;
     }
 
@@ -62,12 +80,15 @@ public class FragmentLogin extends Fragment implements View.OnClickListener {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btn_login:
-                Backendless.UserService.login("cat@cat.cat", "cat", new BackendlessCallback<BackendlessUser>() {
-                //Backendless.UserService.login(etLoginUsername.getText().toString(), etSignInPassword.getText().toString(), new BackendlessCallback<BackendlessUser>() {
+                //Backendless.UserService.login("cat@cat.cat", "cat", new BackendlessCallback<BackendlessUser>() {
+                Backendless.UserService.login(etLoginUsername.getText().toString(), etSignInPassword.getText().toString(), new BackendlessCallback<BackendlessUser>() {
                     @Override
                     public void handleResponse(BackendlessUser backendlessUser) {
-                        Log.e("login", backendlessUser.getEmail() + " successfully login " + backendlessUser.getObjectId());
-                        ((ActivityLogin)getActivity()).goToMainUI(backendlessUser.getObjectId());
+                        String userObjectId = backendlessUser.getObjectId();
+                        Log.e("login", backendlessUser.getEmail() + " successfully login " + userObjectId);
+                        ((ActivityLogin)getActivity()).myApplication.setUserLoginName(etLoginUsername.getText().toString());
+                        ((ActivityLogin)getActivity()).myApplication.setUserLoginPassword(etSignInPassword.getText().toString());
+                        ((ActivityLogin)getActivity()).goToMainUI(userObjectId);
                     }
                     @Override
                     public void handleFault(BackendlessFault fault){

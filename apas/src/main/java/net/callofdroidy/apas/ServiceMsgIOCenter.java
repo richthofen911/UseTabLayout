@@ -72,6 +72,10 @@ public class ServiceMsgIOCenter<T extends PubsubProviderClient, S extends Genera
         }
     }
 
+    protected void unsubscribeAll(){
+        t.unsubscribeAll();
+    }
+
     public class BinderMsgIO extends Binder{
 
         public void setPubsubProviderClient(T pubsubProviderClient){
@@ -108,6 +112,10 @@ public class ServiceMsgIOCenter<T extends PubsubProviderClient, S extends Genera
 
         public void pubToAnotherChannel(String anotherChannelName, Message message){
             publishToAnotherChannel(anotherChannelName, message);
+        }
+
+        public void unsubAll(){
+            unsubscribeAll();
         }
     }
 }

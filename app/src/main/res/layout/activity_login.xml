@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:background="@color/login_blue"
     android:gravity="center_horizontal"
-    tools:context="io.ap1.proximity.ActivityMain"
+    tools:context="io.ap1.proximity.view.ActivityLogin"
     xmlns:app="http://schemas.android.com/apk/res-auto" >
 
     <android.support.v7.widget.Toolbar
@@ -18,10 +18,11 @@
         android:minHeight="?attr/actionBarSize"
         app:title="@string/app_name" >
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
             android:layout_gravity="right"
-            android:src="@mipmap/ic_launcher"/>
+            android:layout_marginEnd="20dp"
+            android:src="@drawable/ae_login_logo"/>
     </android.support.v7.widget.Toolbar>
 
     <FrameLayout

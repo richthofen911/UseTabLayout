@@ -35,6 +35,7 @@ import io.ap1.proximity.adapter.AdapterUserInList;
 
 /**
  * Created by admin on 09/02/16.
+ * This fragment shows the users detected in a list
  */
 public class FragmentChat extends FragmentPreloadControl {
     private static final String TAG = "FragmentChat";
@@ -90,8 +91,8 @@ public class FragmentChat extends FragmentPreloadControl {
         Log.e(TAG, "onVisibleLazyLoad");
         toolbar = ((ActivityMain)getActivity()).toolbar;
         toolbar.setTitle("Messages");
-        tvToolbarEnd = ((ActivityMain)getActivity()).tvToolbarEnd;
-        tvToolbarEnd.setVisibility(View.VISIBLE);
+        //tvToolbarEnd = ((ActivityMain)getActivity()).tvToolbarEnd;
+        //tvToolbarEnd.setVisibility(View.VISIBLE);
     }
 
     @Override

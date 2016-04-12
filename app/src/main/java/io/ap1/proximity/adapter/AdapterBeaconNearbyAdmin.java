@@ -30,6 +30,11 @@ public class AdapterBeaconNearbyAdmin extends RecyclerView.Adapter<ViewHolderBea
         String attrs = Constants.MAJOR + beaconTmp.getMajor() + (Constants.MINOR) + beaconTmp.getMinor();
         viewHolder.tvBeaconNearbyUserAttributes.setText(attrs);
 
+        viewHolder.uuid = beaconTmp.getUuid();
+        viewHolder.major = beaconTmp.getMajor();
+        viewHolder.minor = beaconTmp.getMinor();
+        viewHolder.rssi = beaconTmp.getRssi();
+
         viewHolder.selfPosition = position;
     }
 

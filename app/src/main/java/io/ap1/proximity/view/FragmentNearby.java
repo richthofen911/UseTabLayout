@@ -15,7 +15,7 @@ import io.ap1.proximity.R;
 
 public class FragmentNearby extends FragmentPreloadControl {
 
-    private static final String TAG = "Fragment Nearby User";
+    private static final String TAG = "FragmentNearbyUser";
     //private AdapterBeaconNearbyUser adapterBeaconNearbyUser;
     private RecyclerView recyclerViewBeaconNearby;
     private LinearLayoutManager linearLayoutManager;
@@ -79,6 +79,7 @@ public class FragmentNearby extends FragmentPreloadControl {
         if(tvToolbarEnd != null)
             tvToolbarEnd.setVisibility(View.GONE);
         //if (toolbar != null)
+
         //    toolbar.removeView(connect);
     }
 

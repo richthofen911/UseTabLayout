@@ -10,10 +10,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
@@ -25,18 +28,26 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.backendless.Backendless;
+import com.backendless.BackendlessUser;
+import com.backendless.exceptions.BackendlessFault;
 import com.pubnub.api.Pubnub;
+import com.squareup.picasso.Picasso;
 
 import io.ap1.libbeaconmanagement.ServiceBeaconManagement;
 import io.ap1.libbeaconmanagement.Utils.CallBackUpdateBeaconSet;
 import io.ap1.libbeaconmanagement.Utils.CallBackUpdateCompanySet;
+import io.ap1.proximity.MyApplication;
 import io.ap1.proximity.AppDataStore;
 import io.ap1.proximity.AppPubsubCallback;
-import io.ap1.proximity.MyBackendlessUser;
+import io.ap1.proximity.Constants;
+import io.ap1.proximity.DefaultBackendlessCallback;
 import io.ap1.proximity.MyPubsubProviderClient;
 import io.ap1.proximity.PermissionHandler;
 import io.ap1.proximity.ServiceMessageCenter;
@@ -53,7 +64,6 @@ public class ActivityMain extends AppCompatActivity{
 
     public static Intent intentShowBeaconUrlContent;
     public static Intent intentShowBeaconDetails;
-    private static final int requestCodeFineLoc = 101;
 
     public static RecyclerView.AdapterDataObserver adapterDataObserver = new RecyclerView.AdapterDataObserver() {
         @Override
@@ -104,10 +114,12 @@ public class ActivityMain extends AppCompatActivity{
     public LinearLayout mapSwitch;
     public TextView tvToolbarEnd;
 
+    private BackendlessUser myUserObject;
     private String myUserObjectId;
 
-
-    public boolean isAdmin = true;
+    // use a persisted file to keep bluetooth name. if the app crash, the bluetooth cannot be resumed
+    // this time but it will be resumed next time.
+    private SharedPreferences spOriginalBTName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,6 +127,7 @@ public class ActivityMain extends AppCompatActivity{
         setContentView(R.layout.activity_main);
 
         myUserObjectId = getIntent().getStringExtra("userObjectId");
+        spOriginalBTName = getApplication().getSharedPreferences("originalBTName", 0);
 
         adapterBeaconNearbyAdmin = new AdapterBeaconNearbyAdmin();
         adapterBeaconNearbyUser = new AdapterBeaconNearbyUser(this);
@@ -127,6 +140,8 @@ public class ActivityMain extends AppCompatActivity{
         myPubsubProviderClient = new MyPubsubProviderClient(new Pubnub("pub-c-af13868a-beb9-4719-82fc-8518ddfacea8", "sub-c-48ef81b4-f118-11e5-8f88-0619f8945a4f"));
         appPubsubCallback = new AppPubsubCallback(this, myUserObjectId, adapterUserInList, TAG);
 
+        getUserData();
+
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -134,7 +149,12 @@ public class ActivityMain extends AppCompatActivity{
         if (mBluetoothAdapter == null)
             Toast.makeText(this, "Bluetooth is not available", Toast.LENGTH_LONG).show();
         else {
-            changeBTNameForThisApp(myUserObjectId);
+            String btName = mBluetoothAdapter.getName();
+            if(!btName.startsWith("proximity/")){
+                spOriginalBTName.edit().putString("originalBTName", btName);
+                changeBTNameForThisApp(myUserObjectId);
+            }
+
             ensureDiscoverable();
         }
 
@@ -176,11 +196,7 @@ public class ActivityMain extends AppCompatActivity{
                             @Override
                             public void onSuccess() {
                                 progressDialog.dismiss();
-                                if(!PermissionHandler.checkPermission(ActivityMain.this, Manifest.permission.ACCESS_FINE_LOCATION)){
-                                    PermissionHandler.requestPermission(ActivityMain.this, Manifest.permission.ACCESS_FINE_LOCATION);
-                                }else {
-                                    startScanning();
-                                }
+                                startScanning();
                             }
 
                             @Override
@@ -231,9 +247,10 @@ public class ActivityMain extends AppCompatActivity{
             }
         };
 
-        if(!PermissionHandler.checkPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)){
-            PermissionHandler.requestPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-        }else {
+        String[] notGrantedPermission = PermissionHandler.checkPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION});
+        if(notGrantedPermission != null)
+            PermissionHandler.requestPermissions(this, notGrantedPermission, Constants.PERMISSION_REQUEST_CODE_ACCESS_FINE_LOCATION);
+        else {
             bindServiceMsgCenter();
             bindServiceBeaconManagement();
         }
@@ -272,10 +289,34 @@ public class ActivityMain extends AppCompatActivity{
             }
         });
 
-        setUpDrawer();
-
         intentShowBeaconUrlContent = new Intent(ActivityMain.this, ActivityBeaconUrlContent.class);
         intentShowBeaconUrlContent = new Intent(ActivityMain.this, ActivityBeaconDetail.class);
+    }
+
+    private void getUserData(){
+        Backendless.Persistence.of(BackendlessUser.class).findById(myUserObjectId, new DefaultBackendlessCallback<BackendlessUser>(this, TAG, "Pulling User Data...") {
+            @Override
+            public void handleResponse(BackendlessUser response) {
+                super.handleResponse(response);
+
+                myUserObject = response;
+                Toast.makeText(ActivityMain.this, "Pull Data: Success", Toast.LENGTH_SHORT).show();
+                setUpDrawer();
+            }
+
+            @Override
+            public void handleFault(BackendlessFault fault) {
+                super.handleFault(fault);
+                Log.e("Handle fault", fault.toString());
+            }
+        });
+    }
+
+    public String getMyUserProperty(String key){
+        if(myUserObject != null)
+            return (String) myUserObject.getProperty(key);
+        else
+            return null;
     }
 
     protected void setUpDrawer(){
@@ -287,6 +328,19 @@ public class ActivityMain extends AppCompatActivity{
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        int headers = navigationView.getHeaderCount();
+        if(headers > 0){
+            if(myUserObject != null){
+                Log.e(TAG, "setUpDrawer: " + myUserObject.getProperty("profileImage") + myUserObject.getProperty("nickname") + myUserObject.getProperty("email"));
+                LinearLayout headerView = (LinearLayout)navigationView.getHeaderView(0);
+                ImageView headerImage = (ImageView) headerView.findViewById(R.id.iv_drawer_header_image);
+                Picasso.with(ActivityMain.this).load(Constants.PROFILE_IMAGE_PATH_ROOT + myUserObject.getProperty("profileImage")).into(headerImage);
+                ((TextView) headerView.findViewById(R.id.tv_drawer_header_name)).setText((String)myUserObject.getProperty("nickname"));
+                ((TextView) headerView.findViewById(R.id.tv_drawer_header_email)).setText((String)myUserObject.getProperty("email"));
+            }else
+                Toast.makeText(this, "MyUserObject is null", Toast.LENGTH_SHORT).show();
+        }
+
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
@@ -295,9 +349,12 @@ public class ActivityMain extends AppCompatActivity{
                 if (id == R.id.nav_settings) {
                     startActivity(new Intent(ActivityMain.this, ActivitySettings.class).putExtra("userObjectId", myUserObjectId));
                 } else if (id == R.id.nav_logout) {
-
+                    MyApplication myApplication = (MyApplication)getApplication();
+                    myApplication.setUserLoginName(null);
+                    myApplication.setUserLoginPassword(null);
+                    startActivity(new Intent(ActivityMain.this, ActivityLogin.class));
+                    finish();
                 }
-
                 DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
                 drawer.closeDrawer(GravityCompat.START);
                 return true;
@@ -370,8 +427,11 @@ public class ActivityMain extends AppCompatActivity{
     }
 
     protected void unbindServiceChat(){
-        if(binderMsgCenter != null && binderMsgCenter.isBinderAlive())
+        if(binderMsgCenter != null && binderMsgCenter.isBinderAlive()){
+            binderMsgCenter.unsubAll();
             unbindService(connChat);
+        }
+
     }
 
     public void startScanning(){
@@ -395,22 +455,28 @@ public class ActivityMain extends AppCompatActivity{
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
-            case requestCodeFineLoc: {
-                // If request is cancelled, the result arrays are empty.
+            case Constants.PERMISSION_REQUEST_CODE_ACCESS_FINE_LOCATION: {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     bindServiceBeaconManagement();
                 } else {
-                    Toast.makeText(this, "no permission to run this app", Toast.LENGTH_SHORT).show();
+                    Snackbar.make(toolbar, "Location permission is required to display beacon detection results and to show the beacon map",
+                            Snackbar.LENGTH_SHORT)
+                            .setAction("OK", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    PermissionHandler.requestPermissions(ActivityMain.this,
+                                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                            Constants.PERMISSION_REQUEST_CODE_ACCESS_FINE_LOCATION);
+                                }
+                            })
+                            .show();
                 }
             }
-            // other 'case' lines to check for other
-            // permissions this app might request
         }
     }
-
 
     @Override
     protected void onDestroy(){
@@ -422,7 +488,7 @@ public class ActivityMain extends AppCompatActivity{
         appPubsubCallback = null;
 
         if (mBluetoothAdapter != null){
-            mBluetoothAdapter.setName(btNameOrigin);
+            mBluetoothAdapter.setName(spOriginalBTName.getString("originalBTName", "MyDevice"));
             if(mBluetoothAdapter.isDiscovering())
                 mBluetoothAdapter.cancelDiscovery();
         }
@@ -437,7 +503,5 @@ public class ActivityMain extends AppCompatActivity{
         }catch (Exception e){
             Log.e(TAG, "mReceiver was not registered, cannot unregister it");
         }
-
     }
-
 }

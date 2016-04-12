@@ -8,4 +8,6 @@ public interface PubsubProviderClient<S extends GeneralPubsubCallback> {
     void subscribeToChannel(String channelName, S generalPubsubCallback);
 
     void publishToChannel(String channelName, Message message, S generalPubsubCallback);
+
+    void unsubscribeAll();
 }

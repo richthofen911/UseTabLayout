@@ -15,7 +15,7 @@ import io.ap1.proximity.adapter.AdapterBeaconPlaces;
 
 public class FragmentPlaces extends FragmentPreloadControl {
 
-    private static final String TAG = "Fragment Places";
+    private static final String TAG = "FragmentPlaces";
 
 
     private RecyclerView recyclerViewBeaconPlaces;
@@ -26,7 +26,6 @@ public class FragmentPlaces extends FragmentPreloadControl {
     public FragmentPlaces() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

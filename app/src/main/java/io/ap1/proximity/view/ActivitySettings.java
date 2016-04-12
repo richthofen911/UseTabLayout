@@ -14,7 +14,9 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 
 import android.support.v4.widget.DrawerLayout;
@@ -66,13 +68,14 @@ public class ActivitySettings extends AppCompatActivity {
     private Bitmap profileImage;
 
     private static final String TAG = "ActivitySettings";
-    private static final int SELECT_PICTURE = 1;
-    private static final int TAKE_A_PHOTO = 2;
     public static final int USER_CHANGE_COLOR = 3;
+    private static final int INTENT_CODE_TAKE_PHOTO = 201;
+    private static final int INTENT_CODE_SELECT_PICTURE = 202;
 
     private float density;
 
-    private static final String newPhotoPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath() + File.separator + "proximity_profile_image.jpg";
+    private static String newPhotoPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsoluteFile()
+            + File.separator + "proximity_profile_image.png";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,12 +101,8 @@ public class ActivitySettings extends AppCompatActivity {
 
         myUserObjectId = getIntent().getStringExtra("userObjectId");
         Log.e(TAG, "userObjectId: " + myUserObjectId);
-        //String objectId = user.substring(user.indexOf("objectId="), user.length() - 1);
-        //Log.i("Object Id", objectId);
-        //final String realObjectId = getIntent().getStringExtra("objectId");
-        //Log.i("Real Object Id", realObjectId);
 
-        Backendless.Persistence.of( BackendlessUser.class ).findById(myUserObjectId, new DefaultBackendlessCallback<BackendlessUser>(mContext, "Getting user data...") {
+        Backendless.Persistence.of(BackendlessUser.class).findById(myUserObjectId, new DefaultBackendlessCallback<BackendlessUser>(mContext, "Getting user data...") {
             @Override
             public void handleResponse(BackendlessUser response) {
                 super.handleResponse(response);
@@ -264,30 +263,24 @@ public class ActivitySettings extends AppCompatActivity {
 
         // This activity implements OnMenuItemClickListener
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.image_take_photo:
-                        if(!PermissionHandler.checkPermission(ActivitySettings.this, Manifest.permission.CAMERA)){
-                            PermissionHandler.requestPermission(ActivitySettings.this, Manifest.permission.CAMERA);
-                        }else {
-                            intentPicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                            intentPicture.addCategory(Intent.CATEGORY_DEFAULT);
-                            File file = new File(newPhotoPath);
-                            Uri imageUri = Uri.fromFile(file );
-                            intentPicture.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-                            startActivityForResult(intentPicture, TAKE_A_PHOTO);
+                        // write_external_storage is also necessary to save the photo on the device to access
+                        String[] notGrantedPermissionCamera = PermissionHandler.checkPermissions(ActivitySettings.this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE});
+                        if(notGrantedPermissionCamera != null)
+                            PermissionHandler.requestPermissions(ActivitySettings.this, notGrantedPermissionCamera, Constants.PERMISSION_REQUEST_CODE_CAMERA);
+                        else {
+                            dispatchTakingPhotoIntent();
                         }
                         return true;
                     case R.id.image_choose_picture:
-                        if(!PermissionHandler.checkPermission(ActivitySettings.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)){
-                            PermissionHandler.requestPermission(ActivitySettings.this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-                        }else {
-                            intentPicture = new Intent();
-                            intentPicture.setType("image/*");
-                            intentPicture.setAction(Intent.ACTION_GET_CONTENT);
-                            startActivityForResult(Intent.createChooser(intentPicture, "Select a picture"), SELECT_PICTURE);
+                        String[] notGrantedPermissionWExStorage = PermissionHandler.checkPermissions(ActivitySettings.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE});
+                        if(notGrantedPermissionWExStorage != null)
+                            PermissionHandler.requestPermissions(ActivitySettings.this, notGrantedPermissionWExStorage, Constants.PERMISSION_REQUEST_CODE_WRITE_EXTERNAL_STORAGE);
+                        else {
+                            dispatchSelectPictureIntent();
                         }
                         return true;
                     default:
@@ -312,14 +305,53 @@ public class ActivitySettings extends AppCompatActivity {
         return Bitmap.createBitmap(bitmapOriginal, 0, 0, bmpWidth, bmpHeight, matrix, true);
     }
 
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        File imageFile = new File(newPhotoPath);
+        if(imageFile.isFile())
+            imageFile.createNewFile();
+        Log.e(TAG, "createImageFile: AbsolutePath " + newPhotoPath);
+        return imageFile;
+    }
+
+    private void galleryAddPic() {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        File f = new File(newPhotoPath);
+        Uri contentUri = Uri.fromFile(f);
+        mediaScanIntent.setData(contentUri);
+        this.sendBroadcast(mediaScanIntent);
+    }
+
+    private void dispatchTakingPhotoIntent(){
+        intentPicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if(intentPicture.resolveActivity(getPackageManager()) != null){
+            File photoFile = null;
+            try{
+                photoFile = createImageFile();
+            }catch (IOException e){
+                Log.e(TAG, "onMenuItemClick: create photo file error: " + e.toString());
+            }
+            if(photoFile != null){
+                intentPicture.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
+                startActivityForResult(intentPicture, INTENT_CODE_TAKE_PHOTO);
+            }
+        }
+    }
+
+    private void dispatchSelectPictureIntent(){
+        intentPicture = new Intent();
+        intentPicture.setType("image/*");
+        intentPicture.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intentPicture, "Select a picture"), INTENT_CODE_SELECT_PICTURE);
+    }
+
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode){
-            case SELECT_PICTURE:
+            case INTENT_CODE_SELECT_PICTURE:
                 if(resultCode == RESULT_OK){
                     Uri selectedImageUri = data.getData();
                     if (Build.VERSION.SDK_INT < 19) {
                         selectedImagePath = getPath(selectedImageUri);
-                        //profileImage = BitmapFactory.decodeFile(selectedImagePath);
                         profileImage = resizeImage(BitmapFactory.decodeFile(selectedImagePath));
                         ivProfileImage.setImageBitmap(profileImage);
                         profileImageName = myUserObjectId + ".png";
@@ -328,7 +360,6 @@ public class ActivitySettings extends AppCompatActivity {
                         try {
                             parcelFileDescriptor = getContentResolver().openFileDescriptor(selectedImageUri, "r");
                             FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
-                            //profileImage = BitmapFactory.decodeFileDescriptor(fileDescriptor);
                             profileImage = resizeImage(BitmapFactory.decodeFileDescriptor(fileDescriptor));
                             parcelFileDescriptor.close();
                             ivProfileImage.setImageBitmap(profileImage);
@@ -342,13 +373,13 @@ public class ActivitySettings extends AppCompatActivity {
                     }
                 }
                 break;
-            case TAKE_A_PHOTO:
+            case INTENT_CODE_TAKE_PHOTO:
                 if(resultCode == RESULT_OK){
                     selectedImagePath = getPath(Uri.parse(newPhotoPath));
-                    //profileImage = BitmapFactory.decodeFile(selectedImagePath);
                     profileImage = resizeImage(BitmapFactory.decodeFile(selectedImagePath));
                     ivProfileImage.setImageBitmap(profileImage);
                     profileImageName = myUserObjectId + ".png";
+                    galleryAddPic();
                 }
                 break;
             case USER_CHANGE_COLOR:
@@ -365,26 +396,41 @@ public class ActivitySettings extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
-            case TAKE_A_PHOTO:
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    intentPicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    intentPicture.addCategory(Intent.CATEGORY_DEFAULT);
-                    startActivityForResult(intentPicture, TAKE_A_PHOTO);
-                } else {
-                    Toast.makeText(this, "no permission to access the camera", Toast.LENGTH_SHORT).show();
-                }
+            case Constants.PERMISSION_REQUEST_CODE_CAMERA:
+                if(grantResults.length > 0)
+                    if(grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                        dispatchTakingPhotoIntent();
+                    } else {
+                        Snackbar.make(toolbar, "CAMERA and WRITE_EXTERNAL_STORAGE permissions are required to take a photo for your profile image and access by this app",
+                            Snackbar.LENGTH_SHORT)
+                            .setAction("OK", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    PermissionHandler.requestPermissions(ActivitySettings.this,
+                                            new String[]{Manifest.permission.CAMERA},
+                                            Constants.PERMISSION_REQUEST_CODE_CAMERA);
+                                }
+                            })
+                            .show();
+                    }
                 break;
-            case SELECT_PICTURE:
+            case Constants.PERMISSION_REQUEST_CODE_WRITE_EXTERNAL_STORAGE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    intentPicture = new Intent();
-                    intentPicture.setType("image/*");
-                    intentPicture.setAction(Intent.ACTION_GET_CONTENT);
-                    startActivityForResult(Intent.createChooser(intentPicture, "Select a picture"), SELECT_PICTURE);
+                    dispatchSelectPictureIntent();
                 } else {
-                    Toast.makeText(this, "no permission to access the local pictures", Toast.LENGTH_SHORT).show();
+                    Snackbar.make(toolbar, "Write External Storage permission is required to choose a picture from your local device as the profile image",
+                            Snackbar.LENGTH_SHORT)
+                            .setAction("OK", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    PermissionHandler.requestPermissions(ActivitySettings.this,
+                                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                            Constants.PERMISSION_REQUEST_CODE_WRITE_EXTERNAL_STORAGE);
+                                }
+                            })
+                            .show();
                 }
                 break;
         }

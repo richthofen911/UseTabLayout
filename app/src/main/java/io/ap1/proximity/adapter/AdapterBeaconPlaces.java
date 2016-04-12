@@ -41,7 +41,11 @@ public class AdapterBeaconPlaces extends RecyclerView.Adapter<ViewHolderBeaconPl
             String title = databaseHelper.queryForOneCompany(beaconTmp.getIdcompany()).getCompany();
             title = title.substring(0, 1);
             beaconInPlace.tvBeaconPlacesIcon.setText(title);
-            beaconInPlace.tvBeaconPlacesIcon.setBackgroundColor(Color.parseColor("#" + databaseHelper.queryForOneCompany(beaconTmp.getIdcompany()).getColor()));
+            String companyColor = databaseHelper.queryForOneCompany(beaconTmp.getIdcompany()).getColor(); // default color, WHITE
+            if(companyColor.equals("")){
+                companyColor = "FFFFFF"; // if not defined, use white
+            }
+            beaconInPlace.tvBeaconPlacesIcon.setBackgroundColor(Color.parseColor("#" + companyColor));
             beaconInPlace.tvBeaconPlacesName.setText(beaconTmp.getNickname());
             beaconInPlace.tvBeaconPlacesAttributes.setText(Constants.MAJOR + beaconTmp.getMinor() + Constants.MINOR + beaconTmp.getMinor());
             beaconInPlace.tvArrowPlaces.setText(">");

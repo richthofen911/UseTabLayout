@@ -1,14 +1,10 @@
 package io.ap1.proximity.viewholder;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-
-import io.ap1.libbeaconmanagement.Company;
 import io.ap1.proximity.R;
 import io.ap1.proximity.view.ActivityCompanyDetails;
 import io.ap1.proximity.view.ActivityCompanyList;
