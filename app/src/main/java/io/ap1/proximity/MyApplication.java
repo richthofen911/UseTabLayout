@@ -1,7 +1,6 @@
 package io.ap1.proximity;
 
 import android.app.Application;
-import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -17,7 +16,6 @@ import io.ap1.libbeaconmanagement.Utils.ApiCaller;
 public class MyApplication extends Application{
     private static final String TAG = "MyApplication";
 
-    private SharedPreferences spUserInfo;
     private Thread.UncaughtExceptionHandler uncaughtExceptionHandler = new Thread.UncaughtExceptionHandler(){
         @Override
         public void uncaughtException(Thread thread, final Throwable throwable){
@@ -46,22 +44,5 @@ public class MyApplication extends Application{
         super.onCreate();
 
         Thread.setDefaultUncaughtExceptionHandler(uncaughtExceptionHandler);
-        spUserInfo = this.getSharedPreferences("UserInfo", 0);
-    }
-
-    public void setUserLoginName(String loginName){
-        spUserInfo.edit().putString("username", loginName).apply();
-    }
-
-    public void setUserLoginPassword(String loginPassword){
-        spUserInfo.edit().putString("password", loginPassword).apply();
-    }
-
-    public String getUserLoginName(){
-        return spUserInfo.getString("username", null);
-    }
-
-    public String getUserLoginPassword(){
-        return spUserInfo.getString("password", null);
     }
 }

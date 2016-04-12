@@ -1,6 +1,7 @@
 package io.ap1.proximity.view;
 
 import android.app.Fragment;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,12 +19,15 @@ import com.backendless.exceptions.BackendlessFault;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import io.ap1.proximity.Constants;
 import io.ap1.proximity.R;
 
 /**
  * Created by admin on 08/02/16.
  */
 public class FragmentLogin extends Fragment implements View.OnClickListener {
+    private static final String TAG = "FragmentLogin";
+
     @Bind(R.id.et_login_username)
     EditText etLoginUsername;
     @Bind(R.id.et_signIn_password)
@@ -47,17 +51,14 @@ public class FragmentLogin extends Fragment implements View.OnClickListener {
         user = ((ActivityLogin)getActivity()).backendlessUser;
 
         Bundle userInfo = getArguments();
-        String loginName = userInfo.getString("loginName");
-        String loginPassword = userInfo.getString("loginPassword");
+        String loginName = userInfo.getString(Constants.USER_LOGIN_KEY_LOGINNAME);
+        String loginPassword = userInfo.getString(Constants.USER_LOGIN_KEY_LOGINPASSWORD);
+        Log.e(TAG, "onCreateView: " + loginName + loginPassword);
         if(loginName != null && loginPassword != null){
             Backendless.UserService.login(loginName, loginPassword, new BackendlessCallback<BackendlessUser>() {
                 @Override
                 public void handleResponse(BackendlessUser backendlessUser) {
-                    String userObjectId = backendlessUser.getObjectId();
-                    Log.e("login", backendlessUser.getEmail() + " successfully login " + userObjectId);
-                    ((ActivityLogin)getActivity()).myApplication.setUserLoginName(etLoginUsername.getText().toString());
-                    ((ActivityLogin)getActivity()).myApplication.setUserLoginPassword(etSignInPassword.getText().toString());
-                    ((ActivityLogin)getActivity()).goToMainUI(userObjectId);
+                    ((ActivityLogin)getActivity()).goToMainUI(backendlessUser.getObjectId());
                 }
                 @Override
                 public void handleFault(BackendlessFault fault){
@@ -85,9 +86,14 @@ public class FragmentLogin extends Fragment implements View.OnClickListener {
                     @Override
                     public void handleResponse(BackendlessUser backendlessUser) {
                         String userObjectId = backendlessUser.getObjectId();
-                        Log.e("login", backendlessUser.getEmail() + " successfully login " + userObjectId);
-                        ((ActivityLogin)getActivity()).myApplication.setUserLoginName(etLoginUsername.getText().toString());
-                        ((ActivityLogin)getActivity()).myApplication.setUserLoginPassword(etSignInPassword.getText().toString());
+                        String inputName = etLoginUsername.getText().toString();
+                        String inputPassoword = etSignInPassword.getText().toString();
+                        Log.e(TAG, "intputInfo: " + inputName + inputPassoword);
+                        SharedPreferences sharedPreferences = ((ActivityLogin)getActivity()).spUserInfo;
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString(Constants.USER_LOGIN_KEY_LOGINNAME, inputName);
+                        editor.putString(Constants.USER_LOGIN_KEY_LOGINPASSWORD, inputPassoword);
+                        editor.commit();
                         ((ActivityLogin)getActivity()).goToMainUI(userObjectId);
                     }
                     @Override

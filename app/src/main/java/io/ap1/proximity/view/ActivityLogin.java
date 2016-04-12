@@ -4,31 +4,36 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
 import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
 
+import io.ap1.proximity.Constants;
 import io.ap1.proximity.MyApplication;
 import io.ap1.proximity.R;
 
 public class ActivityLogin extends AppCompatActivity {
+    private static final String TAG = "ActivityLogin";
 
     FragmentManager fragmentManager;
     BackendlessUser backendlessUser;
     FragmentTransaction fragmentTransaction;
-
-    MyApplication myApplication;
+    SharedPreferences spUserInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        spUserInfo = getApplicationContext().getSharedPreferences("UserInfo", 0);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
@@ -42,20 +47,19 @@ public class ActivityLogin extends AppCompatActivity {
         backendlessUser = new BackendlessUser();
 
         if(findViewById(R.id.fragment_login_container) != null){
+            /*
             if(savedInstanceState != null){
                 return;
             }
-
-            myApplication = (MyApplication) getApplication();
+*/
             Bundle userInfo = new Bundle();
-            userInfo.putString("loginName", myApplication.getUserLoginName());
-            userInfo.putString("loginPassword", myApplication.getUserLoginPassword());
+            userInfo.putString(Constants.USER_LOGIN_KEY_LOGINNAME, spUserInfo.getString(Constants.USER_LOGIN_KEY_LOGINNAME, null));
+            userInfo.putString(Constants.USER_LOGIN_KEY_LOGINPASSWORD, spUserInfo.getString(Constants.USER_LOGIN_KEY_LOGINPASSWORD, null));
 
             FragmentLogin fragmentLogin = new FragmentLogin();
             fragmentLogin.setArguments(userInfo);
             fragmentManager = getFragmentManager();
             fragmentManager.beginTransaction().add(R.id.fragment_login_container, fragmentLogin).commit();
-
         }
     }
 

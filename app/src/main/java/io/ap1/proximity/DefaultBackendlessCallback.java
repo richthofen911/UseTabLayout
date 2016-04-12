@@ -30,8 +30,6 @@ public class DefaultBackendlessCallback<T> extends BackendlessCallback<T> {
     public void handleResponse( T response ) {
         if(progressDialog != null)
             progressDialog.cancel();
-
-        Log.e("progressDialog", "canceled");
     }
 
     @Override

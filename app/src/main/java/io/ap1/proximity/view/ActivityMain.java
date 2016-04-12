@@ -41,9 +41,8 @@ import com.pubnub.api.Pubnub;
 import com.squareup.picasso.Picasso;
 
 import io.ap1.libbeaconmanagement.ServiceBeaconManagement;
-import io.ap1.libbeaconmanagement.Utils.CallBackUpdateBeaconSet;
+import io.ap1.libbeaconmanagement.Utils.CallBackSyncData;
 import io.ap1.libbeaconmanagement.Utils.CallBackUpdateCompanySet;
-import io.ap1.proximity.MyApplication;
 import io.ap1.proximity.AppDataStore;
 import io.ap1.proximity.AppPubsubCallback;
 import io.ap1.proximity.Constants;
@@ -186,13 +185,13 @@ public class ActivityMain extends AppCompatActivity{
                 binderBeaconManagement.setListAdapter(adapterBeaconNearbyUser);
 
                 final ProgressDialog progCheckCompany = android.app.ProgressDialog.show(ActivityMain.this, "Update Company Data", "Please wait", true);
-                binderBeaconManagement.getRemoteCompanyHash("/getAllCompanies_a.php", new CallBackUpdateCompanySet() {
+                binderBeaconManagement.getRemoteCompanyHash("/getAllCompanies_a.php", new CallBackSyncData() {
                     @Override
                     public void onSuccess() {
                         progCheckCompany.dismiss();
 
                         final ProgressDialog progressDialog = android.app.ProgressDialog.show(ActivityMain.this, "Update Beacon Data", "Please Wait", true);
-                        binderBeaconManagement.getRemoteBeaconHash("/getAllBeaconsv5_a.php", new CallBackUpdateBeaconSet() {
+                        binderBeaconManagement.getRemoteBeaconHash("/getAllBeaconsv5_a.php", new CallBackSyncData() {
                             @Override
                             public void onSuccess() {
                                 progressDialog.dismiss();
@@ -300,7 +299,6 @@ public class ActivityMain extends AppCompatActivity{
                 super.handleResponse(response);
 
                 myUserObject = response;
-                Toast.makeText(ActivityMain.this, "Pull Data: Success", Toast.LENGTH_SHORT).show();
                 setUpDrawer();
             }
 
@@ -349,9 +347,11 @@ public class ActivityMain extends AppCompatActivity{
                 if (id == R.id.nav_settings) {
                     startActivity(new Intent(ActivityMain.this, ActivitySettings.class).putExtra("userObjectId", myUserObjectId));
                 } else if (id == R.id.nav_logout) {
-                    MyApplication myApplication = (MyApplication)getApplication();
-                    myApplication.setUserLoginName(null);
-                    myApplication.setUserLoginPassword(null);
+                    SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("UserInfo", 0);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString(Constants.USER_LOGIN_KEY_LOGINNAME, null);
+                    editor.putString(Constants.USER_LOGIN_KEY_LOGINPASSWORD, null);
+                    editor.apply();
                     startActivity(new Intent(ActivityMain.this, ActivityLogin.class));
                     finish();
                 }
@@ -444,14 +444,14 @@ public class ActivityMain extends AppCompatActivity{
             binderBeaconManagement.stopScanning();
     }
 
-    public void updateCompanySet(String apiPath, CallBackUpdateCompanySet callBackUpdateCompanySet){
+    public void updateCompanySet(String apiPath, CallBackSyncData callBackUpdateCompanySet){
         if(binderBeaconManagement != null && binderBeaconManagement.isBinderAlive())
             binderBeaconManagement.getRemoteCompanyHash(apiPath, callBackUpdateCompanySet);
     }
 
-    public void updateBeaconSet(String apiPath, CallBackUpdateBeaconSet callBackUpdateBeaconSet){
+    public void updateBeaconSet(String apiPath, CallBackSyncData callBackSyncData){
         if(binderBeaconManagement != null && binderBeaconManagement.isBinderAlive())
-            binderBeaconManagement.getRemoteBeaconHash(apiPath, callBackUpdateBeaconSet);
+            binderBeaconManagement.getRemoteBeaconHash(apiPath, callBackSyncData);
     }
 
     @Override

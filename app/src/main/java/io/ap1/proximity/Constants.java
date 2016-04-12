@@ -15,6 +15,9 @@ public interface Constants {
 
     String MAJOR = "major: ";
     String MINOR = " minor: ";
+
+    String USER_LOGIN_KEY_LOGINNAME = "loginName";
+    String USER_LOGIN_KEY_LOGINPASSWORD = "loginPassword";
     int COLOR_WHITE = Color.parseColor("#FFFFFF");
     int COLOR_BLUE_LIGHT = Color.parseColor("#04A9CE");
     String PROFILE_IMAGE_PATH_ROOT = "http://159.203.15.85:80/api/CBCCFC6F-B6C9-A38D-FF43-FB8A5C7BD400/v1/files/profileImage/";

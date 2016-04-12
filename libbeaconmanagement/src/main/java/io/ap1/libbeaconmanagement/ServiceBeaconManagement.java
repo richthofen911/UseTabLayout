@@ -32,9 +32,11 @@ import io.ap1.libbeaconmanagement.Utils.ApiCaller;
 import io.ap1.libbeaconmanagement.Utils.CallBackUpdateCompanySet;
 import io.ap1.libbeaconmanagement.Utils.DataStore;
 import io.ap1.libbeaconmanagement.Utils.ServiceBeaconDetection;
-import io.ap1.libbeaconmanagement.Utils.CallBackUpdateBeaconSet;
+import io.ap1.libbeaconmanagement.Utils.CallBackSyncData;
 
 public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends ServiceBeaconDetection {
+    private static final String TAG = "ServiceBeaconMngt";
+
     protected SharedPreferences spHashValue;
     protected int idparent;
 
@@ -50,8 +52,6 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
     protected String currentAdapter = "";
     protected static final String adapterTypeAdmin = "AdapterBeaconNearbyAdmin";
     protected static final String adapterTypeUser = "AdapterBeaconNearbyUser";
-
-    private static final String TAG = "ServiceBeaconMngt";
 
     public ServiceBeaconManagement() {
     }
@@ -114,7 +114,7 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
         }
     }
 
-    protected void checkRemoteBeaconHash(final String urlPath, final CallBackUpdateBeaconSet callBackUpdateBeaconSet) {
+    protected void checkRemoteBeaconHash(final String urlPath, final CallBackSyncData callBackSyncData) {
         Map<String, String> postParams = new HashMap<>();
         postParams.put("hash", spHashValue.getString("hashBeacon", "empty"));
 
@@ -126,7 +126,7 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
                         if (result.equals("1")) {
                             Log.e(TAG, "beacon hash local == remote");
                             DataStore.beaconInAllPlacesList = sortBeaconsByCompany();
-                            callBackUpdateBeaconSet.onSuccess();
+                            callBackSyncData.onSuccess();
                         } else {
                             Log.e(TAG, "beacon hash local != remote");
                             try {
@@ -136,9 +136,9 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
                                 clearDetectedBeaconList(); // clear current detected beacon list display
                                 DataStore.detectedBeaconList.clear();
                                 JSONArray beaconSetRemote = jsonObject.getJSONArray("beacons");
-                                updateLocalBeaconDB(beaconSetRemote, callBackUpdateBeaconSet, remoteBeaconHash);
+                                updateLocalBeaconDB(beaconSetRemote, callBackSyncData, remoteBeaconHash);
                             } catch (JSONException e) {
-                                callBackUpdateBeaconSet.onFailure(e.toString());
+                                callBackSyncData.onFailure(e.toString());
                             }
                         }
                     }
@@ -155,7 +155,7 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
                 });
     }
 
-    protected void checkRemoteCompanyHash(final String urlPath, final CallBackUpdateCompanySet callBackUpdateCompanySet){
+    protected void checkRemoteCompanyHash(final String urlPath, final CallBackSyncData callBackUpdateCompanySet){
         Map<String, String> postParams = new HashMap<>();
         postParams.put("hash", spHashValue.getString("hashCompany", "empty"));
 
@@ -194,7 +194,7 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
                 });
     }
 
-    protected void updateLocalBeaconDB(JSONArray newBeaconSet, final CallBackUpdateBeaconSet callBackUpdateBeaconSet, String remoteBeaconHash){ //save all beacons into local DB one by one
+    protected void updateLocalBeaconDB(JSONArray newBeaconSet, final CallBackSyncData callBackSyncData, String remoteBeaconHash){ //save all beacons into local DB one by one
         Log.e(TAG, "updateing local beacons table...");
         Gson gson = new Gson(); //use Gson to parse a Beacon JSONObject to a POJO
         int newBeaconSetLength = newBeaconSet.length();
@@ -209,10 +209,10 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
         spHashValue.edit().putString("hashBeacon", remoteBeaconHash).apply();
         DataStore.beaconInAllPlacesList = sortBeaconsByCompany();
         Log.e(TAG, "update beacon info success");
-        callBackUpdateBeaconSet.onSuccess();
+        callBackSyncData.onSuccess();
     }
 
-    protected void updateLocalCompanyDB(JSONArray newCompanySet, final CallBackUpdateCompanySet callBackUpdateCompanySet, String remoteCompanyHash){
+    protected void updateLocalCompanyDB(JSONArray newCompanySet, final CallBackSyncData callBackUpdateCompanySet, String remoteCompanyHash){
         Log.e(TAG, "update local companies table...");
         Gson gson = new Gson();
         int newCompanySetLength = newCompanySet.length();
@@ -393,11 +393,11 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
             timerResortList.cancel();
         }
 
-        public void getRemoteBeaconHash(String apiPath, CallBackUpdateBeaconSet callBackUpdateBeaconSet){
-            checkRemoteBeaconHash(apiPath, callBackUpdateBeaconSet);
+        public void getRemoteBeaconHash(String apiPath, CallBackSyncData callBackSyncData){
+            checkRemoteBeaconHash(apiPath, callBackSyncData);
         }
 
-        public void getRemoteCompanyHash(String apiPath, CallBackUpdateCompanySet callBackUpdateCompanySet){
+        public void getRemoteCompanyHash(String apiPath, CallBackSyncData callBackUpdateCompanySet){
             checkRemoteCompanyHash(apiPath, callBackUpdateCompanySet);
         }
 
