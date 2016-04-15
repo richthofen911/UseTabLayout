@@ -29,7 +29,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import io.ap1.libbeaconmanagement.Utils.ApiCaller;
-import io.ap1.libbeaconmanagement.Utils.CallBackUpdateCompanySet;
 import io.ap1.libbeaconmanagement.Utils.DataStore;
 import io.ap1.libbeaconmanagement.Utils.ServiceBeaconDetection;
 import io.ap1.libbeaconmanagement.Utils.CallBackSyncData;

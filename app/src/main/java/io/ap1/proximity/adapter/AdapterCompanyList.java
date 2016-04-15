@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 
 import io.ap1.libbeaconmanagement.Company;
-import io.ap1.libbeaconmanagement.Utils.DataStore;
 import io.ap1.proximity.R;
 import io.ap1.proximity.viewholder.ViewHolderCompanyList;
 
@@ -21,6 +20,10 @@ public class AdapterCompanyList extends RecyclerView.Adapter<ViewHolderCompanyLi
     private Company companyTmp;
 
     public AdapterCompanyList (ArrayList<Company> companyList){
+        this.companyList = companyList;
+    }
+
+    public void setDataSource(ArrayList<Company> companyList){
         this.companyList = companyList;
     }
 
@@ -40,6 +43,7 @@ public class AdapterCompanyList extends RecyclerView.Adapter<ViewHolderCompanyLi
         viewHolder.color = companyTmp.getColor();
         viewHolder.lat = companyTmp.getLat();
         viewHolder.lng = companyTmp.getLng();
+        viewHolder.hash = companyTmp.getHash();
         viewHolder.selfPosition = position;
     }
 

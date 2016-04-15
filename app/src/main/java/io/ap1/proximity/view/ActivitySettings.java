@@ -3,6 +3,7 @@ package io.ap1.proximity.view;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -31,6 +32,7 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,6 +54,7 @@ import io.ap1.proximity.PermissionHandler;
 import io.ap1.proximity.R;
 
 public class ActivitySettings extends AppCompatActivity {
+    private static final String TAG = "ActivitySettings";
 
     private EditText nickname, aboutMe;
     private TextView tvColorValue;
@@ -67,7 +70,6 @@ public class ActivitySettings extends AppCompatActivity {
     private String myUserObjectId;
     private Bitmap profileImage;
 
-    private static final String TAG = "ActivitySettings";
     public static final int USER_CHANGE_COLOR = 3;
     private static final int INTENT_CODE_TAKE_PHOTO = 201;
     private static final int INTENT_CODE_SELECT_PICTURE = 202;
@@ -97,8 +99,6 @@ public class ActivitySettings extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.toolbar_settings);
         tvSave = (TextView) findViewById(R.id.tv_company_details_toobar_save);
 
-        setUpDrawer();
-
         myUserObjectId = getIntent().getStringExtra("userObjectId");
         Log.e(TAG, "userObjectId: " + myUserObjectId);
 
@@ -106,6 +106,8 @@ public class ActivitySettings extends AppCompatActivity {
             @Override
             public void handleResponse(BackendlessUser response) {
                 super.handleResponse(response);
+                setUpDrawer(response);
+                /*
                 Log.e("user obj", response.getProperty("nickname") + " "
                                 + response.getProperty("bio") + " "
                                 + response.getProperty("visible") + " "
@@ -113,6 +115,7 @@ public class ActivitySettings extends AppCompatActivity {
                                 + response.getProperty("incognito") + " "
                                 + response.getProperty("color") + " "
                 );
+                */
                 Log.e(TAG, "user persis resp: " + response.toString());
                 nickname.setText((String) response.getProperty("nickname"));
                 aboutMe.setText((String) response.getProperty("bio"));
@@ -135,7 +138,7 @@ public class ActivitySettings extends AppCompatActivity {
         });
     }
 
-    protected void setUpDrawer(){
+    protected void setUpDrawer(BackendlessUser myUserObject){
         final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -144,6 +147,18 @@ public class ActivitySettings extends AppCompatActivity {
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        int headers = navigationView.getHeaderCount();
+        if(headers > 0){
+            if(myUserObject != null){
+                Log.e(TAG, "setUpDrawer: " + myUserObject.getProperty("profileImage") + myUserObject.getProperty("nickname") + myUserObject.getProperty("email"));
+                LinearLayout headerView = (LinearLayout)navigationView.getHeaderView(0);
+                ImageView headerImage = (ImageView) headerView.findViewById(R.id.iv_drawer_header_image);
+                Picasso.with(ActivitySettings.this).load(Constants.PROFILE_IMAGE_PATH_ROOT + myUserObject.getProperty("profileImage")).into(headerImage);
+                ((TextView) headerView.findViewById(R.id.tv_drawer_header_name)).setText((String)myUserObject.getProperty("nickname"));
+                ((TextView) headerView.findViewById(R.id.tv_drawer_header_email)).setText((String)myUserObject.getProperty("email"));
+            }else
+                Toast.makeText(this, "MyUserObject is null", Toast.LENGTH_SHORT).show();
+        }
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
@@ -153,7 +168,13 @@ public class ActivitySettings extends AppCompatActivity {
                     // swipe back the drawer
                     drawer.closeDrawer(GravityCompat.START);
                 } else if (id == R.id.nav_logout) {
-
+                    SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("UserInfo", 0);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString(Constants.USER_LOGIN_KEY_LOGINNAME, null);
+                    editor.putString(Constants.USER_LOGIN_KEY_LOGINPASSWORD, null);
+                    editor.apply();
+                    startActivity(new Intent(ActivitySettings.this, ActivityLogin.class));
+                    finish();
                 }
                 DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
                 drawer.closeDrawer(GravityCompat.START);
@@ -192,7 +213,7 @@ public class ActivitySettings extends AppCompatActivity {
 
                 @Override
                 public void handleFault(BackendlessFault backendlessFault) {
-
+                    Toast.makeText(ActivitySettings.this, "Fail to update the profile image: " + backendlessFault.toString(), Toast.LENGTH_SHORT).show();
                 }
             });
         }else

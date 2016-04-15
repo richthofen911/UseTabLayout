@@ -42,7 +42,6 @@ import com.squareup.picasso.Picasso;
 
 import io.ap1.libbeaconmanagement.ServiceBeaconManagement;
 import io.ap1.libbeaconmanagement.Utils.CallBackSyncData;
-import io.ap1.libbeaconmanagement.Utils.CallBackUpdateCompanySet;
 import io.ap1.proximity.AppDataStore;
 import io.ap1.proximity.AppPubsubCallback;
 import io.ap1.proximity.Constants;
@@ -212,7 +211,7 @@ public class ActivityMain extends AppCompatActivity{
                     public void onFailure(String cause) {
                         progCheckCompany.dismiss();
                         Toast.makeText(ActivityMain.this, cause, Toast.LENGTH_SHORT).show();
-                        Log.e("update beacon hash err", cause);
+                        Log.e("update company data err", cause);
                     }
                 });
                 progCheckCompany.setCancelable(true);
@@ -308,13 +307,6 @@ public class ActivityMain extends AppCompatActivity{
                 Log.e("Handle fault", fault.toString());
             }
         });
-    }
-
-    public String getMyUserProperty(String key){
-        if(myUserObject != null)
-            return (String) myUserObject.getProperty(key);
-        else
-            return null;
     }
 
     protected void setUpDrawer(){

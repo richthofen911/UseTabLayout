@@ -2,9 +2,13 @@ package io.ap1.proximity.viewholder;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+
+import io.ap1.proximity.Constants;
 import io.ap1.proximity.R;
 import io.ap1.proximity.view.ActivityCompanyDetails;
 import io.ap1.proximity.view.ActivityCompanyList;
@@ -21,6 +25,7 @@ public class ViewHolderCompanyList extends RecyclerView.ViewHolder{
     public String color;
     public String lat;
     public String lng;
+    public String hash;
     public String url = "http://ap1.io/";
 
     public ViewHolderCompanyList(View rootView){
@@ -29,6 +34,7 @@ public class ViewHolderCompanyList extends RecyclerView.ViewHolder{
         tvCompanyToBeSelected = (TextView) rootView.findViewById(R.id.tv_company_in_list_name);
         tvCompanyInfo = (TextView) rootView.findViewById(R.id.tv_company_in_list_info);
 
+        /*
         tvCompanyToBeSelected.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -40,6 +46,28 @@ public class ViewHolderCompanyList extends RecyclerView.ViewHolder{
                 hostActivity.finish();
             }
         });
+        */
+        tvCompanyToBeSelected.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(final View v) {
+                PopupMenu popup = new PopupMenu(v.getContext(), v);
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.delete_company:
+                                ((ActivityCompanyList)v.getContext()).deleteCompany(hash);
+                                return true;
+                            default:
+                                return false;
+                        }
+                    }
+                });
+                popup.inflate(R.menu.delete_company);
+                popup.show();
+                return true;
+            }
+        });
 
         tvCompanyInfo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -49,7 +77,9 @@ public class ViewHolderCompanyList extends RecyclerView.ViewHolder{
                 intent.putExtra("color", color);
                 intent.putExtra("lat", lat);
                 intent.putExtra("lng", lng);
-                v.getContext().startActivity(intent);
+                intent.putExtra("hash", hash);
+                intent.putExtra("addOrEdit", "edit");
+                ((ActivityCompanyList) v.getContext()).startActivityForResult(intent, Constants.INTENT_REQUEST_CODE_ADD_COMPANY);
             }
         });
     }

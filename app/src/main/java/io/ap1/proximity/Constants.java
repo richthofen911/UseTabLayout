@@ -13,6 +13,8 @@ public interface Constants {
     int PERMISSION_REQUEST_CODE_WRITE_EXTERNAL_STORAGE = 103;
     int PERMISSION_REQUEST_CODE_BUNDLE = 110;
 
+    int INTENT_REQUEST_CODE_ADD_COMPANY = 11;  // Add and Edit company use this same intent request code
+
     String MAJOR = "major: ";
     String MINOR = " minor: ";
 

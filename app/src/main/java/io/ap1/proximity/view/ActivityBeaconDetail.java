@@ -102,6 +102,9 @@ public class ActivityBeaconDetail extends AppCompatActivity {
         if(detectedRssi != null)
             etBeaconDetailRssi.setText(detectedRssi);
 
+        etBeaconDetailUrlNear.setText(R.string.default_beacon_url);
+        etBeaconDetailUrlFar.setText(R.string.default_beacon_url);
+
         tvBeaconDetailCompanyArrow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -160,6 +163,7 @@ public class ActivityBeaconDetail extends AppCompatActivity {
         }
     }
 
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode){
             case INTENT_CODE_SELECT_COMPANY:

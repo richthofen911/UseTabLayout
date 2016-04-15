@@ -1,6 +1,7 @@
 package io.ap1.proximity;
 
 import android.app.Application;
+import android.os.Build;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -15,14 +16,23 @@ import io.ap1.libbeaconmanagement.Utils.ApiCaller;
  */
 public class MyApplication extends Application{
     private static final String TAG = "MyApplication";
+    private String username;
+    private String userObjectId;
+    private final static String deviceInfo = Build.BRAND + "/" + Build.MODEL + "/" + Build.VERSION.RELEASE;
 
     private Thread.UncaughtExceptionHandler uncaughtExceptionHandler = new Thread.UncaughtExceptionHandler(){
         @Override
         public void uncaughtException(Thread thread, final Throwable throwable){
-            String bugTrackerServerBaseUrl = "http://192.168.128.57:3999";
-            String urlPath = "/";
+            String bugTrackerServerBaseUrl = "http://159.203.36.215:3999";
+            String urlPath = "/report";
             Map<String, String> postParams = new HashMap<String, String>();
-            postParams.put("cause", throwable.toString());
+            postParams.put("appname", "Proximity(Android)");
+            postParams.put("username", username);
+            postParams.put("userappid", userObjectId);
+            postParams.put("deviceinfo", deviceInfo);
+            String cause = throwable.toString();
+            cause = cause.replace("\n", ". ");
+            postParams.put("cause", cause);
 
             ApiCaller.getInstance(getApplicationContext()).setAPI(bugTrackerServerBaseUrl, urlPath, null, postParams, Request.Method.POST).exec(
                 new ApiCaller.VolleyCallback() {
@@ -44,5 +54,13 @@ public class MyApplication extends Application{
         super.onCreate();
 
         Thread.setDefaultUncaughtExceptionHandler(uncaughtExceptionHandler);
+    }
+
+    public void setUsername(String username){
+        this.username = username;
+    }
+
+    public void setUserObjectId(String userObjectId){
+        this.userObjectId = userObjectId;
     }
 }

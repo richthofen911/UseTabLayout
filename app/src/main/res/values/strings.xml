@@ -30,4 +30,9 @@
         <item>Map</item>
     </string-array>
 
+    <string name="default_beacon_url">http://www.ap1.io</string>
+    <string name="default_lat">43.6672112</string>
+    <string name="default_lng">-79.3854604</string>
+    <string name="default_color_in_text">#04A9CE</string>
+
 </resources>

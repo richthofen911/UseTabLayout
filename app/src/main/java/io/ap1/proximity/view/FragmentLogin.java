@@ -1,5 +1,6 @@
 package io.ap1.proximity.view;
 
+import android.app.Application;
 import android.app.Fragment;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import com.backendless.exceptions.BackendlessFault;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import io.ap1.proximity.Constants;
+import io.ap1.proximity.MyApplication;
 import io.ap1.proximity.R;
 
 /**
@@ -51,14 +53,16 @@ public class FragmentLogin extends Fragment implements View.OnClickListener {
         user = ((ActivityLogin)getActivity()).backendlessUser;
 
         Bundle userInfo = getArguments();
-        String loginName = userInfo.getString(Constants.USER_LOGIN_KEY_LOGINNAME);
+        final String loginName = userInfo.getString(Constants.USER_LOGIN_KEY_LOGINNAME);
         String loginPassword = userInfo.getString(Constants.USER_LOGIN_KEY_LOGINPASSWORD);
         Log.e(TAG, "onCreateView: " + loginName + loginPassword);
         if(loginName != null && loginPassword != null){
             Backendless.UserService.login(loginName, loginPassword, new BackendlessCallback<BackendlessUser>() {
                 @Override
                 public void handleResponse(BackendlessUser backendlessUser) {
-                    ((ActivityLogin)getActivity()).goToMainUI(backendlessUser.getObjectId());
+                    String userObjectId = backendlessUser.getObjectId();
+                    setGlobalUserInfo(loginName, userObjectId);
+                    ((ActivityLogin)getActivity()).goToMainUI(userObjectId);
                 }
                 @Override
                 public void handleFault(BackendlessFault fault){
@@ -94,6 +98,7 @@ public class FragmentLogin extends Fragment implements View.OnClickListener {
                         editor.putString(Constants.USER_LOGIN_KEY_LOGINNAME, inputName);
                         editor.putString(Constants.USER_LOGIN_KEY_LOGINPASSWORD, inputPassoword);
                         editor.commit();
+                        setGlobalUserInfo(inputName, userObjectId);
                         ((ActivityLogin)getActivity()).goToMainUI(userObjectId);
                     }
                     @Override
@@ -111,6 +116,15 @@ public class FragmentLogin extends Fragment implements View.OnClickListener {
                 break;
             default:
         }
+    }
+
+    /**
+     the user info would be used as the identity when sending crash report to our server
+     */
+    private void setGlobalUserInfo(String username, String userObjectId){
+        MyApplication myApplication = (MyApplication)getActivity().getApplication();
+        myApplication.setUsername(username);
+        myApplication.setUserObjectId(userObjectId);
     }
 
     @Override

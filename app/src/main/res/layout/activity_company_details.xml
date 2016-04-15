@@ -66,7 +66,7 @@
             android:id="@+id/tv_company_details_color"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="#04A9CE"/>
+            android:text="@string/default_color_in_text"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -77,7 +77,7 @@
             android:layout_height="16dp"
             android:background="@color/light_blue"
             android:clickable="true"
-            android:text="#04A9CE"
+            android:text="@string/default_color_in_text"
             android:textColor="@color/light_blue"/>
     </LinearLayout>
 
@@ -98,7 +98,7 @@
             android:id="@+id/et_company_details_latitude"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Default Format: 45.4 S"/>
+            android:text="@string/default_lat"/>
     </LinearLayout>
 
     <LinearLayout
@@ -118,6 +118,6 @@
             android:id="@+id/et_company_details_longitude"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Default format: 100.5 E"/>
+            android:text="@string/default_lng"/>
     </LinearLayout>
 </LinearLayout>
