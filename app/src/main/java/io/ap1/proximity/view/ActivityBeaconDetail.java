@@ -1,6 +1,5 @@
 package io.ap1.proximity.view;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -137,12 +136,18 @@ public class ActivityBeaconDetail extends AppCompatActivity {
             postParams.put("major", major);
             postParams.put("minor", minor);
             postParams.put("rssi", rssi);
-            postParams.put("nickname", nickname);
-            postParams.put("macaddress", macaddress);
-            postParams.put("lat", lat);
-            postParams.put("lng", lng);
-            postParams.put("urlnear", urlnear);
-            postParams.put("urlfar", urlfar);
+            if(!nickname.equals(""))
+                postParams.put("nickname", nickname);
+            if(!macaddress.equals(""))
+                postParams.put("macaddress", macaddress);
+            if(!lat.equals(""))
+                postParams.put("lat", lat);
+            if(!lng.equals(""))
+                postParams.put("long", lng);
+            if(!urlnear.equals(""))
+                postParams.put("urlnear", urlnear);
+            if(!urlfar.equals(""))
+                postParams.put("urlfar", urlfar);
 
             ApiCaller.getInstance(getApplicationContext()).setAPI(DataStore.urlBase, "/addBeaconv5.php", null, postParams, Request.Method.POST)
                     .exec(new ApiCaller.VolleyCallback(){

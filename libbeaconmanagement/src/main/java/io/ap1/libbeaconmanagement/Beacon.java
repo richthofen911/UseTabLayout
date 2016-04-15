@@ -59,12 +59,7 @@ public class Beacon implements Comparable<Beacon>{
     @DatabaseField(useGetSet = true, columnName = IDCOMPANY)
     private String idcompany;
     @DatabaseField(useGetSet = true, columnName = COMPANYNAME)
-    /*
-    private String companyname;
-    @DatabaseField(useGetSet = true, columnName = COLOR)
-    private String color;
-    @DatabaseField(useGetSet = true, columnName = MACADDRESS)
-    */
+
     private String macaddress;
     @DatabaseField(useGetSet = true, columnDefinition = IDPARENT)
     private String idparent;
@@ -191,24 +186,6 @@ public class Beacon implements Comparable<Beacon>{
     public void setIdcompany(String idcompany){
         this.idcompany = idcompany;
     }
-
-    /*
-    public String getCompanyname(){
-        return companyname;
-    }
-
-    public void setCompanyname(String companyname){
-        this.companyname = companyname;
-    }
-
-    public String getColor(){
-        return color;
-    }
-
-    public void setColor(String color){
-        this.color = color;
-    }
-    */
 
     public String getMacaddress(){
         return macaddress;

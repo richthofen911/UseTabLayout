@@ -77,7 +77,6 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
         Beacon beaconQueried = databaseHelper.queryForOneBeacon(ap1Beacon);
         if(beaconQueried != null){
             // if beaconQueried is in local db, add it to detected&registerd list
-            //Log.e("detected&registered", "add to new&registered list");
             if(beaconQueried.getIdparent().equals(idparent)){
                 String nickname = beaconQueried.getNickname();
                 if(nickname != null && !nickname.equals(""))

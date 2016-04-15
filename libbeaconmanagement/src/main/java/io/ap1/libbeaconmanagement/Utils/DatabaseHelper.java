@@ -24,6 +24,7 @@ import io.ap1.libbeaconmanagement.Company;
  */
 public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
     private static final String TAG = "DatabaseHelper";
+
     private static final String DATABASE_NAME = "beacons.db";
     private static final int DATABASE_VERSION = 1;
 

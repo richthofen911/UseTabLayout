@@ -1,6 +1,5 @@
 package io.ap1.libbeaconmanagement.Utils;
 
-import android.app.Application;
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;

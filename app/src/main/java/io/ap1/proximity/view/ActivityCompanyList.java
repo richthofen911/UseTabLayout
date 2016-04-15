@@ -5,7 +5,6 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -13,7 +12,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -108,7 +106,6 @@ public class ActivityCompanyList extends AppCompatActivity {
                             };
 
                             bindService(new Intent(ActivityCompanyList.this, ServiceBeaconManagement.class), connBeaconManagement, BIND_AUTO_CREATE);
-
                         }else if(result.equals("0")){
                             Toast.makeText(ActivityCompanyList.this, "Company doesn't exist", Toast.LENGTH_SHORT).show();
                         }
