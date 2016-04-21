@@ -26,6 +26,7 @@ import java.util.Collection;
 import io.ap1.libbeaconmanagement.Beacon;
 import io.ap1.libbeaconmanagement.BeaconOperation;
 
+// this class must extends OrmLiteBaseService because the subclass cannot extends that service, it need to extends this service
 public class ServiceBeaconDetection extends OrmLiteBaseService<DatabaseHelper> implements
         RECOServiceConnectListener, RECORangingListener{
     private static final String TAG = "ServiceBeaconDetection";
@@ -210,7 +211,7 @@ public class ServiceBeaconDetection extends OrmLiteBaseService<DatabaseHelper> i
     protected void actionOnRssiChanged(int index, String newRssi){}
 
     private void inOut(int theRssi, RECOBeacon recoBeacon){
-        if(!generalSearchMode){
+        if(!generalSearchMode){ // the mode to find a specific target beacon
             if(theRssi > rssiBorder){ // if the beacon is detected and its rssi is strong enough, which means it is the beacon for the specific location, not a random one
                 if(!entered){ //if haven't entered, do it
                     exitCount = 0;
@@ -240,7 +241,7 @@ public class ServiceBeaconDetection extends OrmLiteBaseService<DatabaseHelper> i
                     Log.e("not this beacon", String.valueOf(recoBeacon.getMinor()));
                 }
             }
-        }else {
+        }else { // general scanning mode
             Beacon detectedBeacon = new Beacon();
             detectedBeacon.setUuid(recoBeacon.getProximityUuid());
             detectedBeacon.setMajor(String.valueOf(recoBeacon.getMajor()));

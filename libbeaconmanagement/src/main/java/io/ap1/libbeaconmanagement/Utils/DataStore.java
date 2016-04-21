@@ -12,7 +12,8 @@ public class DataStore {
 
     public static ArrayList<Beacon> detectedBeaconList = new ArrayList<>();
     public static ArrayList<Beacon> detectedAndRegisteredBeaconList = new ArrayList<>();
-    public static ArrayList<Beacon> beaconInAllPlacesList = new ArrayList<>();
+    public static ArrayList<Beacon> registeredAndGroupedBeaconList = new ArrayList<>(); // grouped by company
+    public static ArrayList<Beacon> beaconAllList = new ArrayList<>();
     public static ArrayList<Company> companyInList = new ArrayList<>();
     public static String urlBase = "http://159.203.15.175/filemaker";
 }

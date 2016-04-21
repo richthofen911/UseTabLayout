@@ -26,6 +26,7 @@ import io.ap1.libbeaconmanagement.ServiceBeaconManagement;
 import io.ap1.libbeaconmanagement.Utils.ApiCaller;
 import io.ap1.libbeaconmanagement.Utils.CallBackSyncData;
 import io.ap1.libbeaconmanagement.Utils.DataStore;
+import io.ap1.libbeaconmanagement.Utils.DefaultVolleyCallback;
 import io.ap1.proximity.R;
 
 public class ActivityCompanyDetails extends AppCompatActivity {
@@ -119,7 +120,7 @@ public class ActivityCompanyDetails extends AppCompatActivity {
             postParams.put("hash", companyHash);
 
         ApiCaller.getInstance(getApplicationContext()).setAPI(DataStore.urlBase, apiActionPath, null, postParams, Request.Method.POST)
-                .exec(new ApiCaller.VolleyCallback(){
+                .exec(new DefaultVolleyCallback(){
                     @Override
                     public void onDelivered(String result){
                         Log.e(TAG, "onDelivered: " + result);
@@ -130,11 +131,11 @@ public class ActivityCompanyDetails extends AppCompatActivity {
                                     Log.e(TAG, "Service UpdateCompany: Connected");
                                     binderBeaconManagement = (ServiceBeaconManagement.BinderManagement) service;
 
-                                    final ProgressDialog progCheckCompany = ProgressDialog.show(ActivityCompanyDetails.this, "Updating Company Data", "Please wait", true);
-                                    binderBeaconManagement.getRemoteCompanyHash("/getAllCompanies_a.php", new CallBackSyncData() {
+
+                                    binderBeaconManagement.getRemoteCompanyHash("/getAllCompanies_a.php", new CallBackSyncData(ActivityCompanyDetails.this, "Updating Company Data") {
                                         @Override
                                         public void onSuccess() {
-                                            progCheckCompany.dismiss();
+                                            super.onSuccess();
                                             Toast.makeText(ActivityCompanyDetails.this, "Success", Toast.LENGTH_SHORT).show();
                                             Intent resultIntent = new Intent();
                                             setResult(RESULT_OK, resultIntent);
@@ -143,12 +144,11 @@ public class ActivityCompanyDetails extends AppCompatActivity {
 
                                         @Override
                                         public void onFailure(String cause) {
-                                            progCheckCompany.dismiss();
+                                            super.onFailure(cause);
                                             Toast.makeText(ActivityCompanyDetails.this, "Fail, " + cause, Toast.LENGTH_SHORT).show();
                                             Log.e(TAG, "Fail to update Company Data" + cause);
                                         }
                                     });
-                                    progCheckCompany.setCancelable(true);
                                 }
 
                                 @Override

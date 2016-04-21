@@ -14,6 +14,7 @@ public interface Constants {
     int PERMISSION_REQUEST_CODE_BUNDLE = 110;
 
     int INTENT_REQUEST_CODE_ADD_COMPANY = 11;  // Add and Edit company use this same intent request code
+    int INTENT_REQUEST_CODE_AD_BEACON = 12;  // AD_BEACON means Add Or Delete Beacon
 
     String MAJOR = "major: ";
     String MINOR = " minor: ";

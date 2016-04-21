@@ -24,12 +24,16 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.security.auth.login.LoginException;
+
 import io.ap1.libbeaconmanagement.Utils.ApiCaller;
 import io.ap1.libbeaconmanagement.Utils.DataStore;
+import io.ap1.libbeaconmanagement.Utils.DefaultVolleyCallback;
 import io.ap1.libbeaconmanagement.Utils.ServiceBeaconDetection;
 import io.ap1.libbeaconmanagement.Utils.CallBackSyncData;
 
@@ -72,20 +76,22 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
 
     @Override
     protected void actionOnEnterAp1Beacon(Beacon ap1Beacon){
-        Log.e("onEnter", ap1Beacon.getMajor() + "-" + ap1Beacon.getMinor());
-
-        Beacon beaconQueried = databaseHelper.queryForOneBeacon(ap1Beacon);
+        List<Beacon> beaconQueried = databaseHelper.queryBeacons(ap1Beacon);
         if(beaconQueried != null){
             // if beaconQueried is in local db, add it to detected&registerd list
-            if(beaconQueried.getIdparent().equals(idparent)){
-                String nickname = beaconQueried.getNickname();
-                if(nickname != null && !nickname.equals(""))
-                    ap1Beacon.setNickname(nickname);
-                else
-                    ap1Beacon.setNickname("Inactive");
-                ap1Beacon.setUrlfar(beaconQueried.getUrlfar());
-                ap1Beacon.setUrlnear(beaconQueried.getUrlnear());
-                addToDetectedAndRegisteredList(DataStore.detectedAndRegisteredBeaconList.size(), ap1Beacon);
+            for(Beacon beacon : beaconQueried){
+                Log.e(TAG, "actionOnEnterAp1Beacon: " + beacon.getMajor() + "-" + beacon.getMinor() + ": " + beacon.getIdparent() + " is in localDB");
+                if(beacon.getIdparent().equals(String.valueOf(idparent))){
+                    Log.e(TAG, "actionOnEnterAp1Beacon: idparent match: " + idparent);
+                    String nickname = beacon.getNickname();
+                    if(nickname != null && !nickname.equals(""))
+                        ap1Beacon.setNickname(nickname);
+                    else
+                        ap1Beacon.setNickname("Inactive");
+                    ap1Beacon.setUrlfar(beacon.getUrlfar());
+                    ap1Beacon.setUrlnear(beacon.getUrlnear());
+                    addToDetectedAndRegisteredList(DataStore.detectedAndRegisteredBeaconList.size(), beacon);
+                }
             }
         }else
             ap1Beacon.setNickname("Inactive");
@@ -93,7 +99,6 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
 
         displayDetectedAndRegisteredBeaconsList("NewBeacon");
     }
-
 
     @Override
     protected void actionOnRssiChanged(int index, String newRssi){
@@ -105,7 +110,7 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
         int registeredListSize = DataStore.detectedAndRegisteredBeaconList.size();
         for(int j = 0; j < registeredListSize; j++){
             if(BeaconOperation.equals(tmpBeacon, DataStore.detectedAndRegisteredBeaconList.get(j))){
-                DataStore.detectedAndRegisteredBeaconList.get(j).setRssi(newRssi); // override the beacon's rssi in detected&registeredBeaconList
+                DataStore.detectedAndRegisteredBeaconList.get(j).setRssi(newRssi); // override the beacon's rssi in detected and registeredBeaconList
                 if(!needToResetNearbyStatus)
                     needToResetNearbyStatus = true;
             }
@@ -117,13 +122,14 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
         postParams.put("hash", spHashValue.getString("hashBeacon", "empty"));
 
         ApiCaller.getInstance(getApplicationContext()).setAPI(DataStore.urlBase, urlPath, null, postParams, Request.Method.POST).exec(
-                new ApiCaller.VolleyCallback() {
+                new DefaultVolleyCallback() {
                     @Override
                     public void onDelivered(String result) {
                         Log.e(TAG, "resp check beacon hash: " + result);
                         if (result.equals("1")) {
                             Log.e(TAG, "beacon hash local == remote");
-                            DataStore.beaconInAllPlacesList = sortBeaconsByCompany();
+                            DataStore.beaconAllList = (ArrayList<Beacon>) databaseHelper.queryForAllBeacons();
+                            DataStore.registeredAndGroupedBeaconList = groupRegisteredBeaconsByCompany();
                             callBackSyncData.onSuccess();
                         } else {
                             Log.e(TAG, "beacon hash local != remote");
@@ -158,13 +164,13 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
         postParams.put("hash", spHashValue.getString("hashCompany", "empty"));
 
         ApiCaller.getInstance(getApplicationContext()).setAPI(DataStore.urlBase, urlPath, null, postParams, Request.Method.POST).exec(
-                new ApiCaller.VolleyCallback() {
+                new DefaultVolleyCallback() {
                     @Override
                     public void onDelivered(String result) {
                         Log.e(TAG, "resp check company hash: " + result);
                         if (result.equals("1")) {
                             Log.e(TAG, "company hash local == remote");
-                            DataStore.beaconInAllPlacesList = sortBeaconsByCompany();
+                            DataStore.beaconAllList = (ArrayList<Beacon>) databaseHelper.queryForAllBeacons();
                             callBackUpdateCompanySet.onSuccess();
                         } else {
                             Log.e(TAG, "company hash local != remote");
@@ -205,7 +211,8 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
             }
         }
         spHashValue.edit().putString("hashBeacon", remoteBeaconHash).apply();
-        DataStore.beaconInAllPlacesList = sortBeaconsByCompany();
+        DataStore.registeredAndGroupedBeaconList = groupRegisteredBeaconsByCompany();
+        DataStore.beaconAllList = (ArrayList<Beacon>) databaseHelper.queryForAllBeacons();
         Log.e(TAG, "update beacon info success");
         callBackSyncData.onSuccess();
     }
@@ -228,6 +235,9 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
         callBackUpdateCompanySet.onSuccess();
     }
 
+    public ArrayList<Beacon> getBeaconsWithAppIdParent(String idparent){
+        return (ArrayList<Beacon>) databaseHelper.queryForBeaconsWithAppIdParent(idparent);
+    }
 
     protected void saveUrlContent(String beaconUrl, String urlContent){ //save url content as local html file
         FileOutputStream outputStream;
@@ -290,12 +300,33 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
         }
     }
 
-    protected ArrayList<Beacon> sortBeaconsByCompany(){
-        String[] companyIds = databaseHelper.queryDistinct("idcompany");
+    // use registeredBeacon as input and return beacons grouped by companyid
+    protected ArrayList<Beacon> groupRegisteredBeaconsByCompany(){
+        ArrayList<Beacon> ungroupedRegisterdBeacons = getBeaconsWithAppIdParent(String.valueOf(idparent));
+        Map<String, ArrayList<Beacon>> groupedBeacons = new HashMap<String, ArrayList<Beacon>>();
+        for (Beacon beacon: ungroupedRegisterdBeacons) {
+            String key = beacon.getIdcompany();
+            if (groupedBeacons.get(key) == null) {
+                groupedBeacons.put(key, new ArrayList<Beacon>());
+            }
+            groupedBeacons.get(key).add(beacon);
+        }
 
-        //String[] companyNames = new String[companyAmount];
-        //for(int i = 0; i < companyAmount; i++)
-        //    companyNames[i] = databaseHelper.queryForOneCompany(companyIds[i]).getCompany();
+        ArrayList<Beacon> groupedBeaconsList = new ArrayList<>();
+        for(ArrayList<Beacon> beaconGroup : groupedBeacons.values()){
+            Beacon groupDivider = new Beacon(); // create a fake beacon as a group divider for different companies
+            String idCompany = (beaconGroup.get(0)).getIdcompany();
+            groupDivider.setIdcompany(idCompany);
+            groupDivider.setNickname("groupDivider");
+            groupedBeaconsList.add(groupDivider);
+            groupedBeaconsList.addAll(beaconGroup);
+        }
+
+        for(Beacon beacon : groupedBeaconsList)
+            Log.e(TAG, "groupRegisteredBeacon: " + beacon.getIdcompany() + ":" + beacon.getMajor() + "-" + beacon.getMinor());
+        return groupedBeaconsList;
+        /*
+        String[] companyIds = databaseHelper.queryDistinctBeaconTable("idcompany");
 
         if(companyIds.length > 0){
             ArrayList[] sortByCompany = new ArrayList[companyIds.length];
@@ -318,6 +349,7 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
             return finalResult;
         }else
             return null;
+        */
     }
 
     public void setAdapter(@NonNull T t){
@@ -348,13 +380,13 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
         return t;
     }
 
-
+    // this method is just for debug
     private void displayDetectedAndRegisteredBeaconsList(String step){
         StringBuilder stringBuilder = new StringBuilder();
         for(Beacon beacon : DataStore.detectedAndRegisteredBeaconList){
             stringBuilder.append(beacon.getMajor()).append("-").append(beacon.getMinor()).append("\n");
         }
-        Log.e(step + ":List", stringBuilder.toString());
+        Log.e(TAG, "D&R beacons: " + stringBuilder.toString());
     }
 
 
@@ -373,7 +405,7 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
             try {
                 ApplicationInfo appInfo = getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
                 idparent = appInfo.metaData.getInt("idparent");
-                Log.e("idparent", "" + idparent);
+                Log.e(TAG, "App idparent" + idparent);
             } catch (PackageManager.NameNotFoundException e) {
                 e.printStackTrace();
             }
@@ -404,7 +436,7 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
         }
 
         public ArrayList<Beacon> getBeaconInAllPlaces(){
-            return DataStore.beaconInAllPlacesList;
+            return DataStore.beaconAllList;
         }
 
         public ArrayList<Beacon> getBeaconDetected(){
@@ -415,14 +447,9 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
             return DataStore.detectedAndRegisteredBeaconList;
         }
 
-        // return beacons that (have same idparent as registered in this app && in proximity && in local db)
-        public ArrayList<Beacon> getMyBeaconsOnMap(){
-            ArrayList<Beacon> myBeaconsOnMap = new ArrayList<>();
-            for(Beacon beacon : DataStore.detectedAndRegisteredBeaconList){
-                if(Integer.parseInt(beacon.getRssi()) > rssiBorder)
-                    myBeaconsOnMap.add(beacon);
-            }
-            return myBeaconsOnMap;
+        // return beacons that (have same idparent as registered in this app)
+        public ArrayList<Beacon> getMyBeacons(){
+            return DataStore.registeredAndGroupedBeaconList;
         }
 
         public T getListAdapter(){

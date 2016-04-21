@@ -12,6 +12,7 @@ import android.util.Log;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
+import com.j256.ormlite.stmt.PreparedUpdate;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 
@@ -191,7 +192,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
      * @param beaconFromDetectedList
      * @return
      */
-    public Beacon queryForOneBeacon(Beacon beaconFromDetectedList){
+    public List<Beacon> queryBeacons(Beacon beaconFromDetectedList){
         try {
             if(beaconDao == null)
                 beaconDao = getBeaconDao();
@@ -199,14 +200,14 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
                     eq("major", beaconFromDetectedList.getMajor()).and().
                     eq("minor", beaconFromDetectedList.getMinor()).query();
             if(beaconWanted.size() > 0){
-                Log.e("queryOneBeacon", "in");
-                return beaconWanted.get(0);
+                Log.e(TAG, "queryBeacons: success");
+                return beaconWanted;
             }else {
-                Log.e("queryOneBeacon", "not in");
+                Log.e(TAG, "queryBeacons: not in local db");
                 return null;
             }
         }catch (SQLException e){
-            Log.e("queryOneBeacon", "error");
+            Log.e(TAG, "queryBeacons: error, " + e.toString());
             return null;
         }
     }
@@ -238,7 +239,18 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
         }
     }
 
-    public String[] queryDistinct(String columnName){
+    public List<Beacon> queryForBeaconsWithAppIdParent(String idparent){
+        try {
+            List<Beacon> beaconWithAppIdParent = beaconDao.queryBuilder().where().
+                    eq("idparent", idparent).query();
+            return beaconWithAppIdParent;
+        } catch (SQLException e){
+            Log.e("queryByCompany", e.toString());
+            return null;
+        }
+    }
+
+    public String[] queryDistinctBeaconTable(String columnName){
         try{
             List<Beacon> distinctSamples = beaconDao.queryBuilder().distinct().selectColumns(columnName).query();
             int resultsAmount = distinctSamples.size();
@@ -248,7 +260,6 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
             }
             return results;
         }catch (SQLException e) {
-            Log.e("queryDistinct", e.toString());
             return null;
         }
     }

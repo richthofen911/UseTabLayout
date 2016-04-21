@@ -10,7 +10,7 @@
     android:clickable="true">
 
     <TextView
-        android:id="@+id/tv_beacon_nearby_user_icon"
+        android:id="@+id/tv_beacon_places_icon"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:gravity="center"
@@ -20,38 +20,27 @@
         android:textSize="30sp"/>
 
     <TextView
-        android:id="@+id/tv_beacon_nearby_user_name"
+        android:id="@+id/tv_beacon_places_name"
         android:layout_width="wrap_content"
         android:layout_height="20dp"
-        android:layout_toEndOf="@id/tv_beacon_nearby_user_icon"
+        android:layout_toEndOf="@id/tv_beacon_places_icon"
         android:layout_marginLeft="15dp"
         android:gravity="center_vertical"
         android:text="Lumber"
         android:textColor="@android:color/black" />
 
     <TextView
-        android:id="@+id/tv_beacon_nearby_user_attributes"
+        android:id="@+id/tv_beacon_places_attributes"
         android:layout_width="wrap_content"
         android:layout_height="20dp"
-        android:layout_toEndOf="@id/tv_beacon_nearby_user_icon"
-        android:layout_below="@id/tv_beacon_nearby_user_name"
+        android:layout_toEndOf="@id/tv_beacon_places_icon"
+        android:layout_below="@id/tv_beacon_places_name"
         android:layout_marginLeft="15dp"
         android:gravity="center_vertical"
         android:text="major: 666 minor: 5" />
 
-    <!--
-    <ImageView
-        android:id="@+id/iv_arrow"
-        android:layout_width="30dp"
-        android:layout_height="match_parent"
-        android:layout_alignParentRight="true"
-        android:padding="3dp"
-        android:gravity="center"
-        android:scaleType="centerCrop"
-        android:background="@drawable/arrow"/>
-        -->
     <TextView
-        android:id="@+id/tv_arrow_places"
+        android:id="@+id/tv_places_arrow"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"

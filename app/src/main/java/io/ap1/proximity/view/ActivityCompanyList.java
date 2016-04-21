@@ -26,6 +26,7 @@ import io.ap1.libbeaconmanagement.Utils.ApiCaller;
 import io.ap1.libbeaconmanagement.Utils.CallBackSyncData;
 import io.ap1.libbeaconmanagement.Utils.DataStore;
 import io.ap1.libbeaconmanagement.Utils.DatabaseHelper;
+import io.ap1.libbeaconmanagement.Utils.DefaultVolleyCallback;
 import io.ap1.proximity.Constants;
 import io.ap1.proximity.R;
 import io.ap1.proximity.adapter.AdapterCompanyList;
@@ -66,7 +67,7 @@ public class ActivityCompanyList extends AppCompatActivity {
         Map<String, String> postParams = new HashMap<>();
         postParams.put("hash", hash);
         ApiCaller.getInstance(getApplicationContext()).setAPI(DataStore.urlBase, "/deleteCompany.php", null, postParams, Request.Method.POST)
-                .exec(new ApiCaller.VolleyCallback(){
+                .exec(new DefaultVolleyCallback(this, "Processing"){
                     @Override
                     public void onDelivered(String result){
                         Log.e(TAG, "onDelivered: " + result);
@@ -77,11 +78,10 @@ public class ActivityCompanyList extends AppCompatActivity {
                                     Log.e(TAG, "Service UpdateCompany: Connected");
                                     binderBeaconManagement = (ServiceBeaconManagement.BinderManagement) service;
 
-                                    final ProgressDialog progCheckCompany = ProgressDialog.show(ActivityCompanyList.this, "Updating Company Data", "Please wait", true);
-                                    binderBeaconManagement.getRemoteCompanyHash("/getAllCompanies_a.php", new CallBackSyncData() {
+                                    binderBeaconManagement.getRemoteCompanyHash("/getAllCompanies_a.php", new CallBackSyncData(ActivityCompanyList.this, "Updating Company Data") {
                                         @Override
                                         public void onSuccess() {
-                                            progCheckCompany.dismiss();
+                                            super.onSuccess();
                                             Toast.makeText(ActivityCompanyList.this, "The company has been deleted", Toast.LENGTH_SHORT).show();
                                             companyListData = (ArrayList)databaseHelper.queryForAllCompanies();
                                             adapterCompanyList.setDataSource(companyListData);
@@ -91,12 +91,11 @@ public class ActivityCompanyList extends AppCompatActivity {
 
                                         @Override
                                         public void onFailure(String cause) {
-                                            progCheckCompany.dismiss();
+                                            super.onFailure(cause);
                                             Toast.makeText(ActivityCompanyList.this, "Fail, " + cause, Toast.LENGTH_SHORT).show();
                                             Log.e(TAG, "Fail to update Company Data" + cause);
                                         }
                                     });
-                                    progCheckCompany.setCancelable(true);
                                 }
 
                                 @Override

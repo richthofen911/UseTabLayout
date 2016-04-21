@@ -4,22 +4,24 @@ import android.app.ProgressDialog;
 import android.content.Context;
 
 /**
- * Created by admin on 16/10/15.
+ * Created by admin on 20/04/16.
  */
-public class CallBackSyncData {
+public class DefaultVolleyCallback {
     private ProgressDialog progressDialog;
 
-    public CallBackSyncData(Context context, String message){
+    public DefaultVolleyCallback(){}
+
+    public DefaultVolleyCallback(Context context, String message){
         progressDialog = ProgressDialog.show(context, "", message, true );
         progressDialog.setCancelable(true);
     }
 
-    public void onSuccess(){
+    public void onDelivered(final String result){
         if(progressDialog != null)
             progressDialog.cancel();
     }
 
-    public void onFailure(String cause){
+    public void onException(final String e){
         if(progressDialog != null)
             progressDialog.cancel();
     }

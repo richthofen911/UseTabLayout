@@ -57,6 +57,8 @@ public class FragmentChat extends FragmentPreloadControl {
         Log.e(TAG, "onCreateView");
         View view = inflater.inflate(R.layout.fragment_chat, container, false);
 
+
+
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView_user_list);
         linearLayoutManager = new LinearLayoutManager(getContext().getApplicationContext());
 
@@ -64,6 +66,8 @@ public class FragmentChat extends FragmentPreloadControl {
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(((ActivityMain)getActivity()).adapterUserInList);
 
+        if(((ActivityMain)getActivity()).isReadyToDiscoverDevices)
+            ((ActivityMain)getActivity()).discoverDevices();
 
         return view;
     }

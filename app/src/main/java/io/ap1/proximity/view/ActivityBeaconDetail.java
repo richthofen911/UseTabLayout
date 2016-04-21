@@ -1,5 +1,6 @@
 package io.ap1.proximity.view;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -11,6 +12,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
+import com.google.gson.JsonObject;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +24,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import io.ap1.libbeaconmanagement.Utils.ApiCaller;
 import io.ap1.libbeaconmanagement.Utils.DataStore;
+import io.ap1.libbeaconmanagement.Utils.DefaultVolleyCallback;
 import io.ap1.proximity.R;
 
 public class ActivityBeaconDetail extends AppCompatActivity {
@@ -79,6 +85,8 @@ public class ActivityBeaconDetail extends AppCompatActivity {
     @Bind(R.id.et_beacon_detail_lng)
     EditText etBeaconDetailLng;
 
+    private String companyHash = "";
+
     public final static int INTENT_CODE_SELECT_COMPANY = 1;
 
     @Override
@@ -136,6 +144,7 @@ public class ActivityBeaconDetail extends AppCompatActivity {
             postParams.put("major", major);
             postParams.put("minor", minor);
             postParams.put("rssi", rssi);
+            postParams.put("hash", companyHash);
             if(!nickname.equals(""))
                 postParams.put("nickname", nickname);
             if(!macaddress.equals(""))
@@ -150,18 +159,25 @@ public class ActivityBeaconDetail extends AppCompatActivity {
                 postParams.put("urlfar", urlfar);
 
             ApiCaller.getInstance(getApplicationContext()).setAPI(DataStore.urlBase, "/addBeaconv5.php", null, postParams, Request.Method.POST)
-                    .exec(new ApiCaller.VolleyCallback(){
+                    .exec(new DefaultVolleyCallback(this, "Processing"){
                         @Override
                         public void onDelivered(String result){
+                            super.onDelivered(result);
                             Log.e(TAG, "onDelivered: " + result);
-                            if(result.equals("1")){
-                                Snackbar.make(v, "New Company Added", Snackbar.LENGTH_SHORT).show();
-                            }else if(result.equals("0")){
-                                Snackbar.make(v, "Company Existed Already", Snackbar.LENGTH_SHORT).show();
+                            try{
+                                JSONObject jsonObject = new JSONObject(result);
+                                if(jsonObject.getInt("success") == 1){
+                                    Snackbar.make(v, "New Beacon Added", Snackbar.LENGTH_SHORT).show();
+                                }
+                                else
+                                    Snackbar.make(v, "Beacon Existed Already", Snackbar.LENGTH_SHORT).show();
+                            }catch (JSONException e){
+                                Log.e(TAG, "AddBeacon request onDelivered: " + e.toString());
                             }
                         }
                         @Override
                         public void onException(final String e){
+                            super.onException(e);
                             Toast.makeText(ActivityBeaconDetail.this, e, Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -175,7 +191,7 @@ public class ActivityBeaconDetail extends AppCompatActivity {
                 if(resultCode == RESULT_OK){
                     String id = data.getStringExtra("id");
                     String companyName = data.getStringExtra("company");
-
+                    companyHash = data.getStringExtra("companyHash");
                     tvBeaconDetailCompanySelect.setText(companyName);
                 }
         }

@@ -34,19 +34,21 @@ public class ViewHolderCompanyList extends RecyclerView.ViewHolder{
         tvCompanyToBeSelected = (TextView) rootView.findViewById(R.id.tv_company_in_list_name);
         tvCompanyInfo = (TextView) rootView.findViewById(R.id.tv_company_in_list_info);
 
-        /*
+        // to select this company as the beacon's company value
         tvCompanyToBeSelected.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra("company", tvCompanyToBeSelected.getText().toString());
                 resultIntent.putExtra("id", id);
+                resultIntent.putExtra("companyHash", hash);
                 Activity hostActivity = (ActivityCompanyList)v.getContext();
                 hostActivity.setResult(hostActivity.RESULT_OK, resultIntent);
                 hostActivity.finish();
             }
         });
-        */
+
+        // to delete
         tvCompanyToBeSelected.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(final View v) {

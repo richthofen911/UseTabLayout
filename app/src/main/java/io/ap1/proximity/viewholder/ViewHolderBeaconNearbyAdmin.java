@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import io.ap1.proximity.Constants;
 import io.ap1.proximity.R;
 import io.ap1.proximity.view.ActivityBeaconDetail;
 import io.ap1.proximity.view.ActivityMain;
@@ -17,7 +18,6 @@ import io.ap1.proximity.view.ActivityMain;
 public class ViewHolderBeaconNearbyAdmin extends RecyclerView.ViewHolder{
 
     public int selfPosition;
-
 
     public TextView tvBeaconNearbyAdminName;
     public TextView tvBeaconNearbyUserAttributes;
@@ -47,8 +47,9 @@ public class ViewHolderBeaconNearbyAdmin extends RecyclerView.ViewHolder{
                 intent.putExtra("major", major);
                 intent.putExtra("minor", minor);
                 intent.putExtra("rssi", rssi);
-
                 context.startActivity(intent);
+
+                //((ActivityMain)context).startActivityForResult(intent, Constants.INTENT_REQUEST_CODE_ADD_BEACON);
             }
         });
 

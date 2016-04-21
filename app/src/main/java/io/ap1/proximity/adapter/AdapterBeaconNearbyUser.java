@@ -7,8 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
-
 import io.ap1.libbeaconmanagement.Beacon;
 import io.ap1.libbeaconmanagement.Utils.DataStore;
 import io.ap1.libbeaconmanagement.Utils.DatabaseHelper;
@@ -36,12 +34,11 @@ public class AdapterBeaconNearbyUser extends RecyclerView.Adapter<ViewHolderBeac
         return new ViewHolderBeaconNearbyUser(view);
     }
 
-
     @Override
     public void onBindViewHolder(ViewHolderBeaconNearbyUser viewHolder, final int position){
         beaconTmp = DataStore.detectedAndRegisteredBeaconList.get(position);
-
-        String title = databaseHelper.queryForOneCompany(beaconTmp.getIdcompany()).getCompany();
+        String companyId = beaconTmp.getIdcompany();
+        String title = databaseHelper.queryForOneCompany(companyId).getCompany();
         title = title.substring(0, 1);
         viewHolder.tvBeaconNearbyUserIcon.setText(title);
         viewHolder.tvBeaconNearbyUserIcon.setBackgroundColor(Color.parseColor("#" + databaseHelper.queryForOneCompany(beaconTmp.getIdcompany()).getColor()));
@@ -49,14 +46,13 @@ public class AdapterBeaconNearbyUser extends RecyclerView.Adapter<ViewHolderBeac
         String attr = Constants.MAJOR + beaconTmp.getMinor() + Constants.MINOR + beaconTmp.getMinor();
         viewHolder.tvBeaconNearbyUserAttributes.setText(attr);
         if(Integer.parseInt(beaconTmp.getRssi()) > rssiBorder){
-            viewHolder.tvBeaconNearbyUserInProximity.setText("Nearby");
+            viewHolder.tvBeaconNearbyUserIsNearby.setText("Nearby");
             viewHolder.url = (beaconTmp.getUrlnear());
         }
         else{
-            viewHolder.tvBeaconNearbyUserInProximity.setText("Not in proximity");
+            viewHolder.tvBeaconNearbyUserIsNearby.setText("Not in proximity");
             viewHolder.url = (beaconTmp.getUrlfar());
         }
-
     }
 
     @Override

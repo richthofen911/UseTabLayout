@@ -34,7 +34,6 @@ public class FragmentPlaces extends FragmentPreloadControl {
 
         toolbar = ((ActivityMain)getActivity()).toolbar;
 
-
         recyclerViewBeaconPlaces = (RecyclerView) view.findViewById(R.id.recyclerView_beacon_places);
         linearLayoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
         recyclerViewBeaconPlaces.setLayoutManager(linearLayoutManager);

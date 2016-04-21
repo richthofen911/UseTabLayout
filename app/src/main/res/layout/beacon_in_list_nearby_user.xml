@@ -10,7 +10,7 @@
     android:clickable="true">
 
     <TextView
-        android:id="@+id/tv_beacon_nearby_user_icon"
+        android:id="@+id/tv_beacon_places_icon"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:gravity="center"
@@ -20,10 +20,10 @@
         android:textSize="30sp"/>
 
     <TextView
-        android:id="@+id/tv_beacon_nearby_user_name"
+        android:id="@+id/tv_beacon_places_name"
         android:layout_width="wrap_content"
         android:layout_height="20dp"
-        android:layout_toEndOf="@id/tv_beacon_nearby_user_icon"
+        android:layout_toEndOf="@id/tv_beacon_places_icon"
         android:layout_marginLeft="7dp"
         android:gravity="center_vertical"
         android:text="Lumber"
@@ -32,27 +32,27 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="20dp"
-        android:layout_toEndOf="@id/tv_beacon_nearby_user_name"
+        android:layout_toEndOf="@id/tv_beacon_places_name"
         android:layout_marginLeft="4dp"
         android:gravity="center_vertical"
         android:text="| Registered"/>
 
     <TextView
-        android:id="@+id/tv_beacon_nearby_in_proximity"
+        android:id="@+id/tv_beacon_nearby_user_is_nearby"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/tv_beacon_nearby_user_name"
+        android:layout_below="@id/tv_beacon_places_name"
         android:layout_marginLeft="7dp"
-        android:layout_toEndOf="@id/tv_beacon_nearby_user_icon"
+        android:layout_toEndOf="@id/tv_beacon_places_icon"
         android:gravity="center_vertical"
         android:text="Not in proximity"/>
 
     <TextView
-        android:id="@+id/tv_beacon_nearby_user_attributes"
+        android:id="@+id/tv_beacon_places_attributes"
         android:layout_width="wrap_content"
         android:layout_height="20dp"
-        android:layout_toEndOf="@id/tv_beacon_nearby_in_proximity"
-        android:layout_below="@id/tv_beacon_nearby_user_name"
+        android:layout_toEndOf="@id/tv_beacon_nearby_user_is_nearby"
+        android:layout_below="@id/tv_beacon_places_name"
         android:layout_marginLeft="4dp"
         android:gravity="center_vertical"
         android:text="| major: 666 minor: 5" />
@@ -64,7 +64,7 @@
         android:layout_alignParentRight="true"
         android:gravity="center"
         android:scaleType="centerCrop"
-        android:text="》"
+        android:text=">"
         android:textColor="@color/light_blue"
         android:textSize="30sp"
         />

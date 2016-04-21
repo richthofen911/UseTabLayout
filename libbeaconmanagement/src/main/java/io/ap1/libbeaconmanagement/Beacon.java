@@ -23,8 +23,6 @@ public class Beacon implements Comparable<Beacon>{
     private final String RSSI = "rssi";
     private final String ACCURACY = "accuracy";
     private final String IDCOMPANY = "idcompany";
-    private final String COMPANYNAME = "companyname";
-    private final String COLOR = "color";
     private final String MACADDRESS = "macaddress";
     private final String IDPARENT = "idparent";
 
@@ -58,8 +56,7 @@ public class Beacon implements Comparable<Beacon>{
     private String accuracy;
     @DatabaseField(useGetSet = true, columnName = IDCOMPANY)
     private String idcompany;
-    @DatabaseField(useGetSet = true, columnName = COMPANYNAME)
-
+    @DatabaseField(useGetSet = true, columnName = MACADDRESS)
     private String macaddress;
     @DatabaseField(useGetSet = true, columnDefinition = IDPARENT)
     private String idparent;

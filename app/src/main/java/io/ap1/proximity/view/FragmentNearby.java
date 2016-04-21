@@ -16,7 +16,6 @@ import io.ap1.proximity.R;
 public class FragmentNearby extends FragmentPreloadControl {
 
     private static final String TAG = "FragmentNearbyUser";
-    //private AdapterBeaconNearbyUser adapterBeaconNearbyUser;
     private RecyclerView recyclerViewBeaconNearby;
     private LinearLayoutManager linearLayoutManager;
     private Toolbar toolbar;
@@ -38,6 +37,7 @@ public class FragmentNearby extends FragmentPreloadControl {
         linearLayoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
         recyclerViewBeaconNearby.setLayoutManager(linearLayoutManager);
         recyclerViewBeaconNearby.setHasFixedSize(true);
+        recyclerViewBeaconNearby.setAdapter(((ActivityMain)getActivity()).adapterBeaconNearbyUser);
 
         return view;
     }
@@ -58,14 +58,15 @@ public class FragmentNearby extends FragmentPreloadControl {
                 String hiddenPermission = tvToolbarEnd.getText().toString();
                 // hiddenPermission equals to User means current permission is Admin
                 if(hiddenPermission.equals("User")){
-                    // swap to permission User
                     tvToolbarEnd.setText("Admin");
-                    recyclerViewBeaconNearby.swapAdapter(((ActivityMain)getActivity()).adapterBeaconNearbyUser, true);
-                }else if(hiddenPermission.equals("Admin")){
-                    // which means current permission is User
+                    // swap to permission User
+                    recyclerViewBeaconNearby.setAdapter(null);
+                    recyclerViewBeaconNearby.setAdapter(((ActivityMain)getActivity()).adapterBeaconNearbyUser);
+                }else if(hiddenPermission.equals("Admin")){ // which means current permission is User
                     tvToolbarEnd.setText("User");
                     // swap to permission Admin
-                    recyclerViewBeaconNearby.swapAdapter(((ActivityMain)getActivity()).adapterBeaconNearbyAdmin, true);
+                    recyclerViewBeaconNearby.setAdapter(null);
+                    recyclerViewBeaconNearby.setAdapter(((ActivityMain)getActivity()).adapterBeaconNearbyAdmin);
                 }else {
                     Toast.makeText(getContext(), "Role error", Toast.LENGTH_SHORT).show();
                 }
@@ -78,10 +79,5 @@ public class FragmentNearby extends FragmentPreloadControl {
         Log.e(TAG, "onInvisible");
         if(tvToolbarEnd != null)
             tvToolbarEnd.setVisibility(View.GONE);
-        //if (toolbar != null)
-
-        //    toolbar.removeView(connect);
     }
-
-
 }

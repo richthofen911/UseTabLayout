@@ -88,7 +88,6 @@ public class FragmentMap extends FragmentPreloadControl implements OnMapReadyCal
         googleMap = map;
 
         tvMapMyBeacons.callOnClick();
-
     }
 
     private void setUpMap() {
@@ -249,7 +248,7 @@ public class FragmentMap extends FragmentPreloadControl implements OnMapReadyCal
                 tvMapAllBeacons.setPadding(15, 3, 15, 3);
                 tvMapAllBeacons.setTextColor(Color.WHITE);
 
-                reloadMarkers(((ActivityMain) getActivity()).binderBeaconManagement.getMyBeaconsOnMap());
+                reloadMarkers(((ActivityMain) getActivity()).binderBeaconManagement.getMyBeacons());
                 setUpMap();
             }
         });
@@ -265,7 +264,7 @@ public class FragmentMap extends FragmentPreloadControl implements OnMapReadyCal
                 tvMapMyBeacons.setPadding(15, 3, 15, 3);
                 tvMapMyBeacons.setTextColor(Color.WHITE);
 
-                reloadMarkers(DataStore.beaconInAllPlacesList);
+                reloadMarkers(DataStore.beaconAllList);
                 setUpMap();
             }
         });

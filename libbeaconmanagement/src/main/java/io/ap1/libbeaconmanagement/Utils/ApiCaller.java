@@ -31,9 +31,11 @@ public class   ApiCaller {
     private int requestMethod; //Request.Method.GET is an int
     private Map<String, String> postParams; //this is for POST request
     private StringRequest requestCallAPI;
+    private Context context;
 
     ApiCaller(Context context){
         this.requestQueue = Volley.newRequestQueue(context);
+        this.context = context;
     }
 
     public static synchronized ApiCaller getInstance(Context context){
@@ -65,12 +67,7 @@ public class   ApiCaller {
         return this;
     }
 
-    public interface VolleyCallback{
-        void onDelivered(final String result);
-        void onException(final String e);
-    }
-
-    public void exec(final VolleyCallback callback){
+    public void exec(final DefaultVolleyCallback callback){
         if(APIUrlEncoded == null){
             callback.onDelivered("API has not been set yet");
         }else {

@@ -1,7 +1,6 @@
 package io.ap1.proximity.view;
 
 import android.Manifest;
-import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -60,9 +59,7 @@ import io.ap1.proximity.adapter.AdapterUserInList;
 public class ActivityMain extends AppCompatActivity{
     private static final String TAG = "ActivityMain";
 
-    public static Intent intentShowBeaconUrlContent;
-    public static Intent intentShowBeaconDetails;
-
+    // this is just for debugging the user adapter notify() method
     public static RecyclerView.AdapterDataObserver adapterDataObserver = new RecyclerView.AdapterDataObserver() {
         @Override
         public void onItemRangeChanged(int positionStart, int itemCount, Object payload) {
@@ -101,6 +98,7 @@ public class ActivityMain extends AppCompatActivity{
     String btNameOrigin = "unknown";
     private String myProximityDeviceName;
     private BroadcastReceiver mReceiver;
+    public boolean isReadyToDiscoverDevices = false; // to find other users, not beacons
 
     public AdapterUserInList adapterUserInList;
 
@@ -168,7 +166,6 @@ public class ActivityMain extends AppCompatActivity{
                         binderMsgCenter.getUserObjectByObjectId(getTargetUserObjectId(detectedDeviceName));
                     }
                 } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                    //discoverDevices();
                     Log.e("device discovery", "finished");
                 }
             }
@@ -183,38 +180,34 @@ public class ActivityMain extends AppCompatActivity{
 
                 binderBeaconManagement.setListAdapter(adapterBeaconNearbyUser);
 
-                final ProgressDialog progCheckCompany = android.app.ProgressDialog.show(ActivityMain.this, "Update Company Data", "Please wait", true);
-                binderBeaconManagement.getRemoteCompanyHash("/getAllCompanies_a.php", new CallBackSyncData() {
+
+                binderBeaconManagement.getRemoteCompanyHash("/getAllCompanies_a.php", new CallBackSyncData(ActivityMain.this, "Updating Company Data") {
                     @Override
                     public void onSuccess() {
-                        progCheckCompany.dismiss();
+                        super.onSuccess();
 
-                        final ProgressDialog progressDialog = android.app.ProgressDialog.show(ActivityMain.this, "Update Beacon Data", "Please Wait", true);
-                        binderBeaconManagement.getRemoteBeaconHash("/getAllBeaconsv5_a.php", new CallBackSyncData() {
+                        binderBeaconManagement.getRemoteBeaconHash("/getAllBeaconsv5_a.php", new CallBackSyncData(ActivityMain.this, "Updating Beacon Data") {
                             @Override
                             public void onSuccess() {
-                                progressDialog.dismiss();
+                                super.onSuccess();
                                 startScanning();
                             }
 
                             @Override
                             public void onFailure(String cause) {
-                                progressDialog.dismiss();
+                                super.onFailure(cause);
                                 Toast.makeText(ActivityMain.this, cause, Toast.LENGTH_SHORT).show();
                                 Log.e("update beacon hash err", cause);
                             }
                         });
-                        progressDialog.setCancelable(true);
                     }
 
                     @Override
                     public void onFailure(String cause) {
-                        progCheckCompany.dismiss();
                         Toast.makeText(ActivityMain.this, cause, Toast.LENGTH_SHORT).show();
                         Log.e("update company data err", cause);
                     }
                 });
-                progCheckCompany.setCancelable(true);
             }
 
             @Override
@@ -231,7 +224,7 @@ public class ActivityMain extends AppCompatActivity{
 
                 binderMsgCenter.setMyAdapterUserInList(adapterUserInList);
                 registerMyReceiver(ActivityMain.this);
-                discoverDevices();
+                isReadyToDiscoverDevices = true;
                 binderMsgCenter.setSubChannel("proximity_" + myUserObjectId);
                 binderMsgCenter.setPubsubProviderClient(myPubsubProviderClient);
                 binderMsgCenter.setPubsubCallback(appPubsubCallback);
@@ -286,9 +279,6 @@ public class ActivityMain extends AppCompatActivity{
                 viewPager.setCurrentItem(tab.getPosition());
             }
         });
-
-        intentShowBeaconUrlContent = new Intent(ActivityMain.this, ActivityBeaconUrlContent.class);
-        intentShowBeaconUrlContent = new Intent(ActivityMain.this, ActivityBeaconDetail.class);
     }
 
     private void getUserData(){
@@ -365,7 +355,7 @@ public class ActivityMain extends AppCompatActivity{
         }
     }
 
-    private void discoverDevices(){
+    public void discoverDevices(){
         if(!mBluetoothAdapter.isDiscovering())
             mBluetoothAdapter.startDiscovery();
     }
@@ -423,7 +413,6 @@ public class ActivityMain extends AppCompatActivity{
             binderMsgCenter.unsubAll();
             unbindService(connChat);
         }
-
     }
 
     public void startScanning(){
@@ -444,6 +433,22 @@ public class ActivityMain extends AppCompatActivity{
     public void updateBeaconSet(String apiPath, CallBackSyncData callBackSyncData){
         if(binderBeaconManagement != null && binderBeaconManagement.isBinderAlive())
             binderBeaconManagement.getRemoteBeaconHash(apiPath, callBackSyncData);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.e(TAG, "onActivityResult: ");
+        switch (requestCode){
+            case Constants.INTENT_REQUEST_CODE_AD_BEACON:
+                if(resultCode == RESULT_OK){
+                    updateBeaconSet("/getAllBeaconsv5_a.php", new CallBackSyncData(ActivityMain.this, "Updating Beacon Data") {
+                        @Override
+                        public void onSuccess() {
+                            super.onSuccess();
+                        }
+                    });
+                }
+        }
     }
 
     @Override
