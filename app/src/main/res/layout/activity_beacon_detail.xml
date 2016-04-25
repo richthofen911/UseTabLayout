@@ -16,12 +16,12 @@
         app:title="@string/app_name"
         app:titleTextColor="@android:color/white">
         <TextView
-            android:id="@+id/tv_toobar_beacon_add"
+            android:id="@+id/tv_toolbar_beacon_action"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:layout_marginEnd="15dp"
-            android:onClick="onAddClicked"
+            android:onClick="onActionClicked"
             android:text="Add"
             android:textColor="@android:color/white"
             android:textSize="18sp"/>

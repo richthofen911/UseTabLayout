@@ -264,7 +264,7 @@ public class FragmentMap extends FragmentPreloadControl implements OnMapReadyCal
                 tvMapMyBeacons.setPadding(15, 3, 15, 3);
                 tvMapMyBeacons.setTextColor(Color.WHITE);
 
-                reloadMarkers(DataStore.beaconAllList);
+                reloadMarkers(((ActivityMain) getActivity()).binderBeaconManagement.getBeaconInAllPlaces());
                 setUpMap();
             }
         });

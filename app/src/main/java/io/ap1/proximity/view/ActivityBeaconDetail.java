@@ -1,6 +1,5 @@
 package io.ap1.proximity.view;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -12,7 +11,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.google.gson.JsonObject;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,6 +28,8 @@ import io.ap1.proximity.R;
 public class ActivityBeaconDetail extends AppCompatActivity {
     public final static String TAG = "ActivityBeaconDetail";
 
+    @Bind(R.id.tv_toolbar_beacon_action)
+    TextView tvToolbarBeaconAction;
     @Bind(R.id.tv_beacon_detail_nickName)
     TextView tvBeaconDetailNickName;
     @Bind(R.id.et_beacon_detail_nickName)
@@ -89,6 +89,9 @@ public class ActivityBeaconDetail extends AppCompatActivity {
 
     public final static int INTENT_CODE_SELECT_COMPANY = 1;
 
+    private String addOrDel;
+    private String beaconId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,6 +111,12 @@ public class ActivityBeaconDetail extends AppCompatActivity {
         String detectedRssi = intent.getStringExtra("rssi");
         if(detectedRssi != null)
             etBeaconDetailRssi.setText(detectedRssi);
+        beaconId = intent.getStringExtra("id");
+        addOrDel = intent.getStringExtra("addOrDel");
+        if(addOrDel.equals("add"))
+            tvToolbarBeaconAction.setText("Add");
+        if(addOrDel.equals("del"))
+            tvToolbarBeaconAction.setText("REMOVE");
 
         etBeaconDetailUrlNear.setText(R.string.default_beacon_url);
         etBeaconDetailUrlFar.setText(R.string.default_beacon_url);
@@ -122,43 +131,76 @@ public class ActivityBeaconDetail extends AppCompatActivity {
         });
     }
 
-    public void onAddClicked(final View v){
-        // --- required params
-        String uuid = etBeaconDetailUuid.getText().toString();
-        String major = etBeaconDetailMajor.getText().toString();
-        String minor = etBeaconDetailMinor.getText().toString();
-        String rssi = etBeaconDetailRssi.getText().toString();
-        // --- optional params
-        String nickname = etBeaconDetailNickName.getText().toString();
-        String macaddress = etBeaconDetailMacAddress.getText().toString();
-        String lat = etBeaconDetailLat.getText().toString();
-        String lng = etBeaconDetailLng.getText().toString();
-        String urlnear = etBeaconDetailUrlNear.getText().toString();
-        String urlfar = etBeaconDetailUrlFar.getText().toString();
+    public void onActionClicked(final View v){
+        Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT).show();
+        if(((TextView) v).getText().toString().equals("ADD")){
+            // --- required params
+            String uuid = etBeaconDetailUuid.getText().toString();
+            String major = etBeaconDetailMajor.getText().toString();
+            String minor = etBeaconDetailMinor.getText().toString();
+            String rssi = etBeaconDetailRssi.getText().toString();
+            // --- optional params
+            String nickname = etBeaconDetailNickName.getText().toString();
+            String macaddress = etBeaconDetailMacAddress.getText().toString();
+            String lat = etBeaconDetailLat.getText().toString();
+            String lng = etBeaconDetailLng.getText().toString();
+            String urlnear = etBeaconDetailUrlNear.getText().toString();
+            String urlfar = etBeaconDetailUrlFar.getText().toString();
 
-        if(uuid.equals("")||major.equals("")||minor.equals("")||rssi.equals(""))
-            Toast.makeText(this, "UUID/Major/Minor/Rssi cannot be empty", Toast.LENGTH_SHORT).show();
-        else {
+            if(uuid.equals("")||major.equals("")||minor.equals("")||rssi.equals(""))
+                Toast.makeText(this, "UUID/Major/Minor/Rssi cannot be empty", Toast.LENGTH_SHORT).show();
+            else {
+                Map<String, String> postParams = new HashMap<>();
+                postParams.put("uuid", urlfar);
+                postParams.put("major", major);
+                postParams.put("minor", minor);
+                postParams.put("rssi", rssi);
+                postParams.put("hash", companyHash);
+                if(!nickname.equals(""))
+                    postParams.put("nickname", nickname);
+                if(!macaddress.equals(""))
+                    postParams.put("macaddress", macaddress);
+                if(!lat.equals(""))
+                    postParams.put("lat", lat);
+                if(!lng.equals(""))
+                    postParams.put("long", lng);
+                if(!urlnear.equals(""))
+                    postParams.put("urlnear", urlnear);
+                if(!urlfar.equals(""))
+                    postParams.put("urlfar", urlfar);
+
+                ApiCaller.getInstance(getApplicationContext()).setAPI(DataStore.urlBase, "/addBeaconv5.php", null, postParams, Request.Method.POST)
+                        .exec(new DefaultVolleyCallback(this, "Processing"){
+                            @Override
+                            public void onDelivered(String result){
+                                super.onDelivered(result);
+                                Log.e(TAG, "onDelivered: " + result);
+                                try{
+                                    JSONObject jsonObject = new JSONObject(result);
+                                    if(jsonObject.getInt("success") == 1){
+                                        Snackbar.make(v, "New Beacon Added", Snackbar.LENGTH_SHORT).show();
+                                        Intent resultIntent = new Intent();
+                                        setResult(RESULT_OK, resultIntent);
+                                        finish();
+                                    }
+                                    else
+                                        Snackbar.make(v, "Beacon Existed Already", Snackbar.LENGTH_SHORT).show();
+                                }catch (JSONException e){
+                                    Log.e(TAG, "AddBeacon request onDelivered: " + e.toString());
+                                }
+                            }
+                            @Override
+                            public void onException(final String e){
+                                super.onException(e);
+                                Toast.makeText(ActivityBeaconDetail.this, e, Toast.LENGTH_SHORT).show();
+                            }
+                        });
+            }
+        }else if(((TextView) v).getText().toString().equals("REMOVE")){
             Map<String, String> postParams = new HashMap<>();
-            postParams.put("uuid", urlfar);
-            postParams.put("major", major);
-            postParams.put("minor", minor);
-            postParams.put("rssi", rssi);
-            postParams.put("hash", companyHash);
-            if(!nickname.equals(""))
-                postParams.put("nickname", nickname);
-            if(!macaddress.equals(""))
-                postParams.put("macaddress", macaddress);
-            if(!lat.equals(""))
-                postParams.put("lat", lat);
-            if(!lng.equals(""))
-                postParams.put("long", lng);
-            if(!urlnear.equals(""))
-                postParams.put("urlnear", urlnear);
-            if(!urlfar.equals(""))
-                postParams.put("urlfar", urlfar);
-
-            ApiCaller.getInstance(getApplicationContext()).setAPI(DataStore.urlBase, "/addBeaconv5.php", null, postParams, Request.Method.POST)
+            Log.e(TAG, "onActionClicked: beaconid, " + beaconId);
+            postParams.put("id", beaconId);
+            ApiCaller.getInstance(getApplicationContext()).setAPI(DataStore.urlBase, "/deleteBeaconv4.php", null, postParams, Request.Method.POST)
                     .exec(new DefaultVolleyCallback(this, "Processing"){
                         @Override
                         public void onDelivered(String result){
@@ -167,12 +209,15 @@ public class ActivityBeaconDetail extends AppCompatActivity {
                             try{
                                 JSONObject jsonObject = new JSONObject(result);
                                 if(jsonObject.getInt("success") == 1){
-                                    Snackbar.make(v, "New Beacon Added", Snackbar.LENGTH_SHORT).show();
+                                    Snackbar.make(v, "Beacon Deleted", Snackbar.LENGTH_SHORT).show();
+                                    Intent resultIntent = new Intent();
+                                    setResult(RESULT_OK, resultIntent);
+                                    finish();
                                 }
                                 else
-                                    Snackbar.make(v, "Beacon Existed Already", Snackbar.LENGTH_SHORT).show();
+                                    Snackbar.make(v, "Fail to delete the beacon", Snackbar.LENGTH_SHORT).show();
                             }catch (JSONException e){
-                                Log.e(TAG, "AddBeacon request onDelivered: " + e.toString());
+                                Log.e(TAG, "delete beacon request onDelivered: " + e.toString());
                             }
                         }
                         @Override

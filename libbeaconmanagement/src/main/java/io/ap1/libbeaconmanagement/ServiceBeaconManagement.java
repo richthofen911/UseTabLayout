@@ -75,7 +75,7 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
     }
 
     @Override
-    protected void actionOnEnterAp1Beacon(Beacon ap1Beacon){
+    protected synchronized void actionOnEnterAp1Beacon(Beacon ap1Beacon){
         List<Beacon> beaconQueried = databaseHelper.queryBeacons(ap1Beacon);
         if(beaconQueried != null){
             // if beaconQueried is in local db, add it to detected&registerd list
@@ -84,14 +84,17 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
                 if(beacon.getIdparent().equals(String.valueOf(idparent))){
                     Log.e(TAG, "actionOnEnterAp1Beacon: idparent match: " + idparent);
                     String nickname = beacon.getNickname();
-                    if(nickname != null && !nickname.equals(""))
-                        ap1Beacon.setNickname(nickname);
+                    if(nickname == null)
+                        beacon.setNickname("");
                     else
-                        ap1Beacon.setNickname("Inactive");
-                    ap1Beacon.setUrlfar(beacon.getUrlfar());
-                    ap1Beacon.setUrlnear(beacon.getUrlnear());
+                        beacon.setNickname(nickname);
+                    beacon.setUrlfar(beacon.getUrlfar());
+                    beacon.setUrlnear(beacon.getUrlnear());
                     addToDetectedAndRegisteredList(DataStore.detectedAndRegisteredBeaconList.size(), beacon);
+                }else{
+                    beacon.setNickname("Inactive");
                 }
+                addToDetectedList(DataStore.detectedBeaconList.size(), beacon);
             }
         }else
             ap1Beacon.setNickname("Inactive");
@@ -259,7 +262,7 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
     }
 
     protected void addToDetectedList(int position, Beacon newBeacon) {
-        DataStore.detectedBeaconList.add(position, newBeacon);
+        DataStore.detectedBeaconList.add(newBeacon);
         Log.e("new detected beacon", "added");
 
         Log.e("adapter type", currentAdapter);
@@ -273,7 +276,7 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
     }
 
     protected void addToDetectedAndRegisteredList(int position, Beacon newBeacon){
-        DataStore.detectedAndRegisteredBeaconList.add(position, newBeacon);
+        DataStore.detectedAndRegisteredBeaconList.add(newBeacon);
         Log.e("new registered beacon", "added");
 
         if(currentAdapter.equals(adapterTypeUser))
@@ -325,31 +328,6 @@ public class ServiceBeaconManagement<T extends RecyclerView.Adapter> extends Ser
         for(Beacon beacon : groupedBeaconsList)
             Log.e(TAG, "groupRegisteredBeacon: " + beacon.getIdcompany() + ":" + beacon.getMajor() + "-" + beacon.getMinor());
         return groupedBeaconsList;
-        /*
-        String[] companyIds = databaseHelper.queryDistinctBeaconTable("idcompany");
-
-        if(companyIds.length > 0){
-            ArrayList[] sortByCompany = new ArrayList[companyIds.length];
-            int sortArrayLength = sortByCompany.length;
-            for(int i = 0; i < sortArrayLength; i++)
-                // each element in sortByCompany is an arrayList with beacons having the same idcompany
-                sortByCompany[i] = (ArrayList) databaseHelper.queryForBeaconsByCompanyId(companyIds[i]);
-
-            ArrayList<Beacon> finalResult = new ArrayList<>();
-            for(ArrayList byOneCompany : sortByCompany){
-                if(byOneCompany.size() > 0){ // if this company has beacons
-                    Beacon groupDivider = new Beacon(); // create a fake beacon as a group divider for different companies
-                    groupDivider.setIdcompany(((Beacon) byOneCompany.get(0)).getIdcompany());
-                    groupDivider.setNickname("groupDivider");
-                    finalResult.add(groupDivider);
-                    finalResult.addAll(byOneCompany);
-                    byOneCompany.clear(); // release the arraylist for memory
-                }
-            }
-            return finalResult;
-        }else
-            return null;
-        */
     }
 
     public void setAdapter(@NonNull T t){

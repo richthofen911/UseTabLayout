@@ -25,15 +25,25 @@ public class AdapterBeaconNearbyAdmin extends RecyclerView.Adapter<ViewHolderBea
     @Override
     public void onBindViewHolder(ViewHolderBeaconNearbyAdmin viewHolder, final int position){
         beaconTmp = DataStore.detectedBeaconList.get(position);
-
-        viewHolder.tvBeaconNearbyAdminName.setText(beaconTmp.getNickname());
+        String nickname = beaconTmp.getNickname();
+        if(nickname == null)
+            nickname = "Inactive";
+        if(!nickname.equals("Inactive")){
+            viewHolder.tvArrowNearbyAdmin.setVisibility(View.GONE);
+            viewHolder.ivBeaconNearbyAdminInfo.setVisibility(View.VISIBLE);
+            if(Integer.parseInt(beaconTmp.getRssi()) < 70)
+                viewHolder.tvBeaconNearbyAdminStatus.setText("| Registered & In Location");
+            else
+                viewHolder.tvBeaconNearbyAdminStatus.setText("| Registered");
+        }
+        viewHolder.tvBeaconNearbyAdminName.setText(nickname);
         String attrs = Constants.MAJOR + beaconTmp.getMajor() + (Constants.MINOR) + beaconTmp.getMinor();
         viewHolder.tvBeaconNearbyUserAttributes.setText(attrs);
-
         viewHolder.uuid = beaconTmp.getUuid();
         viewHolder.major = beaconTmp.getMajor();
         viewHolder.minor = beaconTmp.getMinor();
         viewHolder.rssi = beaconTmp.getRssi();
+        viewHolder.beaconId = beaconTmp.getId();
 
         viewHolder.selfPosition = position;
     }

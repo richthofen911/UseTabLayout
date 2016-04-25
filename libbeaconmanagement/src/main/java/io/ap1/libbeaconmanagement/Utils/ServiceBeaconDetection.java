@@ -246,6 +246,7 @@ public class ServiceBeaconDetection extends OrmLiteBaseService<DatabaseHelper> i
             detectedBeacon.setUuid(recoBeacon.getProximityUuid());
             detectedBeacon.setMajor(String.valueOf(recoBeacon.getMajor()));
             detectedBeacon.setMinor(String.valueOf(recoBeacon.getMinor()));
+            //Log.e(TAG, "inOut: new detected Rssi: " + recoBeacon.getRssi());
             detectedBeacon.setRssi(String.valueOf(recoBeacon.getRssi()));
 
             for(int i = 0; i < DataStore.detectedBeaconList.size(); i++){
@@ -254,7 +255,12 @@ public class ServiceBeaconDetection extends OrmLiteBaseService<DatabaseHelper> i
                     isNewDetected = false;
                     //Log.e("beacon in list", "already");
                     // if absolute value > 3, determine the rssi has changed
-                    if(Math.abs(Integer.parseInt(detectedBeacon.getRssi()) - Integer.parseInt(beaconInDetectedList.getRssi())) > 3){
+
+                    String rssiThisTime = detectedBeacon.getRssi();
+                    String rssiLastTime = beaconInDetectedList.getRssi();
+                    if(rssiLastTime.equals(""))
+                        rssiLastTime = "-60";
+                    if(Math.abs(Integer.parseInt(rssiThisTime) - Integer.parseInt(rssiLastTime)) > 3){
                         //Log.e("but rssi", "has changed, need to resort list");
                         actionOnRssiChanged(i, detectedBeacon.getRssi());
                     }
@@ -262,7 +268,6 @@ public class ServiceBeaconDetection extends OrmLiteBaseService<DatabaseHelper> i
                 }
             }
             if(isNewDetected){
-                //Log.e("new detected beacon", recoBeacon.getMajor() + "::" + recoBeacon.getMinor() + "");
                 actionOnEnterAp1Beacon(detectedBeacon);
             }
             isNewDetected = true;  // reset isNewDetected flag to true;
