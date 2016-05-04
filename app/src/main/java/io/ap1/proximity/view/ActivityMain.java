@@ -59,6 +59,9 @@ import io.ap1.proximity.adapter.AdapterUserInList;
 public class ActivityMain extends AppCompatActivity{
     private static final String TAG = "ActivityMain";
 
+    public static String PACKAGE_NAME = "undefined";
+    public static String loginUsername = "undefined";
+
     // this is just for debugging the user adapter notify() method
     public static RecyclerView.AdapterDataObserver adapterDataObserver = new RecyclerView.AdapterDataObserver() {
         @Override
@@ -122,7 +125,10 @@ public class ActivityMain extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        PACKAGE_NAME = getApplicationContext().getPackageName();
+
         myUserObjectId = getIntent().getStringExtra("userObjectId");
+        loginUsername = getIntent().getStringExtra("username");
         spOriginalBTName = getApplication().getSharedPreferences("originalBTName", 0);
 
         adapterBeaconNearbyAdmin = new AdapterBeaconNearbyAdmin();
@@ -176,17 +182,17 @@ public class ActivityMain extends AppCompatActivity{
             public void onServiceConnected(ComponentName name, IBinder service) {
                 Log.e("Service FindBeacon", "Connected");
                 binderBeaconManagement = (ServiceBeaconManagement.BinderManagement) service;
-                binderBeaconManagement.getIdparent();
+                //binderBeaconManagement.getIdparent();
 
                 binderBeaconManagement.setListAdapter(adapterBeaconNearbyUser);
 
 
-                binderBeaconManagement.getRemoteCompanyHash("/getAllCompanies_a.php", new CallBackSyncData(ActivityMain.this, "Updating Company Data") {
+                binderBeaconManagement.getRemoteCompanyHash(Constants.API_PATH_GET_COMPANIES, new CallBackSyncData(ActivityMain.this, "Updating Company Data") {
                     @Override
                     public void onSuccess() {
                         super.onSuccess();
 
-                        binderBeaconManagement.getRemoteBeaconHash("/getAllBeaconsv5_a.php", new CallBackSyncData(ActivityMain.this, "Updating Beacon Data") {
+                        binderBeaconManagement.getRemoteBeaconHash(Constants.API_PATH_GET_BEACONS, new CallBackSyncData(ActivityMain.this, "Updating Beacon Data") {
                             @Override
                             public void onSuccess() {
                                 super.onSuccess();
@@ -363,6 +369,7 @@ public class ActivityMain extends AppCompatActivity{
     protected void bindServiceBeaconManagement(){
         Log.e("trying to bind", "Service BeaconManagement");
         Bundle beaconInfo = new Bundle();
+        beaconInfo.putString("idbundle", PACKAGE_NAME);
         beaconInfo.putString("uuid", UUID_AprilBrother);
         beaconInfo.putInt("major", -1);
         beaconInfo.putInt("minor", -1);
@@ -441,7 +448,7 @@ public class ActivityMain extends AppCompatActivity{
         switch (requestCode){
             case Constants.INTENT_REQUEST_CODE_AD_BEACON:
                 if(resultCode == RESULT_OK){
-                    updateBeaconSet("/getAllBeaconsv5_a.php", new CallBackSyncData(ActivityMain.this, "Updating Beacon Data") {
+                    updateBeaconSet(Constants.API_PATH_GET_BEACONS, new CallBackSyncData(ActivityMain.this, "Updating Beacon Data") {
                         @Override
                         public void onSuccess() {
                             super.onSuccess();

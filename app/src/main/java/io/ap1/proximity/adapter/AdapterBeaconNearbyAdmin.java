@@ -24,6 +24,7 @@ public class AdapterBeaconNearbyAdmin extends RecyclerView.Adapter<ViewHolderBea
 
     @Override
     public void onBindViewHolder(ViewHolderBeaconNearbyAdmin viewHolder, final int position){
+        viewHolder.setIsRecyclable(false);
         beaconTmp = DataStore.detectedBeaconList.get(position);
         String nickname = beaconTmp.getNickname();
         if(nickname == null)
@@ -44,6 +45,13 @@ public class AdapterBeaconNearbyAdmin extends RecyclerView.Adapter<ViewHolderBea
         viewHolder.minor = beaconTmp.getMinor();
         viewHolder.rssi = beaconTmp.getRssi();
         viewHolder.beaconId = beaconTmp.getId();
+        viewHolder.nickname = beaconTmp.getNickname();
+        viewHolder.idcompany = beaconTmp.getIdcompany();
+        viewHolder.urlnear = beaconTmp.getUrlnear();
+        viewHolder.urlfar = beaconTmp.getUrlfar();
+        viewHolder.lat = beaconTmp.getLat();
+        viewHolder.lng = beaconTmp.getLng();
+        viewHolder.macaddress = beaconTmp.getMacaddress();
 
         viewHolder.selfPosition = position;
     }

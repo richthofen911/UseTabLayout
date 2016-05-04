@@ -11,21 +11,21 @@ public class MyApplication extends Application{
 
     private final static String deviceInfo = Build.BRAND + "/" + Build.MODEL + "/" + Build.VERSION.RELEASE;
 
-    private CrashHandler crashHandler = CrashHandler.getInstance();
+    //private CrashHandler crashHandler = CrashHandler.getInstance();
 
     @Override
     public void onCreate(){
         super.onCreate();
 
-        crashHandler.init(this);
-        crashHandler.setDeviceInfo(deviceInfo);
+//        crashHandler.init(this);
+//        crashHandler.setDeviceInfo(deviceInfo);
     }
 
     public void setUsername(String username){
-        crashHandler.setUsername(username);
+//        crashHandler.setUsername(username);
     }
 
     public void setUserObjectId(String userObjectId){
-        crashHandler.setUserAppId(userObjectId);
+//        crashHandler.setUserAppId(userObjectId);
     }
 }

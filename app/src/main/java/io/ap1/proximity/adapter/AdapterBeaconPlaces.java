@@ -30,12 +30,14 @@ public class AdapterBeaconPlaces extends RecyclerView.Adapter<ViewHolderBeaconPl
 
     public AdapterBeaconPlaces(Context context){
         databaseHelper = DatabaseHelper.getHelper(context);
+        /*
         try {
             ApplicationInfo appInfo = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
             myIdParent = appInfo.metaData.getInt("idparent");
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
+        */
     }
 
     @Override
@@ -45,36 +47,37 @@ public class AdapterBeaconPlaces extends RecyclerView.Adapter<ViewHolderBeaconPl
     }
 
     @Override
-    public void onBindViewHolder(ViewHolderBeaconPlaces beaconInPlace, final int position){
-        beaconTmp = DataStore.registeredAndGroupedBeaconList.get(position);
+    public void onBindViewHolder(ViewHolderBeaconPlaces viewHolder, final int position){
+        viewHolder.setIsRecyclable(false);
+        beaconTmp = DataStore.beaconAllList.get(position);
         if(beaconTmp.getNickname().equals("groupDivider")){
-            beaconInPlace.beaconPlacesCell.setClickable(false);
-            beaconInPlace.tvBeaconPlacesIcon.setText("");
-            beaconInPlace.tvBeaconPlacesIcon.setBackgroundColor(Constants.COLOR_WHITE);
-            beaconInPlace.tvBeaconPlacesAttributes.setText("");
+            viewHolder.beaconPlacesCell.setClickable(false);
+            viewHolder.tvBeaconPlacesIcon.setText("");
+            viewHolder.tvBeaconPlacesIcon.setBackgroundColor(Constants.COLOR_WHITE);
+            viewHolder.tvBeaconPlacesAttributes.setText("");
             Company companyTmp = databaseHelper.queryForOneCompany(beaconTmp.getIdcompany());
             String companyName = companyTmp.getCompany();
-            beaconInPlace.tvBeaconPlacesName.setText(companyName);
+            viewHolder.tvBeaconPlacesName.setText(companyName);
         }else {
             String title = databaseHelper.queryForOneCompany(beaconTmp.getIdcompany()).getCompany();
             title = title.substring(0, 1);
-            beaconInPlace.tvBeaconPlacesIcon.setText(title);
+            viewHolder.tvBeaconPlacesIcon.setText(title);
             String companyColor = databaseHelper.queryForOneCompany(beaconTmp.getIdcompany()).getColor(); // default color, WHITE
             if (companyColor.equals("")) {
                 companyColor = "FFFFFF"; // if not defined, use white
             }
-            beaconInPlace.tvBeaconPlacesIcon.setBackgroundColor(Color.parseColor("#" + companyColor));
-            beaconInPlace.tvBeaconPlacesName.setText(beaconTmp.getNickname());
-            beaconInPlace.tvBeaconPlacesAttributes.setText(Constants.MAJOR + beaconTmp.getMajor() + Constants.MINOR + beaconTmp.getMinor());
-            beaconInPlace.tvArrowPlaces.setText(">");
-            beaconInPlace.url = (DataStore.registeredAndGroupedBeaconList.get(position).getUrlfar());
+            viewHolder.tvBeaconPlacesIcon.setBackgroundColor(Color.parseColor("#" + companyColor));
+            viewHolder.tvBeaconPlacesName.setText(beaconTmp.getNickname());
+            viewHolder.tvBeaconPlacesAttributes.setText(Constants.MAJOR + beaconTmp.getMajor() + Constants.MINOR + beaconTmp.getMinor());
+            viewHolder.tvArrowPlaces.setText(">");
+            viewHolder.url = (DataStore.beaconAllList.get(position).getUrlfar());
         }
 
-        beaconInPlace.selfPosition = position;
+        viewHolder.selfPosition = position;
     }
 
     @Override
     public int getItemCount() {
-        return DataStore.registeredAndGroupedBeaconList.size();
+        return DataStore.beaconAllList.size();
     }
 }

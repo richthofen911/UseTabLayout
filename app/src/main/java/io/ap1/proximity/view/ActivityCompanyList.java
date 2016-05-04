@@ -1,6 +1,5 @@
 package io.ap1.proximity.view;
 
-import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -66,7 +65,8 @@ public class ActivityCompanyList extends AppCompatActivity {
     public void deleteCompany(String hash){
         Map<String, String> postParams = new HashMap<>();
         postParams.put("hash", hash);
-        ApiCaller.getInstance(getApplicationContext()).setAPI(DataStore.urlBase, "/deleteCompany.php", null, postParams, Request.Method.POST)
+        postParams.put("user", ActivityMain.loginUsername);
+        ApiCaller.getInstance(getApplicationContext()).setAPI(DataStore.urlBase, Constants.API_PATH_DELETE_COMPANY, null, postParams, Request.Method.POST)
                 .exec(new DefaultVolleyCallback(this, "Processing"){
                     @Override
                     public void onDelivered(String result){
@@ -78,7 +78,7 @@ public class ActivityCompanyList extends AppCompatActivity {
                                     Log.e(TAG, "Service UpdateCompany: Connected");
                                     binderBeaconManagement = (ServiceBeaconManagement.BinderManagement) service;
 
-                                    binderBeaconManagement.getRemoteCompanyHash("/getAllCompanies_a.php", new CallBackSyncData(ActivityCompanyList.this, "Updating Company Data") {
+                                    binderBeaconManagement.getRemoteCompanyHash(Constants.API_PATH_GET_COMPANIES, new CallBackSyncData(ActivityCompanyList.this, "Updating Company Data") {
                                         @Override
                                         public void onSuccess() {
                                             super.onSuccess();

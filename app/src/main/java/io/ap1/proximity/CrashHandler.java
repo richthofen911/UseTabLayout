@@ -75,28 +75,26 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler{
             stringBuilder.append("at ").append(stackTraceElement.toString()).append("\n");
         final String causesTrace = stringBuilder.toString();
 
-        final String crashReport = message + "\nCaused by: " + directCause + "\n" + causesTrace;
+        final String causes = directCause + "\n" + causesTrace;
 
         String bugTrackerServerBaseUrl = "http://159.203.36.215:3999";
-        String urlPath = "/report";
+        String urlPath = "/crashtracker/report";
         Map<String, String> postParams = new HashMap<String, String>();
         postParams.put("appname", "Proximity(Android)");
         postParams.put("username", username);
         postParams.put("userappid", userappid);
         postParams.put("deviceinfo", deviceinfo);
-        postParams.put("cause", crashReport);
+        postParams.put("message", message);
+        postParams.put("cause", causes);
 
         ApiCaller.getInstance(mContext).setAPI(bugTrackerServerBaseUrl, urlPath, null, postParams, Request.Method.POST).exec(
                 new DefaultVolleyCallback() {
                     @Override
                     public void onDelivered(String result) {
-                        super.onDelivered(result);
-                        Log.e(TAG, "Crash Cause Reported");
                     }
 
                     @Override
                     public void onException(final String e) {
-                        super.onException(e);
                     }
                 });
 

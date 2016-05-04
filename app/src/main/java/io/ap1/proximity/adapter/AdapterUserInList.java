@@ -32,7 +32,8 @@ public class AdapterUserInList extends RecyclerView.Adapter<ViewHolderUserInList
     }
 
     @Override
-    public void onBindViewHolder(ViewHolderUserInList detectedUser, int position){
+    public void onBindViewHolder(ViewHolderUserInList viewHolder, int position){
+        viewHolder.setIsRecyclable(false);
         MyBackendlessUser userTmp = AppDataStore.userList.get(position);
         /*
         String userName = (String) userTmp.getProperty("name");
@@ -47,20 +48,20 @@ public class AdapterUserInList extends RecyclerView.Adapter<ViewHolderUserInList
         String userBio = userTmp.getBio();
         String userColor = userTmp.getColor();
         String userPictureUrl = Constants.PROFILE_IMAGE_PATH_ROOT + userTmp.getProfileImage();
-        detectedUser.tvDetectedUserColor.setBackgroundColor(Color.parseColor(userColor));
+        viewHolder.tvDetectedUserColor.setBackgroundColor(Color.parseColor(userColor));
         if(userTmp.getUnreadMessageList().size() == 0)
-            detectedUser.tvDetectedUserMsgNotify.setVisibility(View.GONE);
+            viewHolder.tvDetectedUserMsgNotify.setVisibility(View.GONE);
         else{
             int newSize = userTmp.getUnreadMessageList().size();
-            detectedUser.tvDetectedUserMsgNotify.setVisibility(View.VISIBLE);
-            detectedUser.tvDetectedUserMsgNotify.setText(Integer.toString(newSize));
+            viewHolder.tvDetectedUserMsgNotify.setVisibility(View.VISIBLE);
+            viewHolder.tvDetectedUserMsgNotify.setText(Integer.toString(newSize));
         }
 
-        Picasso.with(context).load(userPictureUrl).into(detectedUser.ivDetectedUserProfileImage);
-        detectedUser.tvDetectedUserName.setText(userName);
-        detectedUser.tvDetectedUserBio.setText(userBio);
+        Picasso.with(context).load(userPictureUrl).into(viewHolder.ivDetectedUserProfileImage);
+        viewHolder.tvDetectedUserName.setText(userName);
+        viewHolder.tvDetectedUserBio.setText(userBio);
 
-        detectedUser.selfPosition = position;
+        viewHolder.selfPosition = position;
     }
 
     @Override

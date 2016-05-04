@@ -35,6 +35,7 @@ public class AdapterCompanyList extends RecyclerView.Adapter<ViewHolderCompanyLi
 
     @Override
     public void onBindViewHolder(ViewHolderCompanyList viewHolder, final int position){
+        viewHolder.setIsRecyclable(false);
         companyTmp = companyList.get(position);
         String companyName = companyTmp.getCompany();
 

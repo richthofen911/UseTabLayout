@@ -49,7 +49,8 @@ public class AdapterChatMsgList extends RecyclerView.Adapter<ViewHolderChatMessa
     }
 
     @Override
-    public void onBindViewHolder(ViewHolderChatMessage newMessage, final int position){
+    public void onBindViewHolder(ViewHolderChatMessage viewHolder, final int position){
+        viewHolder.setIsRecyclable(false);
         Message historyMsg = chatHistory.get(position);
 
         Log.e("myUrl", myProfileImageUrl);
@@ -57,11 +58,11 @@ public class AdapterChatMsgList extends RecyclerView.Adapter<ViewHolderChatMessa
 
         // the other one's message aligns left, mine align right and has background color
         if(historyMsg.getHeaders().get("source").equals(otherObjectId)){
-            newMessage.tvSelfPadding.setVisibility(View.GONE);
-            Picasso.with(context).load(otherProfileImageUrl).into(newMessage.ivChatUserProfileImage);
+            viewHolder.tvSelfPadding.setVisibility(View.GONE);
+            Picasso.with(context).load(otherProfileImageUrl).into(viewHolder.ivChatUserProfileImage);
         }else{
-            Picasso.with(context).load(myProfileImageUrl).into(newMessage.ivChatUserProfileImage);
-            newMessage.tvChatMsgContent.setBackground(context.getResources().getDrawable(R.drawable.textview_round_corner));
+            Picasso.with(context).load(myProfileImageUrl).into(viewHolder.ivChatUserProfileImage);
+            viewHolder.tvChatMsgContent.setBackground(context.getResources().getDrawable(R.drawable.textview_round_corner));
         }
 
         String userName = historyMsg.getHeaders().get("name");
@@ -69,11 +70,11 @@ public class AdapterChatMsgList extends RecyclerView.Adapter<ViewHolderChatMessa
         String timestamp = AppDataStore.myDateFormat.format(Long.parseLong(historyMsg.getHeaders().get("timestamp")));
         String content = historyMsg.getBody();
 
-        newMessage.tvChatUserName.setText(userName);
-        newMessage.tvChatMsgTimestamp.setText(timestamp);
-        newMessage.tvChatMsgContent.setText(content);
+        viewHolder.tvChatUserName.setText(userName);
+        viewHolder.tvChatMsgTimestamp.setText(timestamp);
+        viewHolder.tvChatMsgContent.setText(content);
 
-        newMessage.selfPosition = position;
+        viewHolder.selfPosition = position;
     }
 
     @Override

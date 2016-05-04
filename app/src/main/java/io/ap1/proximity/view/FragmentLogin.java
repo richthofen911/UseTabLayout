@@ -62,7 +62,7 @@ public class FragmentLogin extends Fragment implements View.OnClickListener {
                 public void handleResponse(BackendlessUser backendlessUser) {
                     String userObjectId = backendlessUser.getObjectId();
                     setGlobalUserInfo(loginName, userObjectId);
-                    ((ActivityLogin)getActivity()).goToMainUI(userObjectId);
+                    ((ActivityLogin)getActivity()).goToMainUI(userObjectId, loginName);
                 }
                 @Override
                 public void handleFault(BackendlessFault fault){
@@ -99,7 +99,7 @@ public class FragmentLogin extends Fragment implements View.OnClickListener {
                         editor.putString(Constants.USER_LOGIN_KEY_LOGINPASSWORD, inputPassoword);
                         editor.commit();
                         setGlobalUserInfo(inputName, userObjectId);
-                        ((ActivityLogin)getActivity()).goToMainUI(userObjectId);
+                        ((ActivityLogin)getActivity()).goToMainUI(userObjectId, inputName);
                     }
                     @Override
                     public void handleFault(BackendlessFault fault){

@@ -31,6 +31,8 @@ public class ServiceBeaconDetection extends OrmLiteBaseService<DatabaseHelper> i
         RECOServiceConnectListener, RECORangingListener{
     private static final String TAG = "ServiceBeaconDetection";
 
+    protected String idBundle = "undefined"; // will be app package name
+
     private final boolean DISCONTINUOUS_SCAN = false;
     protected boolean entered = false;
     protected int exitCount = 0;
@@ -85,6 +87,7 @@ public class ServiceBeaconDetection extends OrmLiteBaseService<DatabaseHelper> i
         Log.e("minor", regionDefinition.getInt("minor") + "");
         Log.e("borderValue", regionDefinition.getInt("borderValue") + "");
         Log.e("useGeneralSearchMode", regionDefinition.getBoolean("useGeneralSearchMode") + "");
+        idBundle = regionDefinition.getString("idbundle");
         //idparent = regionDefinition.getString("idparent");
         //Log.e("idparent", idparent);
         defineRegionArgs(regionDefinition.getString("uuid"), regionDefinition.getInt("major"), regionDefinition.getInt("minor"), regionDefinition.getInt("borderValue"), regionDefinition.getBoolean("useGeneralSearchMode"));

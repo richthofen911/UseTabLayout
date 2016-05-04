@@ -70,8 +70,11 @@ public class ActivityLogin extends AppCompatActivity {
         fragmentTransaction.commit();
     }
 
-    public void goToMainUI(String userObjectId){
-        startActivity(new Intent(ActivityLogin.this, ActivityMain.class).putExtra("userObjectId", userObjectId));
+    public void goToMainUI(String userObjectId, String username){
+        Intent intent = new Intent(ActivityLogin.this, ActivityMain.class);
+        intent.putExtra("userObjectId", userObjectId);
+        intent.putExtra("username", username);
+        startActivity(intent);
         finish();
     }
 }

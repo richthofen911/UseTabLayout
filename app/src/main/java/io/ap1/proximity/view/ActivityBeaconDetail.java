@@ -22,7 +22,9 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import io.ap1.libbeaconmanagement.Utils.ApiCaller;
 import io.ap1.libbeaconmanagement.Utils.DataStore;
+import io.ap1.libbeaconmanagement.Utils.DatabaseHelper;
 import io.ap1.libbeaconmanagement.Utils.DefaultVolleyCallback;
+import io.ap1.proximity.Constants;
 import io.ap1.proximity.R;
 
 public class ActivityBeaconDetail extends AppCompatActivity {
@@ -91,12 +93,18 @@ public class ActivityBeaconDetail extends AppCompatActivity {
 
     private String addOrDel;
     private String beaconId;
+    private String idcompany;
+    private String nickname;
+
+    DatabaseHelper databaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_beacon_detail);
         ButterKnife.bind(this);
+
+        databaseHelper = DatabaseHelper.getHelper(this);
 
         Intent intent = getIntent();
         String detectedUuid = intent.getStringExtra("uuid");
@@ -112,9 +120,17 @@ public class ActivityBeaconDetail extends AppCompatActivity {
         if(detectedRssi != null)
             etBeaconDetailRssi.setText(detectedRssi);
         beaconId = intent.getStringExtra("id");
+        nickname = intent.getStringExtra("nickname");
+        if(!nickname.equals("unknown"))
+            etBeaconDetailNickName.setText(nickname);
+        idcompany = intent.getStringExtra("idcompany");
+        if(!idcompany.equals("unknown")){
+            tvBeaconDetailCompanySelect.setText(databaseHelper.queryForOneCompany(idcompany).getCompany());
+        }
+
         addOrDel = intent.getStringExtra("addOrDel");
         if(addOrDel.equals("add"))
-            tvToolbarBeaconAction.setText("Add");
+            tvToolbarBeaconAction.setText("ADD");
         if(addOrDel.equals("del"))
             tvToolbarBeaconAction.setText("REMOVE");
 
@@ -132,7 +148,7 @@ public class ActivityBeaconDetail extends AppCompatActivity {
     }
 
     public void onActionClicked(final View v){
-        Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT).show();
+        Log.e(TAG, "onActionClicked: " + ((TextView) v).getText().toString());
         if(((TextView) v).getText().toString().equals("ADD")){
             // --- required params
             String uuid = etBeaconDetailUuid.getText().toString();
@@ -143,9 +159,15 @@ public class ActivityBeaconDetail extends AppCompatActivity {
             String nickname = etBeaconDetailNickName.getText().toString();
             String macaddress = etBeaconDetailMacAddress.getText().toString();
             String lat = etBeaconDetailLat.getText().toString();
+            if(lat.equals(""))
+                lat = getResources().getString(R.string.default_lat);
             String lng = etBeaconDetailLng.getText().toString();
+            if(lng.equals(""))
+                lng = getResources().getString(R.string.default_lng);
             String urlnear = etBeaconDetailUrlNear.getText().toString();
             String urlfar = etBeaconDetailUrlFar.getText().toString();
+
+            Log.e(TAG, "onActionClicked: " + uuid + major + minor);
 
             if(uuid.equals("")||major.equals("")||minor.equals("")||rssi.equals(""))
                 Toast.makeText(this, "UUID/Major/Minor/Rssi cannot be empty", Toast.LENGTH_SHORT).show();
@@ -155,7 +177,8 @@ public class ActivityBeaconDetail extends AppCompatActivity {
                 postParams.put("major", major);
                 postParams.put("minor", minor);
                 postParams.put("rssi", rssi);
-                postParams.put("hash", companyHash);
+                postParams.put("hash", companyHash); // instead of sending idcompany, we use company's hash
+                postParams.put("user", ActivityMain.loginUsername);
                 if(!nickname.equals(""))
                     postParams.put("nickname", nickname);
                 if(!macaddress.equals(""))
@@ -169,7 +192,7 @@ public class ActivityBeaconDetail extends AppCompatActivity {
                 if(!urlfar.equals(""))
                     postParams.put("urlfar", urlfar);
 
-                ApiCaller.getInstance(getApplicationContext()).setAPI(DataStore.urlBase, "/addBeaconv5.php", null, postParams, Request.Method.POST)
+                ApiCaller.getInstance(getApplicationContext()).setAPI(DataStore.urlBase, Constants.API_PATH_ADD_BEACON, null, postParams, Request.Method.POST)
                         .exec(new DefaultVolleyCallback(this, "Processing"){
                             @Override
                             public void onDelivered(String result){
@@ -177,14 +200,16 @@ public class ActivityBeaconDetail extends AppCompatActivity {
                                 Log.e(TAG, "onDelivered: " + result);
                                 try{
                                     JSONObject jsonObject = new JSONObject(result);
-                                    if(jsonObject.getInt("success") == 1){
+                                    if(jsonObject.getString("success").equals("1")){
                                         Snackbar.make(v, "New Beacon Added", Snackbar.LENGTH_SHORT).show();
                                         Intent resultIntent = new Intent();
                                         setResult(RESULT_OK, resultIntent);
                                         finish();
                                     }
+                                    else if(jsonObject.getString("success").equals("2"))
+                                        Snackbar.make(v, "A user cannot add more than 3 beacon on this demo version", Snackbar.LENGTH_SHORT).show();
                                     else
-                                        Snackbar.make(v, "Beacon Existed Already", Snackbar.LENGTH_SHORT).show();
+                                        Snackbar.make(v, "Fail to add the beacon", Snackbar.LENGTH_SHORT).show();
                                 }catch (JSONException e){
                                     Log.e(TAG, "AddBeacon request onDelivered: " + e.toString());
                                 }
@@ -200,7 +225,9 @@ public class ActivityBeaconDetail extends AppCompatActivity {
             Map<String, String> postParams = new HashMap<>();
             Log.e(TAG, "onActionClicked: beaconid, " + beaconId);
             postParams.put("id", beaconId);
-            ApiCaller.getInstance(getApplicationContext()).setAPI(DataStore.urlBase, "/deleteBeaconv4.php", null, postParams, Request.Method.POST)
+            postParams.put("idbundle", ActivityMain.PACKAGE_NAME);
+            postParams.put("user", ActivityMain.loginUsername);
+            ApiCaller.getInstance(getApplicationContext()).setAPI(DataStore.urlBase, Constants.API_PATH_DELETE_BEACON, null, postParams, Request.Method.POST)
                     .exec(new DefaultVolleyCallback(this, "Processing"){
                         @Override
                         public void onDelivered(String result){
@@ -208,7 +235,7 @@ public class ActivityBeaconDetail extends AppCompatActivity {
                             Log.e(TAG, "onDelivered: " + result);
                             try{
                                 JSONObject jsonObject = new JSONObject(result);
-                                if(jsonObject.getInt("success") == 1){
+                                if(jsonObject.getString("success").equals("1")){
                                     Snackbar.make(v, "Beacon Deleted", Snackbar.LENGTH_SHORT).show();
                                     Intent resultIntent = new Intent();
                                     setResult(RESULT_OK, resultIntent);

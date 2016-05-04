@@ -17,6 +17,9 @@ import android.widget.Toast;
 
 import com.android.volley.Request;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,6 +30,7 @@ import io.ap1.libbeaconmanagement.Utils.ApiCaller;
 import io.ap1.libbeaconmanagement.Utils.CallBackSyncData;
 import io.ap1.libbeaconmanagement.Utils.DataStore;
 import io.ap1.libbeaconmanagement.Utils.DefaultVolleyCallback;
+import io.ap1.proximity.Constants;
 import io.ap1.proximity.R;
 
 public class ActivityCompanyDetails extends AppCompatActivity {
@@ -69,9 +73,9 @@ public class ActivityCompanyDetails extends AppCompatActivity {
 
         addOrEdit = intent.getStringExtra("addOrEdit");
         if(addOrEdit.equals("add"))
-            apiActionPath = "/addCompany.php";
+            apiActionPath = Constants.API_PATH_ADD_COMPANY;
         else
-            apiActionPath = "/editCompany.php";
+            apiActionPath = Constants.API_PATH_EDIT_COMPANY;
 
         companyHash = intent.getStringExtra("hash");
         etCompanyDetailsName.setText(intent.getStringExtra("company"));
@@ -118,19 +122,30 @@ public class ActivityCompanyDetails extends AppCompatActivity {
         postParams.put("long", companyLng);
         if(companyHash != null)
             postParams.put("hash", companyHash);
+        postParams.put("user", ActivityMain.loginUsername);
+        postParams.put("idbundle", ActivityMain.PACKAGE_NAME);
 
         ApiCaller.getInstance(getApplicationContext()).setAPI(DataStore.urlBase, apiActionPath, null, postParams, Request.Method.POST)
                 .exec(new DefaultVolleyCallback(){
                     @Override
                     public void onDelivered(String result){
                         Log.e(TAG, "onDelivered: " + result);
-                        if(result.equals("1")){
+                        boolean success = false;
+                        try{
+                            JSONObject jsonObject = new JSONObject(result);
+                            if(jsonObject.getString("success").equals("1"))
+                                success = true;
+                        }catch (JSONException e){
+                            Log.e(TAG, "onDelivered: response is not in json format");
+                            if(result.equals("1"))
+                                success = true;
+                        }
+                        if(success){
                             connBeaconManagement = new ServiceConnection() {
                                 @Override
                                 public void onServiceConnected(ComponentName name, IBinder service) {
                                     Log.e(TAG, "Service UpdateCompany: Connected");
                                     binderBeaconManagement = (ServiceBeaconManagement.BinderManagement) service;
-
 
                                     binderBeaconManagement.getRemoteCompanyHash("/getAllCompanies_a.php", new CallBackSyncData(ActivityCompanyDetails.this, "Updating Company Data") {
                                         @Override
@@ -160,7 +175,7 @@ public class ActivityCompanyDetails extends AppCompatActivity {
                             bindService(new Intent(ActivityCompanyDetails.this, ServiceBeaconManagement.class), connBeaconManagement, BIND_AUTO_CREATE);
 
                         }else if(result.equals("0")){
-                            Snackbar.make(v, "Company Existed Already", Snackbar.LENGTH_SHORT).show();
+                            Snackbar.make(v, "Failed", Snackbar.LENGTH_SHORT).show();
                         }
                     }
                     @Override

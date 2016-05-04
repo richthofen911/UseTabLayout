@@ -36,14 +36,19 @@ public class AdapterBeaconNearbyUser extends RecyclerView.Adapter<ViewHolderBeac
 
     @Override
     public void onBindViewHolder(ViewHolderBeaconNearbyUser viewHolder, final int position){
-        beaconTmp = DataStore.detectedAndRegisteredBeaconList.get(position);
+        viewHolder.setIsRecyclable(false);
+        beaconTmp = DataStore.detectedAndAddedBeaconList.get(position);
         String companyId = beaconTmp.getIdcompany();
         String title = databaseHelper.queryForOneCompany(companyId).getCompany();
         title = title.substring(0, 1);
         viewHolder.tvBeaconNearbyUserIcon.setText(title);
-        viewHolder.tvBeaconNearbyUserIcon.setBackgroundColor(Color.parseColor("#" + databaseHelper.queryForOneCompany(beaconTmp.getIdcompany()).getColor()));
+        String companyColor = databaseHelper.queryForOneCompany(beaconTmp.getIdcompany()).getColor(); // default color, WHITE
+        if (companyColor.equals("")) {
+            companyColor = "FFFFFF"; // if not defined, use white
+        }
+        viewHolder.tvBeaconNearbyUserIcon.setBackgroundColor(Color.parseColor("#" + companyColor));
         viewHolder.tvBeaconNearbyUserName.setText(beaconTmp.getNickname());
-        String attr = Constants.MAJOR + beaconTmp.getMinor() + Constants.MINOR + beaconTmp.getMinor();
+        String attr = Constants.MAJOR + beaconTmp.getMajor() + Constants.MINOR + beaconTmp.getMinor();
         viewHolder.tvBeaconNearbyUserAttributes.setText(attr);
         if(Integer.parseInt(beaconTmp.getRssi()) > rssiBorder){
             viewHolder.tvBeaconNearbyUserIsNearby.setText("Nearby");
@@ -57,6 +62,6 @@ public class AdapterBeaconNearbyUser extends RecyclerView.Adapter<ViewHolderBeac
 
     @Override
     public int getItemCount() {
-        return DataStore.detectedAndRegisteredBeaconList.size();
+        return DataStore.detectedAndAddedBeaconList.size();
     }
 }
