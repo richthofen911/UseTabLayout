@@ -1,7 +1,6 @@
 package io.ap1.proximity;
 
 import android.app.Activity;
-
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.support.annotation.NonNull;
@@ -55,7 +54,9 @@ public class MyProgressDialog extends AlertDialog{
     public static void dismissDialog (){
         if(instance == null)
             throw new RuntimeException("You must set the Dialog first!");
-        instance.dismiss();
-        isLastDialogDismissed = true;
+        if(!isLastDialogDismissed){
+            instance.dismiss();
+            isLastDialogDismissed = true;
+        }
     }
 }

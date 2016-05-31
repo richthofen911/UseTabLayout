@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -37,8 +38,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 
-import io.ap1.libbeaconmanagement.Beacon;
-import io.ap1.libbeaconmanagement.Utils.DataStore;
+import io.ap1.libap1beaconmngt.Ap1Beacon;
 import io.ap1.proximity.R;
 import io.ap1.proximity.Constants;
 
@@ -61,8 +61,8 @@ public class FragmentMap extends FragmentPreloadControl implements OnMapReadyCal
     private String url = "http://ap1.io"; // use ap1.io as default
 
     private Toolbar toolbar;
-    private ArrayList<Beacon> myBeacons;
-    private ArrayList<Beacon> allBeacons;
+    private ArrayList<Ap1Beacon> myBeacons;
+    private ArrayList<Ap1Beacon> allBeacons;
     private LinearLayout mapSwitch;
     private TextView tvMapMyBeacons;
     private TextView tvMapAllBeacons;
@@ -70,7 +70,6 @@ public class FragmentMap extends FragmentPreloadControl implements OnMapReadyCal
     public FragmentMap() {
         // Required empty public constructor
     }
-
 
     // method flow: GoogleApiClient.connect -> onConnected -> requestLastLocation -> getMapAsync -> onMapReady -> addMarkers -> setUpMap
 
@@ -129,8 +128,8 @@ public class FragmentMap extends FragmentPreloadControl implements OnMapReadyCal
                 mLatitude = mLastLocation.getLatitude();
                 mLongitude = mLastLocation.getLongitude();
             }else{
-                mLatitude = 43.7000000;  // coord of Toronto
-                mLongitude = -79.4000000;
+                mLatitude = 43.7000000;  // coords of
+                mLongitude = -79.4000000; // Ap1 Toronto
             }
             Log.e("location", "last location: " + String.valueOf(mLatitude) + " :: " + String.valueOf(mLongitude));
             ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
@@ -145,7 +144,7 @@ public class FragmentMap extends FragmentPreloadControl implements OnMapReadyCal
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult result) {
+    public void onConnectionFailed(@NonNull ConnectionResult result) {
         Log.e(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + result.getErrorCode());
     }
 
@@ -156,7 +155,7 @@ public class FragmentMap extends FragmentPreloadControl implements OnMapReadyCal
     }
 
     @Override
-    public void onResult(LocationSettingsResult result) {
+    public void onResult(@NonNull LocationSettingsResult result) {
         Log.e("arrive onResult", "");
         final Status status = result.getStatus();
         switch(status.getStatusCode()){
@@ -179,11 +178,11 @@ public class FragmentMap extends FragmentPreloadControl implements OnMapReadyCal
         }
     }
 
-    private void reloadMarkers(ArrayList<Beacon> beaconsList){
+    private void reloadMarkers(ArrayList<Ap1Beacon> beaconsList){
         markers.clear(); // clear markers dataset
         googleMap.clear(); // clear markers on the map
 
-        for(Beacon beacon : beaconsList){
+        for(Ap1Beacon beacon : beaconsList){
             String tmpLat = beacon.getLat();
             String tmpLng = beacon.getLng();
             if((tmpLat != null && !tmpLat.equals("")) && (tmpLng != null && !tmpLng.equals(""))){
@@ -248,7 +247,7 @@ public class FragmentMap extends FragmentPreloadControl implements OnMapReadyCal
                 tvMapAllBeacons.setPadding(15, 3, 15, 3);
                 tvMapAllBeacons.setTextColor(Color.WHITE);
 
-                reloadMarkers(((ActivityMain) getActivity()).binderBeaconManagement.getMyBeacons());
+                reloadMarkers(((ActivityMain) getActivity()).serviceMyBeaconMngt.getMyBeacons());
                 setUpMap();
             }
         });
@@ -264,7 +263,7 @@ public class FragmentMap extends FragmentPreloadControl implements OnMapReadyCal
                 tvMapMyBeacons.setPadding(15, 3, 15, 3);
                 tvMapMyBeacons.setTextColor(Color.WHITE);
 
-                reloadMarkers(((ActivityMain) getActivity()).binderBeaconManagement.getBeaconInAllPlaces());
+                reloadMarkers(((ActivityMain) getActivity()).serviceMyBeaconMngt.getBeaconInAllPlaces());
                 setUpMap();
             }
         });

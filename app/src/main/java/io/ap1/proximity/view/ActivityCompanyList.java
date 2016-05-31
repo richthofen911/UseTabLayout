@@ -19,14 +19,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.ap1.libbeaconmanagement.Company;
-import io.ap1.libbeaconmanagement.ServiceBeaconManagement;
-import io.ap1.libbeaconmanagement.Utils.ApiCaller;
-import io.ap1.libbeaconmanagement.Utils.CallBackSyncData;
-import io.ap1.libbeaconmanagement.Utils.DataStore;
-import io.ap1.libbeaconmanagement.Utils.DatabaseHelper;
-import io.ap1.libbeaconmanagement.Utils.DefaultVolleyCallback;
+import io.ap1.libap1beaconmngt.CallBackSyncData;
+import io.ap1.libap1beaconmngt.Company;
+import io.ap1.libap1beaconmngt.DataStore;
+import io.ap1.libap1beaconmngt.DatabaseHelper;
+import io.ap1.libap1util.ApiCaller;
+import io.ap1.libap1util.CallbackDefaultVolley;
 import io.ap1.proximity.Constants;
+import io.ap1.proximity.MyServiceBeaconMngt;
 import io.ap1.proximity.R;
 import io.ap1.proximity.adapter.AdapterCompanyList;
 
@@ -40,7 +40,8 @@ public class ActivityCompanyList extends AppCompatActivity {
     ArrayList<Company> companyListData;
     DatabaseHelper databaseHelper;
 
-    ServiceBeaconManagement.BinderManagement binderBeaconManagement;
+    MyServiceBeaconMngt.BinderMyBeaconMngt binderBeaconManagement;
+    MyServiceBeaconMngt serviceBeaconMngt;
     ServiceConnection connBeaconManagement;
 
     @Override
@@ -67,7 +68,7 @@ public class ActivityCompanyList extends AppCompatActivity {
         postParams.put("hash", hash);
         postParams.put("user", ActivityMain.loginUsername);
         ApiCaller.getInstance(getApplicationContext()).setAPI(DataStore.urlBase, Constants.API_PATH_DELETE_COMPANY, null, postParams, Request.Method.POST)
-                .exec(new DefaultVolleyCallback(this, "Processing"){
+                .exec(new CallbackDefaultVolley(){
                     @Override
                     public void onDelivered(String result){
                         Log.e(TAG, "onDelivered: " + result);
@@ -76,12 +77,11 @@ public class ActivityCompanyList extends AppCompatActivity {
                                 @Override
                                 public void onServiceConnected(ComponentName name, IBinder service) {
                                     Log.e(TAG, "Service UpdateCompany: Connected");
-                                    binderBeaconManagement = (ServiceBeaconManagement.BinderManagement) service;
+                                    binderBeaconManagement = (MyServiceBeaconMngt.BinderMyBeaconMngt) service;
 
-                                    binderBeaconManagement.getRemoteCompanyHash(Constants.API_PATH_GET_COMPANIES, new CallBackSyncData(ActivityCompanyList.this, "Updating Company Data") {
+                                    serviceBeaconMngt.checkRemoteCompanyHash(Constants.API_PATH_GET_COMPANIES, new CallBackSyncData() {
                                         @Override
                                         public void onSuccess() {
-                                            super.onSuccess();
                                             Toast.makeText(ActivityCompanyList.this, "The company has been deleted", Toast.LENGTH_SHORT).show();
                                             companyListData = (ArrayList)databaseHelper.queryForAllCompanies();
                                             adapterCompanyList.setDataSource(companyListData);
@@ -91,7 +91,6 @@ public class ActivityCompanyList extends AppCompatActivity {
 
                                         @Override
                                         public void onFailure(String cause) {
-                                            super.onFailure(cause);
                                             Toast.makeText(ActivityCompanyList.this, "Fail, " + cause, Toast.LENGTH_SHORT).show();
                                             Log.e(TAG, "Fail to update Company Data" + cause);
                                         }
@@ -104,7 +103,7 @@ public class ActivityCompanyList extends AppCompatActivity {
                                 }
                             };
 
-                            bindService(new Intent(ActivityCompanyList.this, ServiceBeaconManagement.class), connBeaconManagement, BIND_AUTO_CREATE);
+                            bindService(new Intent(ActivityCompanyList.this, MyServiceBeaconMngt.class), connBeaconManagement, BIND_AUTO_CREATE);
                         }else if(result.equals("0")){
                             Toast.makeText(ActivityCompanyList.this, "Company doesn't exist", Toast.LENGTH_SHORT).show();
                         }

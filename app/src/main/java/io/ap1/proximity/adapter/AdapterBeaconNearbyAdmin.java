@@ -4,8 +4,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import io.ap1.libbeaconmanagement.Beacon;
-import io.ap1.libbeaconmanagement.Utils.DataStore;
+
+import io.ap1.libap1beaconmngt.Ap1Beacon;
+import io.ap1.libap1beaconmngt.DataStore;
 import io.ap1.proximity.Constants;
 import io.ap1.proximity.R;
 import io.ap1.proximity.viewholder.ViewHolderBeaconNearbyAdmin;
@@ -14,7 +15,7 @@ import io.ap1.proximity.viewholder.ViewHolderBeaconNearbyAdmin;
  * Created by admin on 22/02/16.
  */
 public class AdapterBeaconNearbyAdmin extends RecyclerView.Adapter<ViewHolderBeaconNearbyAdmin>{
-    private Beacon beaconTmp = null;
+    private Ap1Beacon beaconTmp = null;
 
     @Override
     public ViewHolderBeaconNearbyAdmin onCreateViewHolder(ViewGroup viewGroup, int viewType){
@@ -28,11 +29,11 @@ public class AdapterBeaconNearbyAdmin extends RecyclerView.Adapter<ViewHolderBea
         beaconTmp = DataStore.detectedBeaconList.get(position);
         String nickname = beaconTmp.getNickname();
         if(nickname == null)
-            nickname = "Inactive";
-        if(!nickname.equals("Inactive")){
+            nickname = "Inactive"; // it means it's not a registered Ap1 Beacon
+        else{
             viewHolder.tvArrowNearbyAdmin.setVisibility(View.GONE);
             viewHolder.ivBeaconNearbyAdminInfo.setVisibility(View.VISIBLE);
-            if(Integer.parseInt(beaconTmp.getRssi()) < 70)
+            if(Integer.parseInt(beaconTmp.getRssi()) > -60)
                 viewHolder.tvBeaconNearbyAdminStatus.setText("| Registered & In Location");
             else
                 viewHolder.tvBeaconNearbyAdminStatus.setText("| Registered");

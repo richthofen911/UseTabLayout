@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 
 import java.util.ArrayList;
 
-import io.ap1.libbeaconmanagement.Company;
+import io.ap1.libap1beaconmngt.Company;
 import io.ap1.proximity.R;
 import io.ap1.proximity.viewholder.ViewHolderCompanyList;
 

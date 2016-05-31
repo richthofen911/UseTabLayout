@@ -18,6 +18,8 @@ public interface Constants {
     String MAJOR = "major: ";
     String MINOR = " minor: ";
 
+    String BUNDLE_ID = "io.ap1.prox.pilot";
+
     String USER_LOGIN_KEY_LOGINNAME = "loginName";
     String USER_LOGIN_KEY_LOGINPASSWORD = "loginPassword";
     int COLOR_WHITE = Color.parseColor("#FFFFFF");

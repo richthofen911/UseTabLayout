@@ -1,5 +1,6 @@
 package io.ap1.proximity.viewholder;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
@@ -50,6 +51,8 @@ public class ViewHolderBeaconNearbyAdmin extends RecyclerView.ViewHolder{
         ivBeaconNearbyAdminInfo = (ImageView) rootview.findViewById(R.id.iv_nearby_admin_info);
         beaconNearbyAdminCell = (RelativeLayout) rootview.findViewById(R.id.beacon_nearby_admin_cell);
 
+        Context context = rootview.getContext();
+        final Activity activity = (ActivityMain)context;
 
         tvArrowNearbyAdmin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,8 +65,8 @@ public class ViewHolderBeaconNearbyAdmin extends RecyclerView.ViewHolder{
                 intent.putExtra("rssi", rssi);
                 intent.putExtra("addOrDel", "add");
                 //context.startActivity(intent);
-
-                ((ActivityMain)context).startActivityForResult(intent, Constants.INTENT_REQUEST_CODE_AD_BEACON);
+                //((ActivityMain)context).startActivityForResult(intent, Constants.INTENT_REQUEST_CODE_AD_BEACON); // AD means add/delete
+                activity.startActivityForResult(intent, Constants.INTENT_REQUEST_CODE_AD_BEACON);
             }
         });
 
@@ -80,7 +83,7 @@ public class ViewHolderBeaconNearbyAdmin extends RecyclerView.ViewHolder{
                 intent.putExtra("nickname", nickname);
                 intent.putExtra("idcompany", idcompany);
                 intent.putExtra("addOrDel", "del");
-                context.startActivity(intent);
+                activity.startActivityForResult(intent, Constants.INTENT_REQUEST_CODE_AD_BEACON);
             }
         });
 

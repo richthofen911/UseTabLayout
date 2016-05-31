@@ -17,6 +17,8 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -36,16 +38,21 @@ import android.widget.Toast;
 import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
 import com.backendless.exceptions.BackendlessFault;
+import com.google.gson.Gson;
 import com.pubnub.api.Pubnub;
 import com.squareup.picasso.Picasso;
 
-import io.ap1.libbeaconmanagement.ServiceBeaconManagement;
-import io.ap1.libbeaconmanagement.Utils.CallBackSyncData;
+import io.ap1.libap1beaconmngt.CallBackSyncData;
+import io.ap1.libap1beaconmngt.DataStore;
+import io.ap1.libbeacondetection.BeaconParserType;
+import io.ap1.libbeacondetection.RegionDescription;
 import io.ap1.proximity.AppDataStore;
 import io.ap1.proximity.AppPubsubCallback;
 import io.ap1.proximity.Constants;
 import io.ap1.proximity.DefaultBackendlessCallback;
+import io.ap1.proximity.MyProgressDialog;
 import io.ap1.proximity.MyPubsubProviderClient;
+import io.ap1.proximity.MyServiceBeaconMngt;
 import io.ap1.proximity.PermissionHandler;
 import io.ap1.proximity.ServiceMessageCenter;
 import io.ap1.proximity.adapter.AdapterBeaconNearbyAdmin;
@@ -62,11 +69,14 @@ public class ActivityMain extends AppCompatActivity{
     public static String PACKAGE_NAME = "undefined";
     public static String loginUsername = "undefined";
 
+    // the app should show beacons with rssi larger than -100, and treat those rssi largenr than -60 as NEAR
+
     // this is just for debugging the user adapter notify() method
     public static RecyclerView.AdapterDataObserver adapterDataObserver = new RecyclerView.AdapterDataObserver() {
         @Override
         public void onItemRangeChanged(int positionStart, int itemCount, Object payload) {
             super.onItemRangeChanged(positionStart, itemCount, payload);
+
             String className = "unknown";
             if(payload != null)
                 className = payload.getClass().getSimpleName();
@@ -82,26 +92,30 @@ public class ActivityMain extends AppCompatActivity{
         }
     };
 
-    protected ServiceBeaconManagement.BinderManagement binderBeaconManagement;
+    protected MyServiceBeaconMngt.BinderMyBeaconMngt binderBeaconManagement;
+    MyServiceBeaconMngt serviceMyBeaconMngt;
     public ServiceMessageCenter.BinderMsgCenter binderMsgCenter;
 
     public MyPubsubProviderClient myPubsubProviderClient;
 
-    private static final String UUID_AprilBrother = "E2C56DB5-DFFB-48D2-B060-D0F5A71096E0";
+    //private static final String UUID_AprilBrother = "E2C56DB5-DFFB-48D2-B060-D0F5A71096E0";
     public ViewPager viewPager;
     public AdapterBeaconNearbyAdmin adapterBeaconNearbyAdmin;
     public AdapterBeaconNearbyUser adapterBeaconNearbyUser;
     public AdapterBeaconPlaces adapterBeaconPlaces;
     public AdapterFragmentPager adapterFragmentPager;
-    public static final int rssiBorder = -80;
+    public static final int rssiBorder = -100;
 
     private ServiceConnection connBeaconManagement;
     private ServiceConnection connChat;
 
     String btNameOrigin = "unknown";
     private String myProximityDeviceName;
-    private BroadcastReceiver mReceiver;
+    private BroadcastReceiver mBTReceiver; // receive broadcast when find a bluetooth-ON phone, not for beacons.
     public boolean isReadyToDiscoverDevices = false; // to find other users, not beacons
+    public boolean isReadyToScan = false; // to find beacons
+    public boolean isSyncDataDone = false;
+    public boolean isScanning = false;
 
     public AdapterUserInList adapterUserInList;
 
@@ -120,10 +134,13 @@ public class ActivityMain extends AppCompatActivity{
     // this time but it will be resumed next time.
     private SharedPreferences spOriginalBTName;
 
+    private BroadcastReceiver mLocalReceiver; // used to receive local broadcast for Service-Activity interaction
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         PACKAGE_NAME = getApplicationContext().getPackageName();
 
@@ -160,7 +177,29 @@ public class ActivityMain extends AppCompatActivity{
             ensureDiscoverable();
         }
 
-        mReceiver = new BroadcastReceiver() {
+        mLocalReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String rawMessage = intent.getStringExtra("message");
+                String[] msgFormatted = rawMessage.split("\\|");
+                switch (msgFormatted[0]){
+                    case "ScannerConnected":
+                        isReadyToScan = true;
+                        if(isSyncDataDone && !isScanning){
+                            isScanning = true;
+                            serviceMyBeaconMngt.startScanning();
+                        }
+                        break;
+                    case "ScannerDisconnected":
+                        isReadyToScan = false;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        };
+
+        mBTReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
@@ -181,27 +220,30 @@ public class ActivityMain extends AppCompatActivity{
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 Log.e("Service FindBeacon", "Connected");
-                binderBeaconManagement = (ServiceBeaconManagement.BinderManagement) service;
+                binderBeaconManagement = (MyServiceBeaconMngt.BinderMyBeaconMngt) service;
                 //binderBeaconManagement.getIdparent();
+                serviceMyBeaconMngt = binderBeaconManagement.getService();
 
-                binderBeaconManagement.setListAdapter(adapterBeaconNearbyUser);
+                serviceMyBeaconMngt.setListAdapter(adapterBeaconNearbyUser);
 
-
-                binderBeaconManagement.getRemoteCompanyHash(Constants.API_PATH_GET_COMPANIES, new CallBackSyncData(ActivityMain.this, "Updating Company Data") {
+                MyProgressDialog.show(ActivityMain.this, "Updating Company Data...");
+                serviceMyBeaconMngt.checkRemoteCompanyHash(Constants.API_PATH_GET_COMPANIES, new CallBackSyncData() {
                     @Override
                     public void onSuccess() {
-                        super.onSuccess();
-
-                        binderBeaconManagement.getRemoteBeaconHash(Constants.API_PATH_GET_BEACONS, new CallBackSyncData(ActivityMain.this, "Updating Beacon Data") {
+                        MyProgressDialog.dismissDialog();
+                        MyProgressDialog.show(ActivityMain.this, "Updating Beacon Data...");
+                        serviceMyBeaconMngt.checkRemoteBeaconHash(Constants.API_PATH_GET_BEACONS, new CallBackSyncData() {
                             @Override
                             public void onSuccess() {
-                                super.onSuccess();
-                                startScanning();
+                                MyProgressDialog.dismissDialog();
+                                isSyncDataDone = true;
+                                if(isReadyToScan && !isScanning)
+                                    startScanning();
                             }
 
                             @Override
                             public void onFailure(String cause) {
-                                super.onFailure(cause);
+                                MyProgressDialog.dismissDialog();
                                 Toast.makeText(ActivityMain.this, cause, Toast.LENGTH_SHORT).show();
                                 Log.e("update beacon hash err", cause);
                             }
@@ -210,6 +252,7 @@ public class ActivityMain extends AppCompatActivity{
 
                     @Override
                     public void onFailure(String cause) {
+                        MyProgressDialog.dismissDialog();
                         Toast.makeText(ActivityMain.this, cause, Toast.LENGTH_SHORT).show();
                         Log.e("update company data err", cause);
                     }
@@ -286,6 +329,23 @@ public class ActivityMain extends AppCompatActivity{
             }
         });
     }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+
+        Log.e(TAG, "onResume: register local receiver");
+        LocalBroadcastManager.getInstance(this).registerReceiver(mLocalReceiver, new IntentFilter("beacon"));
+    }
+
+    @Override
+    protected void onStop(){
+        super.onStop();
+
+        Log.e(TAG, "onStop: onStop: unregister local receiver");
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocalReceiver);
+    }
+
 
     private void getUserData(){
         Backendless.Persistence.of(BackendlessUser.class).findById(myUserObjectId, new DefaultBackendlessCallback<BackendlessUser>(this, TAG, "Pulling User Data...") {
@@ -368,15 +428,18 @@ public class ActivityMain extends AppCompatActivity{
 
     protected void bindServiceBeaconManagement(){
         Log.e("trying to bind", "Service BeaconManagement");
+        RegionDescription regionGeneral = new RegionDescription("RegionGeneral", null, -1, -1);
+        Gson gson = new Gson();
+        String jsonObj1 = gson.toJson(regionGeneral);
+        String[] regionDescriptions = new String[]{jsonObj1};
+        int[] beaconParsers = new int[]{BeaconParserType.IBEACON};
+
         Bundle beaconInfo = new Bundle();
         beaconInfo.putString("idbundle", PACKAGE_NAME);
-        beaconInfo.putString("uuid", UUID_AprilBrother);
-        beaconInfo.putInt("major", -1);
-        beaconInfo.putInt("minor", -1);
-        beaconInfo.putInt("borderValue", rssiBorder);
-        beaconInfo.putBoolean("useGeneralSearchMode", true);
-        //beaconInfo.putString("idparent", "11");
-        bindService(new Intent(ActivityMain.this, ServiceBeaconManagement.class).putExtras(beaconInfo), connBeaconManagement, BIND_AUTO_CREATE);
+        beaconInfo.putStringArray("regionDescriptions", regionDescriptions);
+        beaconInfo.putIntArray("beaconParsers", beaconParsers);
+        beaconInfo.putInt("rssiBorder", -100);
+        bindService(new Intent(ActivityMain.this, MyServiceBeaconMngt.class).putExtras(beaconInfo), connBeaconManagement, BIND_AUTO_CREATE);
     }
 
     private void bindServiceMsgCenter(){
@@ -401,8 +464,8 @@ public class ActivityMain extends AppCompatActivity{
     }
 
     private void registerMyReceiver(Context context) {
-        context.registerReceiver(mReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
-        context.registerReceiver(mReceiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));
+        context.registerReceiver(mBTReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+        context.registerReceiver(mBTReceiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));
     }
 
     private String getTargetUserObjectId(String targetDeviceName){
@@ -424,22 +487,26 @@ public class ActivityMain extends AppCompatActivity{
 
     public void startScanning(){
         if(binderBeaconManagement != null && binderBeaconManagement.isBinderAlive())
-            binderBeaconManagement.startScanning();
+            serviceMyBeaconMngt.startScanning();
     }
 
     public void stopScanning(){
         if(binderBeaconManagement != null && binderBeaconManagement.isBinderAlive())
-            binderBeaconManagement.stopScanning();
+            serviceMyBeaconMngt.stopScanning();
     }
 
     public void updateCompanySet(String apiPath, CallBackSyncData callBackUpdateCompanySet){
         if(binderBeaconManagement != null && binderBeaconManagement.isBinderAlive())
-            binderBeaconManagement.getRemoteCompanyHash(apiPath, callBackUpdateCompanySet);
+            serviceMyBeaconMngt.checkRemoteCompanyHash(apiPath, callBackUpdateCompanySet);
     }
 
     public void updateBeaconSet(String apiPath, CallBackSyncData callBackSyncData){
         if(binderBeaconManagement != null && binderBeaconManagement.isBinderAlive())
-            binderBeaconManagement.getRemoteBeaconHash(apiPath, callBackSyncData);
+            serviceMyBeaconMngt.checkRemoteBeaconHash(apiPath, callBackSyncData);
+    }
+
+    public Fragment accessFragmentById(int id){
+        return getSupportFragmentManager().findFragmentById(id);
     }
 
     @Override
@@ -448,10 +515,16 @@ public class ActivityMain extends AppCompatActivity{
         switch (requestCode){
             case Constants.INTENT_REQUEST_CODE_AD_BEACON:
                 if(resultCode == RESULT_OK){
-                    updateBeaconSet(Constants.API_PATH_GET_BEACONS, new CallBackSyncData(ActivityMain.this, "Updating Beacon Data") {
+                    DataStore.registeredAndGroupedBeaconList.clear();
+                    updateBeaconSet(Constants.API_PATH_GET_BEACONS, new CallBackSyncData() {
                         @Override
                         public void onSuccess() {
-                            super.onSuccess();
+                            stopScanning();
+                            startScanning();
+                        }
+
+                        @Override
+                        public void onFailure(String cause){
                         }
                     });
                 }
@@ -487,6 +560,12 @@ public class ActivityMain extends AppCompatActivity{
         super.onDestroy();
         Log.e(TAG, "onDestroy");
 
+        serviceMyBeaconMngt.stopScanning();
+        isScanning = false;
+
+        DataStore.detectedBeaconList.clear();
+        DataStore.detectedAndAddedBeaconList.clear();
+
         unbindServiceChat();
         unbindServiceBeaconManagement();
         appPubsubCallback = null;
@@ -503,9 +582,9 @@ public class ActivityMain extends AppCompatActivity{
         adapterUserInList.unregisterAdapterDataObserver(adapterDataObserver);
 
         try{
-            unregisterReceiver(mReceiver);
+            unregisterReceiver(mBTReceiver);
         }catch (Exception e){
-            Log.e(TAG, "mReceiver was not registered, cannot unregister it");
+            Log.e(TAG, "mBTReceiver was not registered, cannot unregister it");
         }
     }
 }

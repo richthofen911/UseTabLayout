@@ -1,1 +1,1 @@
-include ':app', ':libbeaconmanagement', ':apas'
+include ':app', ':apas', ':libap1beacondetection', ':libap1util', ':libap1beaconmngt'

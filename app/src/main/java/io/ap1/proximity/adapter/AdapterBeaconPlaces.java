@@ -10,10 +10,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import io.ap1.libbeaconmanagement.Beacon;
-import io.ap1.libbeaconmanagement.Company;
-import io.ap1.libbeaconmanagement.Utils.DataStore;
-import io.ap1.libbeaconmanagement.Utils.DatabaseHelper;
+import io.ap1.libap1beaconmngt.Ap1Beacon;
+import io.ap1.libap1beaconmngt.Company;
+import io.ap1.libap1beaconmngt.DataStore;
+import io.ap1.libap1beaconmngt.DatabaseHelper;
 import io.ap1.proximity.Constants;
 import io.ap1.proximity.R;
 import io.ap1.proximity.viewholder.ViewHolderBeaconPlaces;
@@ -24,9 +24,8 @@ import io.ap1.proximity.viewholder.ViewHolderBeaconPlaces;
 public class AdapterBeaconPlaces extends RecyclerView.Adapter<ViewHolderBeaconPlaces>{
     private static final String TAG = "AdapterBeaconPlaces";
 
-    private Beacon beaconTmp = null;
+    private Ap1Beacon beaconTmp = null;
     private DatabaseHelper databaseHelper;
-    private int myIdParent;
 
     public AdapterBeaconPlaces(Context context){
         databaseHelper = DatabaseHelper.getHelper(context);

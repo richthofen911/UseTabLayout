@@ -2,10 +2,12 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Proximity.iml" filepath="$PROJECT_DIR$/Proximity.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Proximity_dev.iml" filepath="$PROJECT_DIR$/Proximity_dev.iml" />
       <module fileurl="file://$PROJECT_DIR$/apas/apas.iml" filepath="$PROJECT_DIR$/apas/apas.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/libbeaconmanagement/libbeaconmanagement.iml" filepath="$PROJECT_DIR$/libbeaconmanagement/libbeaconmanagement.iml" />
+      <module fileurl="file://$PROJECT_DIR$/libap1beacondetection/libap1beacondetection.iml" filepath="$PROJECT_DIR$/libap1beacondetection/libap1beacondetection.iml" />
+      <module fileurl="file://$PROJECT_DIR$/libap1beaconmngt/libap1beaconmngt.iml" filepath="$PROJECT_DIR$/libap1beaconmngt/libap1beaconmngt.iml" />
+      <module fileurl="file://$PROJECT_DIR$/libap1util/libap1util.iml" filepath="$PROJECT_DIR$/libap1util/libap1util.iml" />
     </modules>
   </component>
 </project>

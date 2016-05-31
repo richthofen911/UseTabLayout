@@ -10,8 +10,8 @@ import com.android.volley.Request;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.ap1.libbeaconmanagement.Utils.ApiCaller;
-import io.ap1.libbeaconmanagement.Utils.DefaultVolleyCallback;
+import io.ap1.libap1util.ApiCaller;
+import io.ap1.libap1util.CallbackDefaultVolley;
 
 /**
  * Created by admin on 25/04/16.
@@ -88,7 +88,7 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler{
         postParams.put("cause", causes);
 
         ApiCaller.getInstance(mContext).setAPI(bugTrackerServerBaseUrl, urlPath, null, postParams, Request.Method.POST).exec(
-                new DefaultVolleyCallback() {
+                new CallbackDefaultVolley() {
                     @Override
                     public void onDelivered(String result) {
                     }

@@ -2,6 +2,7 @@ package io.ap1.proximity.view;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -20,11 +21,13 @@ import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import io.ap1.libbeaconmanagement.Utils.ApiCaller;
-import io.ap1.libbeaconmanagement.Utils.DataStore;
-import io.ap1.libbeaconmanagement.Utils.DatabaseHelper;
-import io.ap1.libbeaconmanagement.Utils.DefaultVolleyCallback;
+
+import io.ap1.libap1beaconmngt.DataStore;
+import io.ap1.libap1beaconmngt.DatabaseHelper;
+import io.ap1.libap1util.ApiCaller;
+import io.ap1.libap1util.CallbackDefaultVolley;
 import io.ap1.proximity.Constants;
+import io.ap1.proximity.MyProgressDialog;
 import io.ap1.proximity.R;
 
 public class ActivityBeaconDetail extends AppCompatActivity {
@@ -98,6 +101,8 @@ public class ActivityBeaconDetail extends AppCompatActivity {
 
     DatabaseHelper databaseHelper;
 
+    Handler handler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -121,12 +126,13 @@ public class ActivityBeaconDetail extends AppCompatActivity {
             etBeaconDetailRssi.setText(detectedRssi);
         beaconId = intent.getStringExtra("id");
         nickname = intent.getStringExtra("nickname");
-        if(!nickname.equals("unknown"))
-            etBeaconDetailNickName.setText(nickname);
+        if(nickname != null)
+            if(!nickname.equals("unknown"))
+                etBeaconDetailNickName.setText(nickname);
         idcompany = intent.getStringExtra("idcompany");
-        if(!idcompany.equals("unknown")){
-            tvBeaconDetailCompanySelect.setText(databaseHelper.queryForOneCompany(idcompany).getCompany());
-        }
+        if(idcompany != null)
+            if(!idcompany.equals("unknown"))
+                tvBeaconDetailCompanySelect.setText(databaseHelper.queryForOneCompany(idcompany).getCompany());
 
         addOrDel = intent.getStringExtra("addOrDel");
         if(addOrDel.equals("add"))
@@ -192,12 +198,13 @@ public class ActivityBeaconDetail extends AppCompatActivity {
                 if(!urlfar.equals(""))
                     postParams.put("urlfar", urlfar);
 
+                MyProgressDialog.show(this, "Processing...");
                 ApiCaller.getInstance(getApplicationContext()).setAPI(DataStore.urlBase, Constants.API_PATH_ADD_BEACON, null, postParams, Request.Method.POST)
-                        .exec(new DefaultVolleyCallback(this, "Processing"){
+                        .exec(new CallbackDefaultVolley(){
                             @Override
                             public void onDelivered(String result){
-                                super.onDelivered(result);
                                 Log.e(TAG, "onDelivered: " + result);
+                                MyProgressDialog.dismissDialog();
                                 try{
                                     JSONObject jsonObject = new JSONObject(result);
                                     if(jsonObject.getString("success").equals("1")){
@@ -207,17 +214,18 @@ public class ActivityBeaconDetail extends AppCompatActivity {
                                         finish();
                                     }
                                     else if(jsonObject.getString("success").equals("2"))
-                                        Snackbar.make(v, "A user cannot add more than 3 beacon on this demo version", Snackbar.LENGTH_SHORT).show();
+                                        toastFromWorkThread("A user cannot add more than 3 beacon on this demo version");
                                     else
-                                        Snackbar.make(v, "Fail to add the beacon", Snackbar.LENGTH_SHORT).show();
+                                        toastFromWorkThread("Fail to add the beacon");
                                 }catch (JSONException e){
+                                    toastFromWorkThread("Add Beacon JSONException: " + e.toString());
                                     Log.e(TAG, "AddBeacon request onDelivered: " + e.toString());
                                 }
                             }
                             @Override
                             public void onException(final String e){
-                                super.onException(e);
-                                Toast.makeText(ActivityBeaconDetail.this, e, Toast.LENGTH_SHORT).show();
+                                MyProgressDialog.dismissDialog();
+                                toastFromWorkThread(e);
                             }
                         });
             }
@@ -227,12 +235,15 @@ public class ActivityBeaconDetail extends AppCompatActivity {
             postParams.put("id", beaconId);
             postParams.put("idbundle", ActivityMain.PACKAGE_NAME);
             postParams.put("user", ActivityMain.loginUsername);
+
+            MyProgressDialog.show(this, "Processing...");
             ApiCaller.getInstance(getApplicationContext()).setAPI(DataStore.urlBase, Constants.API_PATH_DELETE_BEACON, null, postParams, Request.Method.POST)
-                    .exec(new DefaultVolleyCallback(this, "Processing"){
+                    .exec(new CallbackDefaultVolley(){
                         @Override
-                        public void onDelivered(String result){
-                            super.onDelivered(result);
+                        public void onDelivered(final String result){
                             Log.e(TAG, "onDelivered: " + result);
+
+                            MyProgressDialog.dismissDialog();
                             try{
                                 JSONObject jsonObject = new JSONObject(result);
                                 if(jsonObject.getString("success").equals("1")){
@@ -242,18 +253,28 @@ public class ActivityBeaconDetail extends AppCompatActivity {
                                     finish();
                                 }
                                 else
-                                    Snackbar.make(v, "Fail to delete the beacon", Snackbar.LENGTH_SHORT).show();
+                                    toastFromWorkThread("Fail to remove, the beacon was not added by you.");
                             }catch (JSONException e){
                                 Log.e(TAG, "delete beacon request onDelivered: " + e.toString());
                             }
                         }
                         @Override
                         public void onException(final String e){
-                            super.onException(e);
-                            Toast.makeText(ActivityBeaconDetail.this, e, Toast.LENGTH_SHORT).show();
+                            MyProgressDialog.dismissDialog();
+                            Log.e(TAG, "onException: " + e);
+                            toastFromWorkThread(e);
                         }
                     });
         }
+    }
+
+    private void toastFromWorkThread(final String message){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(ActivityBeaconDetail.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override

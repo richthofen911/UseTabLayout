@@ -1,6 +1,7 @@
 package io.ap1.proximity.viewholder;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
@@ -34,6 +35,9 @@ public class ViewHolderCompanyList extends RecyclerView.ViewHolder{
         tvCompanyToBeSelected = (TextView) rootView.findViewById(R.id.tv_company_in_list_name);
         tvCompanyInfo = (TextView) rootView.findViewById(R.id.tv_company_in_list_info);
 
+        Context context = rootView.getContext();
+        final ActivityCompanyList hostActivity = (ActivityCompanyList) context;
+
         // to select this company as the beacon's company value
         tvCompanyToBeSelected.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -42,7 +46,6 @@ public class ViewHolderCompanyList extends RecyclerView.ViewHolder{
                 resultIntent.putExtra("company", tvCompanyToBeSelected.getText().toString());
                 resultIntent.putExtra("id", id);
                 resultIntent.putExtra("companyHash", hash);
-                Activity hostActivity = (ActivityCompanyList)v.getContext();
                 hostActivity.setResult(hostActivity.RESULT_OK, resultIntent);
                 hostActivity.finish();
             }
@@ -58,7 +61,7 @@ public class ViewHolderCompanyList extends RecyclerView.ViewHolder{
                     public boolean onMenuItemClick(MenuItem item) {
                         switch (item.getItemId()) {
                             case R.id.delete_company:
-                                ((ActivityCompanyList)v.getContext()).deleteCompany(hash);
+                                hostActivity.deleteCompany(hash);
                                 return true;
                             default:
                                 return false;
@@ -74,14 +77,14 @@ public class ViewHolderCompanyList extends RecyclerView.ViewHolder{
         tvCompanyInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent((ActivityCompanyList)v.getContext(), ActivityCompanyDetails.class);
+                Intent intent = new Intent(hostActivity, ActivityCompanyDetails.class);
                 intent.putExtra("company", tvCompanyToBeSelected.getText().toString());
                 intent.putExtra("color", color);
                 intent.putExtra("lat", lat);
                 intent.putExtra("lng", lng);
                 intent.putExtra("hash", hash);
                 intent.putExtra("addOrEdit", "edit");
-                ((ActivityCompanyList) v.getContext()).startActivityForResult(intent, Constants.INTENT_REQUEST_CODE_ADD_COMPANY);
+                hostActivity.startActivityForResult(intent, Constants.INTENT_REQUEST_CODE_ADD_COMPANY);
             }
         });
     }

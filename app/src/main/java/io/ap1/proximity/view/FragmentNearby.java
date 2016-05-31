@@ -60,16 +60,19 @@ public class FragmentNearby extends FragmentPreloadControl {
                 if(hiddenPermission.equals("User")){
                     tvToolbarEnd.setText("Admin");
                     // swap to permission User
-                    recyclerViewBeaconNearby.setAdapter(null);
-                    recyclerViewBeaconNearby.setAdapter(((ActivityMain)getActivity()).adapterBeaconNearbyUser);
+                    //recyclerViewBeaconNearby.setAdapter(null);
+                    //recyclerViewBeaconNearby.setAdapter(((ActivityMain)getActivity()).adapterBeaconNearbyUser);
+                    recyclerViewBeaconNearby.swapAdapter(((ActivityMain)getActivity()).adapterBeaconNearbyUser, true);
                 }else if(hiddenPermission.equals("Admin")){ // which means current permission is User
                     tvToolbarEnd.setText("User");
                     // swap to permission Admin
-                    recyclerViewBeaconNearby.setAdapter(null);
-                    recyclerViewBeaconNearby.setAdapter(((ActivityMain)getActivity()).adapterBeaconNearbyAdmin);
+                    //recyclerViewBeaconNearby.setAdapter(null);
+                    //recyclerViewBeaconNearby.setAdapter(((ActivityMain)getActivity()).adapterBeaconNearbyAdmin);
+                    recyclerViewBeaconNearby.swapAdapter(((ActivityMain)getActivity()).adapterBeaconNearbyAdmin, true);
                 }else {
                     Toast.makeText(getContext(), "Role error", Toast.LENGTH_SHORT).show();
                 }
+                recyclerViewBeaconNearby.getAdapter().notifyDataSetChanged();
             }
         });
     }

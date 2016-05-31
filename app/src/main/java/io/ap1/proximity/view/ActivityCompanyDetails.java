@@ -25,12 +25,12 @@ import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import io.ap1.libbeaconmanagement.ServiceBeaconManagement;
-import io.ap1.libbeaconmanagement.Utils.ApiCaller;
-import io.ap1.libbeaconmanagement.Utils.CallBackSyncData;
-import io.ap1.libbeaconmanagement.Utils.DataStore;
-import io.ap1.libbeaconmanagement.Utils.DefaultVolleyCallback;
+import io.ap1.libap1beaconmngt.CallBackSyncData;
+import io.ap1.libap1beaconmngt.DataStore;
+import io.ap1.libap1util.ApiCaller;
+import io.ap1.libap1util.CallbackDefaultVolley;
 import io.ap1.proximity.Constants;
+import io.ap1.proximity.MyServiceBeaconMngt;
 import io.ap1.proximity.R;
 
 public class ActivityCompanyDetails extends AppCompatActivity {
@@ -57,7 +57,8 @@ public class ActivityCompanyDetails extends AppCompatActivity {
 
     private static final int COMPANY_CHANGE_COLOR = 4;
 
-    ServiceBeaconManagement.BinderManagement binderBeaconManagement;
+    MyServiceBeaconMngt.BinderMyBeaconMngt binderBeaconManagement;
+    MyServiceBeaconMngt serviceBeaconMngt;
     ServiceConnection connBeaconManagement;
     String apiActionPath;
     String addOrEdit;
@@ -126,7 +127,7 @@ public class ActivityCompanyDetails extends AppCompatActivity {
         postParams.put("idbundle", ActivityMain.PACKAGE_NAME);
 
         ApiCaller.getInstance(getApplicationContext()).setAPI(DataStore.urlBase, apiActionPath, null, postParams, Request.Method.POST)
-                .exec(new DefaultVolleyCallback(){
+                .exec(new CallbackDefaultVolley(){
                     @Override
                     public void onDelivered(String result){
                         Log.e(TAG, "onDelivered: " + result);
@@ -145,12 +146,12 @@ public class ActivityCompanyDetails extends AppCompatActivity {
                                 @Override
                                 public void onServiceConnected(ComponentName name, IBinder service) {
                                     Log.e(TAG, "Service UpdateCompany: Connected");
-                                    binderBeaconManagement = (ServiceBeaconManagement.BinderManagement) service;
+                                    binderBeaconManagement = (MyServiceBeaconMngt.BinderMyBeaconMngt) service;
+                                    serviceBeaconMngt = binderBeaconManagement.getService();
 
-                                    binderBeaconManagement.getRemoteCompanyHash("/getAllCompanies_a.php", new CallBackSyncData(ActivityCompanyDetails.this, "Updating Company Data") {
+                                    serviceBeaconMngt.checkRemoteCompanyHash("/getAllCompanies_a.php", new CallBackSyncData() {
                                         @Override
                                         public void onSuccess() {
-                                            super.onSuccess();
                                             Toast.makeText(ActivityCompanyDetails.this, "Success", Toast.LENGTH_SHORT).show();
                                             Intent resultIntent = new Intent();
                                             setResult(RESULT_OK, resultIntent);
@@ -159,7 +160,6 @@ public class ActivityCompanyDetails extends AppCompatActivity {
 
                                         @Override
                                         public void onFailure(String cause) {
-                                            super.onFailure(cause);
                                             Toast.makeText(ActivityCompanyDetails.this, "Fail, " + cause, Toast.LENGTH_SHORT).show();
                                             Log.e(TAG, "Fail to update Company Data" + cause);
                                         }
@@ -172,7 +172,7 @@ public class ActivityCompanyDetails extends AppCompatActivity {
                                 }
                             };
 
-                            bindService(new Intent(ActivityCompanyDetails.this, ServiceBeaconManagement.class), connBeaconManagement, BIND_AUTO_CREATE);
+                            bindService(new Intent(ActivityCompanyDetails.this, MyServiceBeaconMngt.class), connBeaconManagement, BIND_AUTO_CREATE);
 
                         }else if(result.equals("0")){
                             Snackbar.make(v, "Failed", Snackbar.LENGTH_SHORT).show();

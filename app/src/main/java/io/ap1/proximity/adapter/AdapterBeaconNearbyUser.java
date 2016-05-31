@@ -7,9 +7,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import io.ap1.libbeaconmanagement.Beacon;
-import io.ap1.libbeaconmanagement.Utils.DataStore;
-import io.ap1.libbeaconmanagement.Utils.DatabaseHelper;
+import io.ap1.libap1beaconmngt.Ap1Beacon;
+import io.ap1.libap1beaconmngt.DataStore;
+import io.ap1.libap1beaconmngt.DatabaseHelper;
 import io.ap1.proximity.Constants;
 import io.ap1.proximity.R;
 import io.ap1.proximity.view.ActivityMain;
@@ -19,7 +19,7 @@ import io.ap1.proximity.viewholder.ViewHolderBeaconNearbyUser;
  * Created by admin on 22/02/16.
  */
 public class AdapterBeaconNearbyUser extends RecyclerView.Adapter<ViewHolderBeaconNearbyUser>{
-    private Beacon beaconTmp = null;
+    private Ap1Beacon beaconTmp = null;
     private int rssiBorder = ActivityMain.rssiBorder;
     private DatabaseHelper databaseHelper;
     private Context context;
