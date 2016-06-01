@@ -18,6 +18,7 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
@@ -170,7 +171,7 @@ public class ActivityMain extends AppCompatActivity{
         else {
             String btName = mBluetoothAdapter.getName();
             if(!btName.startsWith("proximity/")){
-                spOriginalBTName.edit().putString("originalBTName", btName);
+                spOriginalBTName.edit().putString("originalBTName", btName).commit();
                 changeBTNameForThisApp(myUserObjectId);
             }
 
@@ -223,6 +224,12 @@ public class ActivityMain extends AppCompatActivity{
                 binderBeaconManagement = (MyServiceBeaconMngt.BinderMyBeaconMngt) service;
                 //binderBeaconManagement.getIdparent();
                 serviceMyBeaconMngt = binderBeaconManagement.getService();
+
+                //FragmentManager fragmentManager = getSupportFragmentManager();
+                //fragmentManager.findFragmentByTag()
+                ((FragmentNearby)adapterFragmentPager.getItem(1)).beaconManagementService = serviceMyBeaconMngt;
+                //if(!serviceMyBeaconMngt.isRecyclerViewFromOutsideSet())
+                serviceMyBeaconMngt.setRecyclerView(((FragmentNearby)adapterFragmentPager.getItem(1)).accessRecyclerView());
 
                 serviceMyBeaconMngt.setListAdapter(adapterBeaconNearbyUser);
 
@@ -503,10 +510,6 @@ public class ActivityMain extends AppCompatActivity{
     public void updateBeaconSet(String apiPath, CallBackSyncData callBackSyncData){
         if(binderBeaconManagement != null && binderBeaconManagement.isBinderAlive())
             serviceMyBeaconMngt.checkRemoteBeaconHash(apiPath, callBackSyncData);
-    }
-
-    public Fragment accessFragmentById(int id){
-        return getSupportFragmentManager().findFragmentById(id);
     }
 
     @Override

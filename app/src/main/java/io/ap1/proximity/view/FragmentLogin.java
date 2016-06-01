@@ -53,22 +53,24 @@ public class FragmentLogin extends Fragment implements View.OnClickListener {
         user = ((ActivityLogin)getActivity()).backendlessUser;
 
         Bundle userInfo = getArguments();
-        final String loginName = userInfo.getString(Constants.USER_LOGIN_KEY_LOGINNAME);
-        String loginPassword = userInfo.getString(Constants.USER_LOGIN_KEY_LOGINPASSWORD);
-        Log.e(TAG, "onCreateView: " + loginName + loginPassword);
-        if(loginName != null && loginPassword != null){
-            Backendless.UserService.login(loginName, loginPassword, new BackendlessCallback<BackendlessUser>() {
-                @Override
-                public void handleResponse(BackendlessUser backendlessUser) {
-                    String userObjectId = backendlessUser.getObjectId();
-                    setGlobalUserInfo(loginName, userObjectId);
-                    ((ActivityLogin)getActivity()).goToMainUI(userObjectId, loginName);
-                }
-                @Override
-                public void handleFault(BackendlessFault fault){
-                    Toast.makeText(getActivity(), fault.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
+        if(userInfo != null){
+            final String loginName = userInfo.getString(Constants.USER_LOGIN_KEY_LOGINNAME);
+            String loginPassword = userInfo.getString(Constants.USER_LOGIN_KEY_LOGINPASSWORD);
+            Log.e(TAG, "onCreateView: " + loginName + loginPassword);
+            if(loginName != null && loginPassword != null){
+                Backendless.UserService.login(loginName, loginPassword, new BackendlessCallback<BackendlessUser>() {
+                    @Override
+                    public void handleResponse(BackendlessUser backendlessUser) {
+                        String userObjectId = backendlessUser.getObjectId();
+                        setGlobalUserInfo(loginName, userObjectId);
+                        ((ActivityLogin)getActivity()).goToMainUI(userObjectId, loginName);
+                    }
+                    @Override
+                    public void handleFault(BackendlessFault fault){
+                        Toast.makeText(getActivity(), fault.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
         }
 
         return view;

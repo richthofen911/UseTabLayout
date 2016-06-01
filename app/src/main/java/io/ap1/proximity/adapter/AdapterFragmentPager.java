@@ -30,7 +30,8 @@ public class AdapterFragmentPager extends FragmentPagerAdapter {
             case 0:
                 return new FragmentChat();
             case 1:
-                return new FragmentNearby();
+                //return new FragmentNearby();
+                return FragmentNearby.getInstance();
             case 2:
                 return new FragmentPlaces();
             case 3:

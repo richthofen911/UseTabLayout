@@ -9,6 +9,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Process;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
@@ -25,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import javax.security.auth.login.LoginException;
 
 import io.ap1.libbeacondetection.ServiceBeaconDetection;
 
@@ -49,6 +52,9 @@ public abstract class ServiceBeaconManagement<T extends RecyclerView.Adapter> ex
 
     protected HandlerThread handlerThread;
     protected Handler handler;
+
+    protected RecyclerView recyclerViewFromOutside;
+    protected boolean isRecyclerViewFromOutsideSet = false;
 
     public ServiceBeaconManagement() {
     }
@@ -136,11 +142,20 @@ public abstract class ServiceBeaconManagement<T extends RecyclerView.Adapter> ex
                     queryResult.setNickname(nickname);
                 queryResult.setUrlfar(queryResult.getUrlfar());
                 queryResult.setUrlnear(queryResult.getUrlnear());
-                addToDetectedAndRegisteredList(DataStore.detectedAndAddedBeaconList.size(), queryResult);
-                addToDetectedList(DataStore.detectedBeaconList.size(), queryResult);
+
+                if(recyclerViewFromOutside == null){
+                    Log.e(TAG, "actionOnEnterAp1Beacon: recyclerveiw is null");
+                }else{
+                    addToDetectedAndRegisteredList(recyclerViewFromOutside, DataStore.detectedAndAddedBeaconList.size(), queryResult);
+                    addToDetectedList(recyclerViewFromOutside, DataStore.detectedBeaconList.size(), queryResult);
+                }
             }
-        }else
-            addToDetectedList(DataStore.detectedBeaconList.size(), ap1Beacon);
+        }else{
+            if(recyclerViewFromOutside == null){
+                Log.e(TAG, "actionOnEnterAp1Beacon, non-local: recyclerview is null");
+            }else
+                addToDetectedList(recyclerViewFromOutside, DataStore.detectedBeaconList.size(), ap1Beacon);
+        }
 
         displayDetectedAndRegisteredBeaconsList("NewBeacon"); // this method call is for debugging
     }
@@ -202,7 +217,7 @@ public abstract class ServiceBeaconManagement<T extends RecyclerView.Adapter> ex
         callBackUpdateCompanySet.onSuccess();
     }
 
-    protected void addToDetectedList(final int position, Ap1Beacon newBeacon) {
+    protected void addToDetectedList(final RecyclerView recyclerView, final int position, final Ap1Beacon newBeacon) {
         DataStore.detectedBeaconList.add(newBeacon);
         Log.e("new detected beacon", "added");
 
@@ -211,28 +226,34 @@ public abstract class ServiceBeaconManagement<T extends RecyclerView.Adapter> ex
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    t.notifyItemInserted(position);
-                    if (position != DataStore.detectedBeaconList.size() - 1) {
-                        Log.e("notifyItemRangeChanged", "position extends");
-                        t.notifyItemRangeChanged(position, DataStore.detectedBeaconList.size() - position);
-                    }
+                    if(!recyclerView.isComputingLayout()){
+                        t.notifyItemInserted(position);
+                        if (position != DataStore.detectedBeaconList.size() - 1) {
+                            Log.e("notifyItemRangeChanged", "position extends");
+                            t.notifyItemRangeChanged(position, DataStore.detectedBeaconList.size() - position);
+                        }
+                    }else
+                        addToDetectedList(recyclerView, position, newBeacon);
                 }
             });
 
         }
     }
 
-    protected void addToDetectedAndRegisteredList(final int position, Ap1Beacon newBeacon){
+    protected void addToDetectedAndRegisteredList(final RecyclerView recyclerView, final int position, final Ap1Beacon newBeacon){
         DataStore.detectedAndAddedBeaconList.add(newBeacon);
         Log.e("new registered beacon", "added");
 
         if(currentAdapter.equals(adapterTypeUser)){
             handler.post(new Runnable(){
                 public void run(){
-                    t.notifyItemInserted(position);
-                    if(position != DataStore.detectedAndAddedBeaconList.size() - 1){
-                        t.notifyItemRangeChanged(position, DataStore.detectedAndAddedBeaconList.size() - position);
-                    }
+                    if(!recyclerView.isComputingLayout()){
+                        t.notifyItemInserted(position);
+                        if(position != DataStore.detectedAndAddedBeaconList.size() - 1){
+                            t.notifyItemRangeChanged(position, DataStore.detectedAndAddedBeaconList.size() - position);
+                        }
+                    }else
+                        addToDetectedAndRegisteredList(recyclerView, position, newBeacon);
                 }
             });
         }
@@ -278,21 +299,14 @@ public abstract class ServiceBeaconManagement<T extends RecyclerView.Adapter> ex
         currentAdapter = t.getClass().getSimpleName();
     }
 
-    public T getAdapter(){
-        return t;
+    public void setRecyclerView(RecyclerView recyclerView){
+        this.recyclerViewFromOutside = recyclerView;
+        //isRecyclerViewFromOutsideSet = true;
+        Log.e(TAG, "setRecyclerView: true");
     }
 
-    protected void postAndNotifyAdapter(final Handler handler, final RecyclerView recyclerView, final RecyclerView.Adapter adapter) {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                if (!recyclerView.isComputingLayout()) {
-                    adapter.notifyDataSetChanged();
-                } else {
-                    postAndNotifyAdapter(handler, recyclerView, adapter);
-                }
-            }
-        });
+    public T getAdapter(){
+        return t;
     }
 
     // this method is just for debug
@@ -303,6 +317,12 @@ public abstract class ServiceBeaconManagement<T extends RecyclerView.Adapter> ex
         }
         Log.e(TAG, "D&R beacons: " + stringBuilder.toString());
     }
+
+    /*
+    public boolean isRecyclerViewFromOutsideSet(){
+        return isRecyclerViewFromOutsideSet;
+    }
+    */
 
     @Override
     public void startScanning(){
@@ -336,15 +356,20 @@ public abstract class ServiceBeaconManagement<T extends RecyclerView.Adapter> ex
     public void stopScanning(){
         super.stopScanning();
 
-        timerResortList.cancel();
-        timerResortList.purge();
+        if(timerResortList != null){
+            timerResortList.cancel();
+            timerResortList.purge();
+        }
         Log.e(TAG, "stopScanning: timer canceled");
     }
 
     public void onDestroy(){
         super.onDestroy();
-        timerResortList.cancel();
-        timerResortList.purge();
+
+        if(timerResortList != null){
+            timerResortList.cancel();
+            timerResortList.purge();
+        }
     }
 
     /*

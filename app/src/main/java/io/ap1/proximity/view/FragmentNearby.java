@@ -11,18 +11,29 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import io.ap1.libap1beaconmngt.ServiceBeaconManagement;
 import io.ap1.proximity.R;
 
 public class FragmentNearby extends FragmentPreloadControl {
 
     private static final String TAG = "FragmentNearbyUser";
-    private RecyclerView recyclerViewBeaconNearby;
+    public RecyclerView recyclerViewBeaconNearby;
     private LinearLayoutManager linearLayoutManager;
     private Toolbar toolbar;
     private TextView tvToolbarEnd;
 
+    public ServiceBeaconManagement beaconManagementService;
+
+    private static FragmentNearby instance;
+
     public FragmentNearby() {
         // Required empty public constructor
+    }
+
+    public static FragmentNearby getInstance(){
+        if(instance == null)
+            instance = new FragmentNearby();
+        return instance;
     }
 
     @Override
@@ -34,6 +45,11 @@ public class FragmentNearby extends FragmentPreloadControl {
         toolbar = ((ActivityMain)getActivity()).toolbar;
         //adapterBeaconNearbyUser = ;
         recyclerViewBeaconNearby = (RecyclerView) view.findViewById(R.id.recyclerView_beacon_nearby);
+        beaconManagementService = ((ActivityMain)getActivity()).serviceMyBeaconMngt;
+        if(beaconManagementService != null)
+            beaconManagementService.setRecyclerView(recyclerViewBeaconNearby);
+        else
+            Log.e(TAG, "onCreateView: beacon service is null");
         linearLayoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
         recyclerViewBeaconNearby.setLayoutManager(linearLayoutManager);
         recyclerViewBeaconNearby.setHasFixedSize(true);
@@ -82,5 +98,9 @@ public class FragmentNearby extends FragmentPreloadControl {
         Log.e(TAG, "onInvisible");
         if(tvToolbarEnd != null)
             tvToolbarEnd.setVisibility(View.GONE);
+    }
+
+    public RecyclerView accessRecyclerView(){
+        return recyclerViewBeaconNearby;
     }
 }
