@@ -11,13 +11,14 @@ public class MyApplication extends Application{
 
     private final static String deviceInfo = Build.BRAND + "/" + Build.MODEL + "/" + Build.VERSION.RELEASE;
 
-    //private CrashHandler crashHandler = CrashHandler.getInstance();
+    private CrashHandler crashHandler;
 
     @Override
     public void onCreate(){
         super.onCreate();
 
-//        crashHandler.init(this);
+        crashHandler = CrashHandler.getInstance();
+        crashHandler.init(this);
 //        crashHandler.setDeviceInfo(deviceInfo);
     }
 

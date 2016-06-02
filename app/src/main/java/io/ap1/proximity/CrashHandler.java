@@ -61,55 +61,61 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler{
      * false, means don't process the exception now, (can be saved) but hand in it to the system to process(pop up the system dialog)
      */
     private boolean handleException(final Throwable throwable) {
-        if (throwable == null)
+        Log.e(TAG, "handleException: arrive handleException");
+
+        if (throwable == null){
+            Log.e(TAG, "handleException: throwable is null");
             return false;
+        }
+        else{
 
-        final String message = throwable.getMessage();
-        final Throwable cause = throwable.getCause();
+            String causes;
 
-        final String directCause = cause.toString();
-        final StackTraceElement[] causesStackTrace = cause.getStackTrace();
+            Log.e(TAG, "handleException: throwable is not null");
+            final String message = throwable.getMessage();
+            final Throwable cause = throwable.getCause();
 
-        StringBuilder stringBuilder = new StringBuilder();
-        for(StackTraceElement stackTraceElement : causesStackTrace)
-            stringBuilder.append("at ").append(stackTraceElement.toString()).append("\n");
-        final String causesTrace = stringBuilder.toString();
-
-        final String causes = directCause + "\n" + causesTrace;
-
-        String bugTrackerServerBaseUrl = "http://159.203.36.215:3999";
-        String urlPath = "/crashtracker/report";
-        Map<String, String> postParams = new HashMap<String, String>();
-        postParams.put("appname", "Proximity(Android)");
-        postParams.put("username", username);
-        postParams.put("userappid", userappid);
-        postParams.put("deviceinfo", deviceinfo);
-        postParams.put("message", message);
-        postParams.put("cause", causes);
-
-        ApiCaller.getInstance(mContext).setAPI(bugTrackerServerBaseUrl, urlPath, null, postParams, Request.Method.POST).exec(
-                new CallbackDefaultVolley() {
-                    @Override
-                    public void onDelivered(String result) {
-                    }
-
-                    @Override
-                    public void onException(final String e) {
-                    }
-                });
-
-        new Thread() {
-            @Override
-            public void run() {
-                Looper.prepare();
-                String loginfo = message + "\nCaused by: " + directCause + "\n" + causesTrace;
-                Log.e("loginfo", loginfo);
-                Toast.makeText(mContext, "Oops, the program comes across an error:", Toast.LENGTH_SHORT).show();
-                Looper.loop();
+            if(cause != null){
+                String directCause = cause.toString();
+                StackTraceElement[] causesStackTrace = cause.getStackTrace();
+                StringBuilder stringBuilder = new StringBuilder();
+                for(StackTraceElement stackTraceElement : causesStackTrace){
+                    stringBuilder.append("at ").append(stackTraceElement.toString()).append("\n");
+                }
+                causes = directCause + "\n" + stringBuilder.toString();
+            }else{
+                StringBuilder stringBuilder = new StringBuilder();
+                StackTraceElement[] stackTrace = throwable.getStackTrace();
+                for(StackTraceElement stackTraceElement : stackTrace){
+                    stringBuilder.append(stackTraceElement.toString()).append("\n");
+                }
+                causes = stringBuilder.toString();
             }
 
-        }.start();
-        return false;
+            Log.e(TAG, "handleException: msg " + message + "\ncauses: " + causes);
+
+            String bugTrackerServerBaseUrl = "http://159.203.26.51:3999";
+            String urlPath = "/crashtracker/report";
+            Map<String, String> postParams = new HashMap<String, String>();
+            postParams.put("appname", "Proximity(Android)");
+            postParams.put("username", username);
+            postParams.put("userappid", userappid);
+            postParams.put("deviceinfo", deviceinfo);
+            postParams.put("message", message);
+            postParams.put("cause", causes);
+
+            ApiCaller.getInstance(mContext).setAPI(bugTrackerServerBaseUrl, urlPath, null, postParams, Request.Method.POST).exec(
+                    new CallbackDefaultVolley() {
+                        @Override
+                        public void onDelivered(String result) {
+                        }
+
+                        @Override
+                        public void onException(final String e) {
+                        }
+                    });
+            return false;
+        }
     }
 
     public void setUsername(String username){
