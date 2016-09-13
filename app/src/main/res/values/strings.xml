@@ -1,38 +1,31 @@
+<?xml version="1.0"?>
 <resources>
-    <string name="app_name">Proximity</string>
-    <!--
+  <string name="app_name">McWong</string>
+  <string name="idbundle">io.ap1.prox.mcwong</string>
+  <!--
     <string name="BACKENDLESS_APP_ID">9A4BF3A5-DFA2-B556-FF2C-A2AD97459C00</string>
     <string name="BACKENDLESS_SECRET_KEY">AC4BC165-6458-2317-FF33-6ADBA6313D00</string>
     -->
-
-
-    <string name="BACKENDLESS_APP_ID">CBCCFC6F-B6C9-A38D-FF43-FB8A5C7BD400</string>
-    <string name="BACKENDLESS_SECRET_KEY">7C17DBD9-74EB-E9F6-FF7E-C58EB5DD5100</string>
-    <string name="BACKENDLESS_APP_VERSION">v1</string>
-
-    <string name="google_app_id">228228601403</string>
-
-    <string name="major">major</string>
-    <string name="minor">minor</string>
-
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-
-    <!--
+  <string name="BACKENDLESS_APP_ID">CBCCFC6F-B6C9-A38D-FF43-FB8A5C7BD400</string>
+  <string name="BACKENDLESS_SECRET_KEY">7C17DBD9-74EB-E9F6-FF7E-C58EB5DD5100</string>
+  <string name="BACKENDLESS_APP_VERSION">v1</string>
+  <string name="google_app_id">228228601403</string>
+  <string name="major">major</string>
+  <string name="minor">minor</string>
+  <string name="navigation_drawer_open">Open navigation drawer</string>
+  <string name="navigation_drawer_close">Close navigation drawer</string>
+  <!--
     idparent is the identity id for this certain app(for a company, not a person)
     -->
-    <string name="idparent">11</string>
-
-    <string-array name="tab_titles">
-        <item>Chat</item>
-        <item>Nearby</item>
-        <item>Places</item>
-        <item>Map</item>
-    </string-array>
-
-    <string name="default_beacon_url">http://www.ap1.io</string>
-    <string name="default_lat">43.6672112</string>
-    <string name="default_lng">-79.3854604</string>
-    <string name="default_color_in_text">#04A9CE</string>
-
+  <string name="idparent">11</string>
+  <string-array name="tab_titles">
+    <item>Chat</item>
+    <item>Nearby</item>
+    <item>Places</item>
+    <item>Map</item>
+  </string-array>
+  <string name="default_beacon_url">http://www.ap1.io</string>
+  <string name="default_lat">43.6672112</string>
+  <string name="default_lng">-79.3854604</string>
+  <string name="default_color_in_text">#04A9CE</string>
 </resources>

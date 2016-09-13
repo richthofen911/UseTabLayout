@@ -1,6 +1,7 @@
 package io.ap1.proximity.adapter;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,8 @@ import io.ap1.proximity.viewholder.ViewHolderBeaconNearbyAdmin;
  * Created by admin on 22/02/16.
  */
 public class AdapterBeaconNearbyAdmin extends RecyclerView.Adapter<ViewHolderBeaconNearbyAdmin>{
+    private final static String TAG = "AdapterNearbyAdmin";
+
     private Ap1Beacon beaconTmp = null;
 
     @Override
@@ -42,6 +45,7 @@ public class AdapterBeaconNearbyAdmin extends RecyclerView.Adapter<ViewHolderBea
         String attrs = Constants.MAJOR + beaconTmp.getMajor() + (Constants.MINOR) + beaconTmp.getMinor();
         viewHolder.tvBeaconNearbyUserAttributes.setText(attrs);
         viewHolder.uuid = beaconTmp.getUuid();
+        Log.e(TAG, "onBindViewHolder: " + viewHolder.uuid);
         viewHolder.major = beaconTmp.getMajor();
         viewHolder.minor = beaconTmp.getMinor();
         viewHolder.rssi = beaconTmp.getRssi();

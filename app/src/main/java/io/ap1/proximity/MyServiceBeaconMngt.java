@@ -47,7 +47,8 @@ public class MyServiceBeaconMngt<T extends RecyclerView.Adapter> extends Service
     public void checkRemoteBeaconHash(String urlPath, final CallBackSyncData callBackSyncData){
         Map<String, String> postParams = new HashMap<>();
         postParams.put("hash", spHashValue.getString("hashBeacon", "empty"));
-        postParams.put("idbundle", Constants.BUNDLE_ID);
+        //postParams.put("idbundle", Constants.BUNDLE_ID);
+        postParams.put("idbundle", getString(R.string.idbundle));
 
         ApiCaller.getInstance(getApplicationContext()).setAPI(DataStore.urlBase, urlPath, null, postParams, Request.Method.POST).exec(
                 new CallbackDefaultVolley() {
@@ -90,7 +91,8 @@ public class MyServiceBeaconMngt<T extends RecyclerView.Adapter> extends Service
     public void checkRemoteCompanyHash(final String urlPath, final CallBackSyncData callBackUpdateCompanySet){
         Map<String, String> postParams = new HashMap<>();
         postParams.put("hash", spHashValue.getString("hashCompany", "empty"));
-        postParams.put("idbundle", Constants.BUNDLE_ID);
+        //postParams.put("idbundle", Constants.BUNDLE_ID);
+        postParams.put("idbundle", getString(R.string.idbundle));
 
         ApiCaller.getInstance(getApplicationContext()).setAPI(DataStore.urlBase, urlPath, null, postParams, Request.Method.POST).exec(
                 new CallbackDefaultVolley() {
@@ -104,6 +106,7 @@ public class MyServiceBeaconMngt<T extends RecyclerView.Adapter> extends Service
                         } else {
                             Log.e(TAG, "company hash local != remote");
                             try {
+                                //Log.e(TAG, "onDelivered: company str" + result);
                                 JSONObject jsonObject = new JSONObject(result);
                                 String remoteCompanyHash = jsonObject.getString("hash");
                                 databaseHelper.deleteAllCompanies(); //drop the old company table and create a new one

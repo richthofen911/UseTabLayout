@@ -113,17 +113,34 @@ public class ActivityBeaconDetail extends AppCompatActivity {
 
         Intent intent = getIntent();
         String detectedUuid = intent.getStringExtra("uuid");
-        if(detectedUuid != null)
+        etBeaconDetailUuid.clearFocus();
+        etBeaconDetailUuid.setFocusable(false);
+        etBeaconDetailUuid.setFocusableInTouchMode(false);
+        if(detectedUuid != null){
             etBeaconDetailUuid.setText(detectedUuid);
+
+        }
         String detectedMajor = intent.getStringExtra("major");
-        if(detectedMajor != null)
+        etBeaconDetailMajor.clearFocus();
+        etBeaconDetailMajor.setFocusable(false);
+        etBeaconDetailMajor.setFocusableInTouchMode(false);
+        if(detectedMajor != null){
             etBeaconDetailMajor.setText(detectedMajor);
+
+        }
         String detectedMinor = intent.getStringExtra("minor");
-        if(detectedMinor != null)
+        etBeaconDetailMinor.clearFocus();
+        etBeaconDetailMinor.setFocusable(false);
+        etBeaconDetailMinor.setFocusableInTouchMode(false);
+        if(detectedMinor != null){
             etBeaconDetailMinor.setText(detectedMinor);
+
+        }
         String detectedRssi = intent.getStringExtra("rssi");
         if(detectedRssi != null)
             etBeaconDetailRssi.setText(detectedRssi);
+        else
+            etBeaconDetailRssi.setText("-80");
         beaconId = intent.getStringExtra("id");
         nickname = intent.getStringExtra("nickname");
         if(nickname != null)
@@ -173,13 +190,13 @@ public class ActivityBeaconDetail extends AppCompatActivity {
             String urlnear = etBeaconDetailUrlNear.getText().toString();
             String urlfar = etBeaconDetailUrlFar.getText().toString();
 
-            Log.e(TAG, "onActionClicked: " + uuid + major + minor);
+            Log.e(TAG, "onActionClicked: " + uuid + "|" + major + "|" + minor);
 
             if(uuid.equals("")||major.equals("")||minor.equals("")||rssi.equals(""))
                 Toast.makeText(this, "UUID/Major/Minor/Rssi cannot be empty", Toast.LENGTH_SHORT).show();
             else {
                 Map<String, String> postParams = new HashMap<>();
-                postParams.put("uuid", urlfar);
+                postParams.put("uuid", uuid);
                 postParams.put("major", major);
                 postParams.put("minor", minor);
                 postParams.put("rssi", rssi);
