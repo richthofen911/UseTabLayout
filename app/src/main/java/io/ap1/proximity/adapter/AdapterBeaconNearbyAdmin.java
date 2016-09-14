@@ -56,6 +56,8 @@ public class AdapterBeaconNearbyAdmin extends RecyclerView.Adapter<ViewHolderBea
         viewHolder.urlfar = beaconTmp.getUrlfar();
         viewHolder.lat = beaconTmp.getLat();
         viewHolder.lng = beaconTmp.getLng();
+        viewHolder.notifytitle = beaconTmp.getNotifytitle();
+        viewHolder.notifytext = beaconTmp.getNotifytext();
         viewHolder.macaddress = beaconTmp.getMacaddress();
 
         viewHolder.selfPosition = position;

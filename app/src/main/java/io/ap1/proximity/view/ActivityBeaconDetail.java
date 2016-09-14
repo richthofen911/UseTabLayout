@@ -113,29 +113,20 @@ public class ActivityBeaconDetail extends AppCompatActivity {
 
         Intent intent = getIntent();
         String detectedUuid = intent.getStringExtra("uuid");
-        etBeaconDetailUuid.clearFocus();
         etBeaconDetailUuid.setFocusable(false);
         etBeaconDetailUuid.setFocusableInTouchMode(false);
-        if(detectedUuid != null){
+        if(detectedUuid != null)
             etBeaconDetailUuid.setText(detectedUuid);
-
-        }
         String detectedMajor = intent.getStringExtra("major");
-        etBeaconDetailMajor.clearFocus();
         etBeaconDetailMajor.setFocusable(false);
         etBeaconDetailMajor.setFocusableInTouchMode(false);
-        if(detectedMajor != null){
+        if(detectedMajor != null)
             etBeaconDetailMajor.setText(detectedMajor);
-
-        }
         String detectedMinor = intent.getStringExtra("minor");
-        etBeaconDetailMinor.clearFocus();
         etBeaconDetailMinor.setFocusable(false);
         etBeaconDetailMinor.setFocusableInTouchMode(false);
-        if(detectedMinor != null){
+        if(detectedMinor != null)
             etBeaconDetailMinor.setText(detectedMinor);
-
-        }
         String detectedRssi = intent.getStringExtra("rssi");
         if(detectedRssi != null)
             etBeaconDetailRssi.setText(detectedRssi);
@@ -154,11 +145,39 @@ public class ActivityBeaconDetail extends AppCompatActivity {
         addOrDel = intent.getStringExtra("addOrDel");
         if(addOrDel.equals("add"))
             tvToolbarBeaconAction.setText("ADD");
-        if(addOrDel.equals("del"))
+        else if(addOrDel.equals("del"))
             tvToolbarBeaconAction.setText("REMOVE");
+        else
+            tvToolbarBeaconAction.setVisibility(View.GONE);
 
-        etBeaconDetailUrlNear.setText(R.string.default_beacon_url);
-        etBeaconDetailUrlFar.setText(R.string.default_beacon_url);
+        String urlNear = intent.getStringExtra("urlnear");
+        if(urlNear != null)
+            etBeaconDetailUrlNear.setText(urlNear);
+        else
+            etBeaconDetailUrlNear.setText(R.string.default_beacon_url);
+
+        String urlFar = intent.getStringExtra("urlfar");
+        if(urlFar != null)
+            etBeaconDetailUrlFar.setText(urlFar);
+        else
+            etBeaconDetailUrlFar.setText(R.string.default_beacon_url);
+
+        String notifyTitle = intent.getStringExtra("notifytitle");
+        if(notifyTitle != null)
+            etBeaconDetailTitle.setText(notifyTitle);
+
+        String notifyText = intent.getStringExtra("notifytext");
+        if(notifyText != null)
+            etBeaconDetailMessage.setText(notifyText);
+
+        String lat = intent.getStringExtra("lat");
+        if(lat != null)
+            etBeaconDetailLat.setText(lat);
+
+        String lng = intent.getStringExtra("lng");
+        if(lng != null)
+            etBeaconDetailLng.setText(lng);
+
 
         tvBeaconDetailCompanyArrow.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -189,6 +208,8 @@ public class ActivityBeaconDetail extends AppCompatActivity {
                 lng = getResources().getString(R.string.default_lng);
             String urlnear = etBeaconDetailUrlNear.getText().toString();
             String urlfar = etBeaconDetailUrlFar.getText().toString();
+            String notifyTitle = etBeaconDetailTitle.getText().toString();
+            String notifyText = etBeaconDetailMessage.getText().toString();
 
             Log.e(TAG, "onActionClicked: " + uuid + "|" + major + "|" + minor);
 
@@ -214,6 +235,10 @@ public class ActivityBeaconDetail extends AppCompatActivity {
                     postParams.put("urlnear", urlnear);
                 if(!urlfar.equals(""))
                     postParams.put("urlfar", urlfar);
+                if(!notifyTitle.equals(""))
+                    postParams.put("notifytitle", notifyTitle);
+                if(!notifyText.equals(""))
+                    postParams.put("notifytext", notifyText);
 
                 MyProgressDialog.show(this, "Processing...");
                 ApiCaller.getInstance(getApplicationContext()).setAPI(DataStore.urlBase, Constants.API_PATH_ADD_BEACON, null, postParams, Request.Method.POST)

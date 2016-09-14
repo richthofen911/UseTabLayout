@@ -15,6 +15,9 @@ import android.view.WindowManager;
 
 import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
 
 import io.ap1.proximity.Constants;
 import io.ap1.proximity.MyApplication;

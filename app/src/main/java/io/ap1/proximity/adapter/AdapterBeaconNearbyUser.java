@@ -3,6 +3,7 @@ package io.ap1.proximity.adapter;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +20,8 @@ import io.ap1.proximity.viewholder.ViewHolderBeaconNearbyUser;
  * Created by admin on 22/02/16.
  */
 public class AdapterBeaconNearbyUser extends RecyclerView.Adapter<ViewHolderBeaconNearbyUser>{
+    private final static String TAG = "AdapterBeaconUser";
+
     private Ap1Beacon beaconTmp = null;
     private int rssiBorder = ActivityMain.rssiBorder;
     private DatabaseHelper databaseHelper;
@@ -50,7 +53,11 @@ public class AdapterBeaconNearbyUser extends RecyclerView.Adapter<ViewHolderBeac
         viewHolder.tvBeaconNearbyUserName.setText(beaconTmp.getNickname());
         String attr = Constants.MAJOR + beaconTmp.getMajor() + Constants.MINOR + beaconTmp.getMinor();
         viewHolder.tvBeaconNearbyUserAttributes.setText(attr);
-        if(Integer.parseInt(beaconTmp.getRssi()) > rssiBorder){
+        String rssiStr = beaconTmp.getRssi();
+        Log.e(TAG, "onBindViewHolder: getRssi: " + rssiStr);
+        if(rssiStr.equals(""))
+            rssiStr = "-60";
+        if(Integer.parseInt(rssiStr) > rssiBorder){
             viewHolder.tvBeaconNearbyUserIsNearby.setText("Nearby");
             viewHolder.url = (beaconTmp.getUrlnear());
         }

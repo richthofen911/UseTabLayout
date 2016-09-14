@@ -37,6 +37,8 @@ public class ViewHolderBeaconNearbyAdmin extends RecyclerView.ViewHolder{
     public String idcompany = "unknown";
     public String urlnear = "unknown";
     public String urlfar = "unknown";
+    public String notifytext = "unknown";
+    public String notifytitle = "unknown";
     public String lat = "unknown";
     public String lng = "unknown";
     public String macaddress = "unknown";
@@ -82,6 +84,12 @@ public class ViewHolderBeaconNearbyAdmin extends RecyclerView.ViewHolder{
                 intent.putExtra("id", beaconId);
                 intent.putExtra("nickname", nickname);
                 intent.putExtra("idcompany", idcompany);
+                intent.putExtra("urlnear", urlnear);
+                intent.putExtra("urlfar", urlfar);
+                intent.putExtra("notifytitle", notifytitle);
+                intent.putExtra("notifytext", notifytext);
+                intent.putExtra("lat", lat);
+                intent.putExtra("lng", lng);
                 intent.putExtra("addOrDel", "del");
                 activity.startActivityForResult(intent, Constants.INTENT_REQUEST_CODE_AD_BEACON);
             }
