@@ -99,6 +99,7 @@ public abstract class ServiceBeaconManagement<T extends RecyclerView.Adapter> ex
         int index = -1;  // if the index stays as -1, it means the detected beacon is
         String rssiNew = null;
 
+        // check if the beacon has been in the detected list already or not
         for(int i = 0; i < DataStore.detectedBeaconList.size(); i++){
             Ap1Beacon beaconInDetectedList = DataStore.detectedBeaconList.get(i);
             if(BeaconOperation.equals(detectedBeacon, beaconInDetectedList)){
@@ -132,7 +133,7 @@ public abstract class ServiceBeaconManagement<T extends RecyclerView.Adapter> ex
     protected void actionOnEnterAp1Beacon(Ap1Beacon ap1Beacon){
         List<Ap1Beacon> beaconQueried = databaseHelper.queryBeacons(ap1Beacon);
         if(beaconQueried != null){
-            // if beaconQueried is in local db, add it to detected&added list
+            // if beaconQueried is in local db, add it to detected&registered list
             for(Ap1Beacon queryResult : beaconQueried){
                 Log.e(TAG, "actionOnEnterAp1Beacon: " + queryResult.getMajor() + "-" + queryResult.getMinor() + ": " + queryResult.getIdparent() + " is in localDB");
                 String nickname = queryResult.getNickname();
@@ -146,8 +147,8 @@ public abstract class ServiceBeaconManagement<T extends RecyclerView.Adapter> ex
                 if(recyclerViewFromOutside == null){
                     Log.e(TAG, "actionOnEnterAp1Beacon: recyclerveiw is null");
                 }else{
-                    addToDetectedAndRegisteredList(recyclerViewFromOutside, DataStore.detectedAndAddedBeaconList.size(), queryResult);
                     addToDetectedList(recyclerViewFromOutside, DataStore.detectedBeaconList.size(), queryResult);
+                    addToDetectedAndRegisteredList(recyclerViewFromOutside, DataStore.detectedAndAddedBeaconList.size(), queryResult);
                 }
             }
         }else{
@@ -157,7 +158,6 @@ public abstract class ServiceBeaconManagement<T extends RecyclerView.Adapter> ex
                 addToDetectedList(recyclerViewFromOutside, DataStore.detectedBeaconList.size(), ap1Beacon);
         }
 
-        displayDetectedAndRegisteredBeaconsList("NewBeacon"); // this method call is for debugging
     }
 
     @Override
@@ -232,8 +232,7 @@ public abstract class ServiceBeaconManagement<T extends RecyclerView.Adapter> ex
                             Log.e("notifyItemRangeChanged", "position extends");
                             t.notifyItemRangeChanged(position, DataStore.detectedBeaconList.size() - position);
                         }
-                    }else
-                        addToDetectedList(recyclerView, position, newBeacon);
+                    }
                 }
             });
 
@@ -252,8 +251,7 @@ public abstract class ServiceBeaconManagement<T extends RecyclerView.Adapter> ex
                         if(position != DataStore.detectedAndAddedBeaconList.size() - 1){
                             t.notifyItemRangeChanged(position, DataStore.detectedAndAddedBeaconList.size() - position);
                         }
-                    }else
-                        addToDetectedAndRegisteredList(recyclerView, position, newBeacon);
+                    }
                 }
             });
         }
@@ -309,27 +307,12 @@ public abstract class ServiceBeaconManagement<T extends RecyclerView.Adapter> ex
         return t;
     }
 
-    // this method is just for debug
-    private void displayDetectedAndRegisteredBeaconsList(String step){
-        StringBuilder stringBuilder = new StringBuilder();
-        for(Ap1Beacon beacon : DataStore.detectedAndAddedBeaconList){
-            stringBuilder.append(beacon.getMajor()).append("-").append(beacon.getMinor()).append("\n");
-        }
-        Log.e(TAG, "D&R beacons: " + stringBuilder.toString());
-    }
-
-    /*
-    public boolean isRecyclerViewFromOutsideSet(){
-        return isRecyclerViewFromOutsideSet;
-    }
-    */
-
     @Override
     public void startScanning(){
         super.startScanning();
 
-        DataStore.detectedBeaconList.clear();
-        DataStore.detectedAndAddedBeaconList.clear();
+        //DataStore.detectedBeaconList.clear();
+        //DataStore.detectedAndAddedBeaconList.clear();
 
         timerResortList = new Timer(); // cancel it in onDestroy()
         timerResortList.schedule(new TimerTask() {

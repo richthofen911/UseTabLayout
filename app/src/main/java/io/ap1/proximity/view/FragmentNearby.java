@@ -1,6 +1,7 @@
 package io.ap1.proximity.view;
 
 import android.os.Bundle;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -13,12 +14,12 @@ import android.widget.Toast;
 
 import io.ap1.libap1beaconmngt.ServiceBeaconManagement;
 import io.ap1.proximity.R;
+import io.ap1.proximity.WrapContentLinearLayoutManager;
 
 public class FragmentNearby extends FragmentPreloadControl {
 
     private static final String TAG = "FragmentNearbyUser";
     public RecyclerView recyclerViewBeaconNearby;
-    private LinearLayoutManager linearLayoutManager;
     private Toolbar toolbar;
     private TextView tvToolbarEnd;
 
@@ -45,13 +46,23 @@ public class FragmentNearby extends FragmentPreloadControl {
         toolbar = ((ActivityMain)getActivity()).toolbar;
         //adapterBeaconNearbyUser = ;
         recyclerViewBeaconNearby = (RecyclerView) view.findViewById(R.id.recyclerView_beacon_nearby);
+
+/*
+        recyclerViewBeaconNearby.setItemAnimator(new DefaultItemAnimator(){
+            @Override
+            public boolean canReuseUpdatedViewHolder(RecyclerView.ViewHolder viewHolder){
+                return  true;
+            }}
+        );
+*/
+
         beaconManagementService = ((ActivityMain)getActivity()).serviceMyBeaconMngt;
         if(beaconManagementService != null)
             beaconManagementService.setRecyclerView(recyclerViewBeaconNearby);
         else
             Log.e(TAG, "onCreateView: beacon service is null");
-        linearLayoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
-        recyclerViewBeaconNearby.setLayoutManager(linearLayoutManager);
+        recyclerViewBeaconNearby.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
+        //recyclerViewBeaconNearby.setLayoutManager(new WrapContentLinearLayoutManager(getActivity().getApplicationContext()));
         recyclerViewBeaconNearby.setHasFixedSize(true);
         recyclerViewBeaconNearby.setAdapter(((ActivityMain)getActivity()).adapterBeaconNearbyUser);
 
@@ -76,19 +87,18 @@ public class FragmentNearby extends FragmentPreloadControl {
                 if(hiddenPermission.equals("User")){
                     tvToolbarEnd.setText("Admin");
                     // swap to permission User
-                    //recyclerViewBeaconNearby.setAdapter(null);
-                    //recyclerViewBeaconNearby.setAdapter(((ActivityMain)getActivity()).adapterBeaconNearbyUser);
-                    recyclerViewBeaconNearby.swapAdapter(((ActivityMain)getActivity()).adapterBeaconNearbyUser, true);
+                    recyclerViewBeaconNearby.setAdapter(null);
+                    recyclerViewBeaconNearby.setAdapter(((ActivityMain)getActivity()).adapterBeaconNearbyUser);
+
                 }else if(hiddenPermission.equals("Admin")){ // which means current permission is User
                     tvToolbarEnd.setText("User");
                     // swap to permission Admin
-                    //recyclerViewBeaconNearby.setAdapter(null);
-                    //recyclerViewBeaconNearby.setAdapter(((ActivityMain)getActivity()).adapterBeaconNearbyAdmin);
-                    recyclerViewBeaconNearby.swapAdapter(((ActivityMain)getActivity()).adapterBeaconNearbyAdmin, true);
+                    recyclerViewBeaconNearby.setAdapter(null);
+                    recyclerViewBeaconNearby.setAdapter(((ActivityMain)getActivity()).adapterBeaconNearbyAdmin);
                 }else {
                     Toast.makeText(getContext(), "Role error", Toast.LENGTH_SHORT).show();
                 }
-                recyclerViewBeaconNearby.getAdapter().notifyDataSetChanged();
+               // recyclerViewBeaconNearby.getAdapter().notifyDataSetChanged();
             }
         });
     }

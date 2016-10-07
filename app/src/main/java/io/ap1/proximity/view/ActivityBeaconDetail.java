@@ -103,6 +103,8 @@ public class ActivityBeaconDetail extends AppCompatActivity {
 
     Handler handler;
 
+    int viewholderPosition;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,7 +114,7 @@ public class ActivityBeaconDetail extends AppCompatActivity {
         databaseHelper = DatabaseHelper.getHelper(this);
 
         Intent intent = getIntent();
-        String detectedUuid = intent.getStringExtra("uuid");
+        String detectedUuid = intent.getStringExtra("uuid").toUpperCase();
         etBeaconDetailUuid.setFocusable(false);
         etBeaconDetailUuid.setFocusableInTouchMode(false);
         if(detectedUuid != null)
@@ -178,6 +180,7 @@ public class ActivityBeaconDetail extends AppCompatActivity {
         if(lng != null)
             etBeaconDetailLng.setText(lng);
 
+        viewholderPosition = intent.getIntExtra("position", 0);
 
         tvBeaconDetailCompanyArrow.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -191,15 +194,17 @@ public class ActivityBeaconDetail extends AppCompatActivity {
 
     public void onActionClicked(final View v){
         Log.e(TAG, "onActionClicked: " + ((TextView) v).getText().toString());
+
+        // --- required params
+        final String uuid = etBeaconDetailUuid.getText().toString();
+        final String major = etBeaconDetailMajor.getText().toString();
+        final String minor = etBeaconDetailMinor.getText().toString();
+        final String rssi = etBeaconDetailRssi.getText().toString();
         if(((TextView) v).getText().toString().equals("ADD")){
-            // --- required params
-            String uuid = etBeaconDetailUuid.getText().toString();
-            String major = etBeaconDetailMajor.getText().toString();
-            String minor = etBeaconDetailMinor.getText().toString();
-            String rssi = etBeaconDetailRssi.getText().toString();
+
             // --- optional params
             String nickname = etBeaconDetailNickName.getText().toString();
-            String macaddress = etBeaconDetailMacAddress.getText().toString();
+            final String macaddress = etBeaconDetailMacAddress.getText().toString();
             String lat = etBeaconDetailLat.getText().toString();
             if(lat.equals(""))
                 lat = getResources().getString(R.string.default_lat);
@@ -213,11 +218,11 @@ public class ActivityBeaconDetail extends AppCompatActivity {
 
             Log.e(TAG, "onActionClicked: " + uuid + "|" + major + "|" + minor);
 
-            if(uuid.equals("")||major.equals("")||minor.equals("")||rssi.equals(""))
-                Toast.makeText(this, "UUID/Major/Minor/Rssi cannot be empty", Toast.LENGTH_SHORT).show();
+            if(uuid.equals("")||major.equals("")||minor.equals("")||rssi.equals("")||tvBeaconDetailCompanySelect.getText().toString().equals(""))
+                Toast.makeText(this, "UUID/Major/Minor/Rssi/Company cannot be empty", Toast.LENGTH_SHORT).show();
             else {
                 Map<String, String> postParams = new HashMap<>();
-                postParams.put("uuid", uuid);
+                postParams.put("uuid", uuid.toUpperCase());
                 postParams.put("major", major);
                 postParams.put("minor", minor);
                 postParams.put("rssi", rssi);
@@ -252,6 +257,11 @@ public class ActivityBeaconDetail extends AppCompatActivity {
                                     if(jsonObject.getString("success").equals("1")){
                                         Snackbar.make(v, "New Beacon Added", Snackbar.LENGTH_SHORT).show();
                                         Intent resultIntent = new Intent();
+                                        resultIntent.putExtra("action", "add");
+                                        resultIntent.putExtra("uuid", uuid);
+                                        resultIntent.putExtra("major", major);
+                                        resultIntent.putExtra("minor", minor);
+                                        resultIntent.putExtra("position", viewholderPosition);
                                         setResult(RESULT_OK, resultIntent);
                                         finish();
                                     }
@@ -291,6 +301,12 @@ public class ActivityBeaconDetail extends AppCompatActivity {
                                 if(jsonObject.getString("success").equals("1")){
                                     Snackbar.make(v, "Beacon Deleted", Snackbar.LENGTH_SHORT).show();
                                     Intent resultIntent = new Intent();
+                                    resultIntent.putExtra("action", "del");
+                                    resultIntent.putExtra("uuid", uuid);
+                                    resultIntent.putExtra("major", major);
+                                    resultIntent.putExtra("minor", minor);
+                                    resultIntent.putExtra("rssi", rssi);
+                                    resultIntent.putExtra("position", viewholderPosition);
                                     setResult(RESULT_OK, resultIntent);
                                     finish();
                                 }

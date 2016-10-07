@@ -17,8 +17,6 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
@@ -43,8 +41,14 @@ import com.google.gson.Gson;
 import com.pubnub.api.Pubnub;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import io.ap1.libap1beaconmngt.Ap1Beacon;
+import io.ap1.libap1beaconmngt.BeaconOperation;
 import io.ap1.libap1beaconmngt.CallBackSyncData;
 import io.ap1.libap1beaconmngt.DataStore;
+import io.ap1.libap1beaconmngt.DatabaseHelper;
 import io.ap1.libbeacondetection.BeaconParserType;
 import io.ap1.libbeacondetection.RegionDescription;
 import io.ap1.proximity.AppDataStore;
@@ -69,6 +73,8 @@ public class ActivityMain extends AppCompatActivity{
 
     public static String PACKAGE_NAME = "undefined";
     public static String loginUsername = "undefined";
+
+    public static ActivityMain instance = null;
 
     // the app should show beacons with rssi larger than -100, and treat those rssi largenr than -60 as NEAR
 
@@ -135,6 +141,8 @@ public class ActivityMain extends AppCompatActivity{
     // this time but it will be resumed next time.
     private SharedPreferences spOriginalBTName;
 
+    private DatabaseHelper databaseHelper;
+
     private BroadcastReceiver mLocalReceiver; // used to receive local broadcast for Service-Activity interaction
 
     @Override
@@ -142,6 +150,7 @@ public class ActivityMain extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        instance = this;
 
         PACKAGE_NAME = getApplicationContext().getPackageName();
 
@@ -153,6 +162,8 @@ public class ActivityMain extends AppCompatActivity{
         adapterBeaconNearbyUser = new AdapterBeaconNearbyUser(this);
         adapterBeaconPlaces = new AdapterBeaconPlaces(this);
         adapterFragmentPager = new AdapterFragmentPager(getSupportFragmentManager());
+
+        databaseHelper = DatabaseHelper.getHelper(this);
 
         adapterUserInList = new AdapterUserInList(this);
         adapterUserInList.registerAdapterDataObserver(ActivityMain.adapterDataObserver);
@@ -502,6 +513,7 @@ public class ActivityMain extends AppCompatActivity{
             serviceMyBeaconMngt.stopScanning();
     }
 
+    /*
     public void updateCompanySet(String apiPath, CallBackSyncData callBackUpdateCompanySet){
         if(binderBeaconManagement != null && binderBeaconManagement.isBinderAlive())
             serviceMyBeaconMngt.checkRemoteCompanyHash(apiPath, callBackUpdateCompanySet);
@@ -511,25 +523,121 @@ public class ActivityMain extends AppCompatActivity{
         if(binderBeaconManagement != null && binderBeaconManagement.isBinderAlive())
             serviceMyBeaconMngt.checkRemoteBeaconHash(apiPath, callBackSyncData);
     }
+    */
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.e(TAG, "onActivityResult: ");
-        switch (requestCode){
-            case Constants.INTENT_REQUEST_CODE_AD_BEACON:
-                if(resultCode == RESULT_OK){
-                    DataStore.registeredAndGroupedBeaconList.clear();
-                    updateBeaconSet(Constants.API_PATH_GET_BEACONS, new CallBackSyncData() {
+    public void clearRecyclerViewData(ArrayList arrayList, RecyclerView.Adapter adapter){
+        int size = arrayList.size();
+        arrayList.clear();
+        /*
+        ((FragmentNearby)adapterFragmentPager.getItem(1)).accessRecyclerView().getRecycledViewPool().clear();
+        for(int i = 0; i < size; i++){
+            if(size > 0)
+                arrayList.remove(i);
+            adapter.notifyItemRangeRemoved(0, size);
+        }
+*/
+        adapter.notifyDataSetChanged();
+    }
+
+    public void updateDataAfterBeaconAddDel(final Intent data){
+        if(binderBeaconManagement != null && binderBeaconManagement.isBinderAlive()){
+            MyProgressDialog.show(ActivityMain.this, "Updating Company Data...");
+            serviceMyBeaconMngt.checkRemoteCompanyHash(Constants.API_PATH_GET_COMPANIES, new CallBackSyncData() {
+                @Override
+                public void onSuccess() {
+                    MyProgressDialog.dismissDialog();
+                    MyProgressDialog.show(ActivityMain.this, "Updating Beacon Data...");
+                    serviceMyBeaconMngt.checkRemoteBeaconHash(Constants.API_PATH_GET_BEACONS, new CallBackSyncData() {
                         @Override
                         public void onSuccess() {
-                            stopScanning();
+                            MyProgressDialog.dismissDialog();
+
+                            isSyncDataDone = true;
+
+                            String action = data.getStringExtra("action");
+                            int position = data.getIntExtra("position", 0);
+                            if(action.equals("add")){
+                                Ap1Beacon newAddedBeacon = new Ap1Beacon();
+                                newAddedBeacon.setUuid(data.getStringExtra("uuid"));
+                                newAddedBeacon.setMajor(data.getStringExtra("major"));
+                                newAddedBeacon.setMinor(data.getStringExtra("minor"));
+
+                                List<Ap1Beacon> beaconQueried = databaseHelper.queryBeacons(newAddedBeacon);
+                                Ap1Beacon queryResult = null;
+                                if(beaconQueried != null) {
+                                    // if beaconQueried is in local db, add it to detected&registered list
+                                    queryResult = beaconQueried.get(0);
+                                    String nickname = queryResult.getNickname();
+                                    if (nickname == null)
+                                        queryResult.setNickname("undefined"); // it means the beacon is in Ap1 DB but the name was not given
+                                    else
+                                        queryResult.setNickname(nickname);
+                                    queryResult.setUrlfar(queryResult.getUrlfar());
+                                    queryResult.setUrlnear(queryResult.getUrlnear());
+                                }
+                                if(queryResult != null){
+                                    DataStore.detectedBeaconList.set(position, queryResult);
+                                    adapterBeaconNearbyAdmin.notifyItemChanged(position, queryResult);
+                                    DataStore.detectedAndAddedBeaconList.add(queryResult);
+                                    adapterBeaconNearbyUser.notifyItemInserted(DataStore.detectedAndAddedBeaconList.size() - 1);
+                                }
+                            }else if(action.equals("del")){
+                                Ap1Beacon newEmptyBeacon = new Ap1Beacon();
+                                newEmptyBeacon.setUuid(data.getStringExtra("uuid"));
+                                newEmptyBeacon.setMajor(data.getStringExtra("major"));
+                                newEmptyBeacon.setMinor(data.getStringExtra("minor"));
+                                newEmptyBeacon.setRssi(data.getStringExtra("rssi"));
+                                DataStore.detectedBeaconList.set(position, newEmptyBeacon);
+                                adapterBeaconNearbyAdmin.notifyItemChanged(position, newEmptyBeacon);
+
+                                for(int i = 0; i < DataStore.detectedAndAddedBeaconList.size(); i++){
+                                    if(BeaconOperation.equals(newEmptyBeacon, DataStore.detectedAndAddedBeaconList.get(i))){
+                                        Log.e(TAG, "onSuccess: find added one to remove: " + i);
+                                        DataStore.detectedAndAddedBeaconList.remove(i);
+                                        adapterBeaconNearbyUser.notifyItemRemoved(i);
+                                        //adapterBeaconNearbyUser.notifyItemRangeChanged(0, DataStore.detectedAndAddedBeaconList.size() - 1);
+                                        break;
+                                    }
+                                }
+
+                            }
+
                             startScanning();
                         }
 
                         @Override
-                        public void onFailure(String cause){
+                        public void onFailure(String cause) {
+                            MyProgressDialog.dismissDialog();
+                            Toast.makeText(ActivityMain.this, cause, Toast.LENGTH_SHORT).show();
+                            Log.e("update beacon hash err", cause);
                         }
                     });
+                }
+
+                @Override
+                public void onFailure(String cause) {
+                    MyProgressDialog.dismissDialog();
+                    Toast.makeText(ActivityMain.this, cause, Toast.LENGTH_SHORT).show();
+                    Log.e("update company data err", cause);
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode){
+            case Constants.INTENT_REQUEST_CODE_AD_BEACON:
+                if(resultCode == RESULT_OK){
+                    DataStore.registeredAndGroupedBeaconList.clear();
+                    Log.e(TAG, "onActivityResult: updating beacon list after beacon AD");
+
+                    //clearRecyclerViewData(DataStore.detectedBeaconList, adapterBeaconNearbyAdmin);
+                    //clearRecyclerViewData(DataStore.detectedAndAddedBeaconList, adapterBeaconNearbyUser);
+                    //((FragmentNearby)adapterFragmentPager.getItem(1)).accessRecyclerView().swapAdapter(adapterEmpty, true);
+                    updateDataAfterBeaconAddDel(data);
+                    //((FragmentNearby)adapterFragmentPager.getItem(1)).accessRecyclerView().swapAdapter(adapterBeaconNearbyAdmin, true);
+
                 }
         }
     }

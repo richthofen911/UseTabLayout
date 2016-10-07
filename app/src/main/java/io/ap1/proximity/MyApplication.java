@@ -17,8 +17,8 @@ public class MyApplication extends Application{
     public void onCreate(){
         super.onCreate();
 
-        crashHandler = CrashHandler.getInstance();
-        crashHandler.init(this);
+        //crashHandler = CrashHandler.getInstance();
+        //crashHandler.init(this);
 //        crashHandler.setDeviceInfo(deviceInfo);
     }
 

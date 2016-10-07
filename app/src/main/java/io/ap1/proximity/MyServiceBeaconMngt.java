@@ -66,8 +66,8 @@ public class MyServiceBeaconMngt<T extends RecyclerView.Adapter> extends Service
                                 JSONObject jsonObject = new JSONObject(result);
                                 String remoteBeaconHash = jsonObject.getString("hash");
                                 databaseHelper.deleteAllBeacons(MyServiceBeaconMngt.this); //drop the old beacon table and create a new one
-                                clearDetectedBeaconList(); // clear current detected beacon list display
-                                DataStore.detectedBeaconList.clear();
+                                //clearDetectedBeaconList(); // clear current detected beacon list display
+                                //DataStore.detectedBeaconList.clear();
                                 JSONArray beaconSetRemote = jsonObject.getJSONArray("beacons");
                                 updateLocalBeaconDB(beaconSetRemote, callBackSyncData, remoteBeaconHash);
                             } catch (JSONException e) {

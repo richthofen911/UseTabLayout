@@ -38,8 +38,7 @@ public class AdapterBeaconNearbyUser extends RecyclerView.Adapter<ViewHolderBeac
     }
 
     @Override
-    public void onBindViewHolder(ViewHolderBeaconNearbyUser viewHolder, final int position){
-        viewHolder.setIsRecyclable(false);
+    public void onBindViewHolder(ViewHolderBeaconNearbyUser viewHolder, int position){
         beaconTmp = DataStore.detectedAndAddedBeaconList.get(position);
         String companyId = beaconTmp.getIdcompany();
         String title = databaseHelper.queryForOneCompany(companyId).getCompany();

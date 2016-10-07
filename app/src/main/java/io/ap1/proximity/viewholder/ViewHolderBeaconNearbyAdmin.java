@@ -19,8 +19,6 @@ import io.ap1.proximity.view.ActivityMain;
  */
 public class ViewHolderBeaconNearbyAdmin extends RecyclerView.ViewHolder{
 
-    public int selfPosition;
-
     public TextView tvBeaconNearbyAdminName;
     public TextView tvBeaconNearbyAdminStatus;
     public TextView tvBeaconNearbyUserAttributes;
@@ -66,6 +64,11 @@ public class ViewHolderBeaconNearbyAdmin extends RecyclerView.ViewHolder{
                 intent.putExtra("minor", minor);
                 intent.putExtra("rssi", rssi);
                 intent.putExtra("addOrDel", "add");
+                //intent.putExtra("position", getAdapterPosition());
+                intent.putExtra("position", getLayoutPosition());
+
+                ActivityMain.instance.stopScanning();
+
                 //context.startActivity(intent);
                 //((ActivityMain)context).startActivityForResult(intent, Constants.INTENT_REQUEST_CODE_AD_BEACON); // AD means add/delete
                 activity.startActivityForResult(intent, Constants.INTENT_REQUEST_CODE_AD_BEACON);
@@ -91,6 +94,11 @@ public class ViewHolderBeaconNearbyAdmin extends RecyclerView.ViewHolder{
                 intent.putExtra("lat", lat);
                 intent.putExtra("lng", lng);
                 intent.putExtra("addOrDel", "del");
+                //intent.putExtra("position", getAdapterPosition());
+                intent.putExtra("position", getLayoutPosition());
+
+                ActivityMain.instance.stopScanning();
+
                 activity.startActivityForResult(intent, Constants.INTENT_REQUEST_CODE_AD_BEACON);
             }
         });
