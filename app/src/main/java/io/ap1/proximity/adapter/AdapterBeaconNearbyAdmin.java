@@ -30,8 +30,12 @@ public class AdapterBeaconNearbyAdmin extends RecyclerView.Adapter<ViewHolderBea
     public void onBindViewHolder(ViewHolderBeaconNearbyAdmin viewHolder, int position){
         beaconTmp = DataStore.detectedBeaconList.get(position);
         String nickname = beaconTmp.getNickname();
-        if(nickname == null)
+        if(nickname == null){
             nickname = "Inactive"; // it means it's not a registered Ap1 Beacon
+            viewHolder.ivBeaconNearbyAdminInfo.setVisibility(View.GONE);
+            viewHolder.tvArrowNearbyAdmin.setVisibility(View.VISIBLE);
+            viewHolder.tvBeaconNearbyAdminStatus.setText("");
+        }
         else{
             viewHolder.tvArrowNearbyAdmin.setVisibility(View.GONE);
             viewHolder.ivBeaconNearbyAdminInfo.setVisibility(View.VISIBLE);
