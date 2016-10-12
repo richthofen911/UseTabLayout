@@ -1,6 +1,10 @@
 package io.ap1.proximity;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
@@ -24,6 +28,8 @@ import io.ap1.libap1beaconmngt.DataStore;
 import io.ap1.libap1beaconmngt.ServiceBeaconManagement;
 import io.ap1.libap1util.ApiCaller;
 import io.ap1.libap1util.CallbackDefaultVolley;
+import io.ap1.proximity.view.ActivityBeaconUrlContent;
+import io.ap1.proximity.view.ActivityMain;
 
 public class MyServiceBeaconMngt<T extends RecyclerView.Adapter> extends ServiceBeaconManagement {
     private final String TAG = "MyServiceBeaconMgnt";
@@ -41,6 +47,28 @@ public class MyServiceBeaconMngt<T extends RecyclerView.Adapter> extends Service
     public IBinder onBind(Intent intent) {
         super.onBind(intent);
         return new BinderMyBeaconMngt();
+    }
+
+    @Override
+    protected void actionOnEnterAp1Beacon(Ap1Beacon ap1Beacon){
+        super.actionOnEnterAp1Beacon(ap1Beacon);
+        if(super.queryResult != null){
+            Log.e(TAG, "actionOnEnterAp1Beacon: " + ap1Beacon.getMajor() + "|" + queryResult.getUrlnear());
+            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            Intent intent = new Intent(this, ActivityBeaconUrlContent.class);
+            intent.putExtra("url", queryResult.getUrlnear());
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+            Notification notification = new Notification.Builder(this)
+                    .setSmallIcon(R.drawable.ic_beacon_found_24dp)
+                    .setContentTitle(queryResult.getNotifytitle())
+                    .setContentText(queryResult.getNotifytext())
+                    .setAutoCancel(true)
+                    .setContentIntent(pendingIntent).build();
+            notificationManager.notify(Constants.NOTIFICATION_FLAG_FOUND_BEACON, notification);
+            Log.e(TAG, "actionOnEnterAp1Beacon: notify");
+            super.queryResult = null;
+        }
     }
 
     @Override

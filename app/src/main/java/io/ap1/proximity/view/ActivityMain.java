@@ -1,6 +1,9 @@
 package io.ap1.proximity.view;
 
 import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -580,6 +583,7 @@ public class ActivityMain extends AppCompatActivity{
                                     adapterBeaconNearbyAdmin.notifyItemChanged(position, queryResult);
                                     DataStore.detectedAndAddedBeaconList.add(queryResult);
                                     adapterBeaconNearbyUser.notifyItemInserted(DataStore.detectedAndAddedBeaconList.size() - 1);
+                                    notifyBeaconDetected(queryResult.getNotifytitle(), queryResult.getNotifytext(), queryResult.getUrlnear());
                                 }
                             }else if(action.equals("del")){
                                 Ap1Beacon newEmptyBeacon = new Ap1Beacon();
@@ -595,13 +599,10 @@ public class ActivityMain extends AppCompatActivity{
                                         Log.e(TAG, "onSuccess: find added one to remove: " + i);
                                         DataStore.detectedAndAddedBeaconList.remove(i);
                                         adapterBeaconNearbyUser.notifyItemRemoved(i);
-                                        //adapterBeaconNearbyUser.notifyItemRangeChanged(0, DataStore.detectedAndAddedBeaconList.size() - 1);
                                         break;
                                     }
                                 }
-
                             }
-
                             startScanning();
                         }
 
@@ -624,6 +625,25 @@ public class ActivityMain extends AppCompatActivity{
         }
     }
 
+    /**
+     * When a beacon is registered and detected, show notification message of the beacon's
+     * notifyTitle and notifyMessage, show it's url content when click the notification
+     */
+    public void notifyBeaconDetected(String title, String message, String url){
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        Intent intent = new Intent(this, ActivityBeaconUrlContent.class);
+        intent.putExtra("url", url);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+        Notification notification = new Notification.Builder(this)
+                .setSmallIcon(R.drawable.ic_beacon_found_24dp)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent).build();
+        notificationManager.notify(Constants.NOTIFICATION_FLAG_ADD_BEACON, notification);
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode){
@@ -632,12 +652,7 @@ public class ActivityMain extends AppCompatActivity{
                     DataStore.registeredAndGroupedBeaconList.clear();
                     Log.e(TAG, "onActivityResult: updating beacon list after beacon AD");
 
-                    //clearRecyclerViewData(DataStore.detectedBeaconList, adapterBeaconNearbyAdmin);
-                    //clearRecyclerViewData(DataStore.detectedAndAddedBeaconList, adapterBeaconNearbyUser);
-                    //((FragmentNearby)adapterFragmentPager.getItem(1)).accessRecyclerView().swapAdapter(adapterEmpty, true);
                     updateDataAfterBeaconAddDel(data);
-                    //((FragmentNearby)adapterFragmentPager.getItem(1)).accessRecyclerView().swapAdapter(adapterBeaconNearbyAdmin, true);
-
                 }
         }
     }

@@ -14,7 +14,6 @@ import android.widget.Toast;
 
 import io.ap1.libap1beaconmngt.ServiceBeaconManagement;
 import io.ap1.proximity.R;
-import io.ap1.proximity.WrapContentLinearLayoutManager;
 
 public class FragmentNearby extends FragmentPreloadControl {
 
@@ -44,17 +43,8 @@ public class FragmentNearby extends FragmentPreloadControl {
 
         View view = inflater.inflate(R.layout.fragment_nearby, container, false);
         toolbar = ((ActivityMain)getActivity()).toolbar;
-        //adapterBeaconNearbyUser = ;
-        recyclerViewBeaconNearby = (RecyclerView) view.findViewById(R.id.recyclerView_beacon_nearby);
 
-/*
-        recyclerViewBeaconNearby.setItemAnimator(new DefaultItemAnimator(){
-            @Override
-            public boolean canReuseUpdatedViewHolder(RecyclerView.ViewHolder viewHolder){
-                return  true;
-            }}
-        );
-*/
+        recyclerViewBeaconNearby = (RecyclerView) view.findViewById(R.id.recyclerView_beacon_nearby);
 
         beaconManagementService = ((ActivityMain)getActivity()).serviceMyBeaconMngt;
         if(beaconManagementService != null)
@@ -62,7 +52,6 @@ public class FragmentNearby extends FragmentPreloadControl {
         else
             Log.e(TAG, "onCreateView: beacon service is null");
         recyclerViewBeaconNearby.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
-        //recyclerViewBeaconNearby.setLayoutManager(new WrapContentLinearLayoutManager(getActivity().getApplicationContext()));
         recyclerViewBeaconNearby.setHasFixedSize(true);
         recyclerViewBeaconNearby.setAdapter(((ActivityMain)getActivity()).adapterBeaconNearbyUser);
 

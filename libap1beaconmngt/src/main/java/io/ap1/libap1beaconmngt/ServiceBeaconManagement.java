@@ -56,6 +56,8 @@ public abstract class ServiceBeaconManagement<T extends RecyclerView.Adapter> ex
     protected RecyclerView recyclerViewFromOutside;
     protected boolean isRecyclerViewFromOutsideSet = false;
 
+    protected Ap1Beacon queryResult;
+
     public ServiceBeaconManagement() {
     }
 
@@ -134,22 +136,21 @@ public abstract class ServiceBeaconManagement<T extends RecyclerView.Adapter> ex
         List<Ap1Beacon> beaconQueried = databaseHelper.queryBeacons(ap1Beacon);
         if(beaconQueried != null){
             // if beaconQueried is in local db, add it to detected&registered list
-            for(Ap1Beacon queryResult : beaconQueried){
-                Log.e(TAG, "actionOnEnterAp1Beacon: " + queryResult.getMajor() + "-" + queryResult.getMinor() + ": " + queryResult.getIdparent() + " is in localDB");
-                String nickname = queryResult.getNickname();
-                if(nickname == null)
-                    queryResult.setNickname("undefined"); // it means the beacon is in Ap1 DB but the name was not given
-                else
-                    queryResult.setNickname(nickname);
-                queryResult.setUrlfar(queryResult.getUrlfar());
-                queryResult.setUrlnear(queryResult.getUrlnear());
+            queryResult = beaconQueried.get(0);
+            Log.e(TAG, "actionOnEnterAp1Beacon: " + queryResult.getMajor() + "-" + queryResult.getMinor() + ": " + queryResult.getIdparent() + " is in localDB");
+            String nickname = queryResult.getNickname();
+            if(nickname == null)
+                queryResult.setNickname("undefined"); // it means the beacon is in Ap1 DB but the name was not given
+            else
+                queryResult.setNickname(nickname);
+            //queryResult.setUrlfar(queryResult.getUrlfar());
+            //queryResult.setUrlnear(queryResult.getUrlnear());
 
-                if(recyclerViewFromOutside == null){
-                    Log.e(TAG, "actionOnEnterAp1Beacon: recyclerveiw is null");
-                }else{
-                    addToDetectedList(recyclerViewFromOutside, DataStore.detectedBeaconList.size(), queryResult);
-                    addToDetectedAndRegisteredList(recyclerViewFromOutside, DataStore.detectedAndAddedBeaconList.size(), queryResult);
-                }
+            if(recyclerViewFromOutside == null){
+                Log.e(TAG, "actionOnEnterAp1Beacon: recyclerveiw is null");
+            }else{
+                addToDetectedList(recyclerViewFromOutside, DataStore.detectedBeaconList.size(), queryResult);
+                addToDetectedAndRegisteredList(recyclerViewFromOutside, DataStore.detectedAndAddedBeaconList.size(), queryResult);
             }
         }else{
             if(recyclerViewFromOutside == null){
@@ -157,7 +158,6 @@ public abstract class ServiceBeaconManagement<T extends RecyclerView.Adapter> ex
             }else
                 addToDetectedList(recyclerViewFromOutside, DataStore.detectedBeaconList.size(), ap1Beacon);
         }
-
     }
 
     @Override
