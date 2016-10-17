@@ -634,14 +634,15 @@ public class ActivityMain extends AppCompatActivity{
         Intent intent = new Intent(this, ActivityBeaconUrlContent.class);
         intent.putExtra("url", url);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+        int num = (int) System.currentTimeMillis();
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, num, intent, PendingIntent.FLAG_ONE_SHOT);
         Notification notification = new Notification.Builder(this)
                 .setSmallIcon(R.drawable.ic_beacon_found_24dp)
                 .setContentTitle(title)
                 .setContentText(message)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent).build();
-        notificationManager.notify(Constants.NOTIFICATION_FLAG_ADD_BEACON, notification);
+        notificationManager.notify(num, notification);
     }
 
     @Override

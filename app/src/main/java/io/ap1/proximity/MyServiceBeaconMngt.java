@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.Toast;
@@ -58,14 +59,15 @@ public class MyServiceBeaconMngt<T extends RecyclerView.Adapter> extends Service
             Intent intent = new Intent(this, ActivityBeaconUrlContent.class);
             intent.putExtra("url", queryResult.getUrlnear());
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+            int num = (int) System.currentTimeMillis();
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, num, intent, PendingIntent.FLAG_ONE_SHOT);
             Notification notification = new Notification.Builder(this)
                     .setSmallIcon(R.drawable.ic_beacon_found_24dp)
                     .setContentTitle(queryResult.getNotifytitle())
                     .setContentText(queryResult.getNotifytext())
                     .setAutoCancel(true)
                     .setContentIntent(pendingIntent).build();
-            notificationManager.notify(Constants.NOTIFICATION_FLAG_FOUND_BEACON, notification);
+            notificationManager.notify(num, notification);
             Log.e(TAG, "actionOnEnterAp1Beacon: notify");
             super.queryResult = null;
         }
