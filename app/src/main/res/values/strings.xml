@@ -1,19 +1,24 @@
 <?xml version="1.0"?>
 <resources>
-  <string name="app_name">Prox_Test</string>
-  <string name="idbundle">io.ap1.test</string>
+  <!--
+  <string name="app_name">Proximity Delaware Beacon</string>
+  <string name="idbundle">io.ap1.prox.delawarebeacon</string>
+  -->
+  <string name="app_name">Proximity Delaware Beacon</string>
+  <string name="idbundle">io.ap1.prox.delawarebeacon</string>
   <!--
     <string name="BACKENDLESS_APP_ID">9A4BF3A5-DFA2-B556-FF2C-A2AD97459C00</string>
     <string name="BACKENDLESS_SECRET_KEY">AC4BC165-6458-2317-FF33-6ADBA6313D00</string>
     -->
-  <string name="BACKENDLESS_APP_ID">CBCCFC6F-B6C9-A38D-FF43-FB8A5C7BD400</string>
-  <string name="BACKENDLESS_SECRET_KEY">7C17DBD9-74EB-E9F6-FF7E-C58EB5DD5100</string>
+  <string name="BACKENDLESS_APP_ID">CB54B635-B6B1-D2CD-FF0B-64E35CA32100</string>
+  <string name="BACKENDLESS_SECRET_KEY">7C9F0621-74D3-A2C0-FF46-F072B5053900</string>
   <string name="BACKENDLESS_APP_VERSION">v1</string>
   <string name="google_app_id">228228601403</string>
   <string name="major">major</string>
   <string name="minor">minor</string>
   <string name="navigation_drawer_open">Open navigation drawer</string>
   <string name="navigation_drawer_close">Close navigation drawer</string>
+  <string name="backendless_base_url">http://138.197.140.50/api</string>
   <!--
     idparent is the identity id for this certain app(for a company, not a person)
     -->

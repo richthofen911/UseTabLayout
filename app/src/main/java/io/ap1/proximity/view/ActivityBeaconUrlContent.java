@@ -6,6 +6,7 @@ import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import io.ap1.proximity.R;
 
@@ -23,6 +24,12 @@ public class ActivityBeaconUrlContent extends AppCompatActivity {
         wvBeaconUrlContent = (WebView) findViewById(R.id.wv_beacon_url_content);
         wvBeaconUrlContent.getSettings().setJavaScriptEnabled(true);
         wvBeaconUrlContent.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
+        wvBeaconUrlContent.setWebViewClient(new WebViewClient(){
+            public boolean shouldOverrideUrlLoading(WebView webView, String url){
+                webView.loadUrl(url);
+                return false;
+            }
+        });
 
         String url = getIntent().getStringExtra("url");
         Log.e(TAG, "onCreate: get url: " + url);

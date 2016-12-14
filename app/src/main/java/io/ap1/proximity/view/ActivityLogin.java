@@ -46,7 +46,7 @@ public class ActivityLogin extends AppCompatActivity {
 
         Backendless.initApp(this, getString(R.string.BACKENDLESS_APP_ID),
                 getString(R.string.BACKENDLESS_SECRET_KEY), getString(R.string.BACKENDLESS_APP_VERSION));
-        Backendless.setUrl("http://159.203.15.85/api"); //Digital Ocean host
+        Backendless.setUrl(getResources().getString(R.string.backendless_base_url)); //Digital Ocean host
         backendlessUser = new BackendlessUser();
 
         if(findViewById(R.id.fragment_login_container) != null){

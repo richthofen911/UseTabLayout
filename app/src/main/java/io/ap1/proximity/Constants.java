@@ -27,7 +27,7 @@ public interface Constants {
     String USER_LOGIN_KEY_LOGINPASSWORD = "loginPassword";
     int COLOR_WHITE = Color.parseColor("#FFFFFF");
     int COLOR_BLUE_LIGHT = Color.parseColor("#04A9CE");
-    String PROFILE_IMAGE_PATH_ROOT = "http://159.203.15.85:80/api/CBCCFC6F-B6C9-A38D-FF43-FB8A5C7BD400/v1/files/profileImage/";
+    String PROFILE_IMAGE_PATH_ROOT = "http://138.197.140.50:80/api/CB54B635-B6B1-D2CD-FF0B-64E35CA32100/v1/files/profileImage/";
 
     String API_PATH_GET_BEACONS = "/getAllBeacons_bidv2_a.php";
     String API_PATH_ADD_BEACON = "/addBeaconv7_a.php";
